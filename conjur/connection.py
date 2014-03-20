@@ -19,3 +19,18 @@ class Connection(object):
         if response.code != 200:
             raise Exception("Authentication failed: %d"%(response.code))
         return token.Token(response.text)
+
+    def user(self, id):
+        pass
+
+    def role(self, id):
+        pass
+
+    def resource(self, id):
+        pass
+
+    def group(self, id):
+        pass
+
+    def variable(self, id):
+        pass
