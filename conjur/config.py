@@ -28,6 +28,14 @@ class Config:
     def account(self, value):
         self.set('account', value)
 
+    @property
+    def appliance_url(self):
+        return self.get('appliance_url')
+
+    @appliance_url.setter
+    def appliance_url(self, value):
+        self.set('appliance_url', value)
+
     def service_url(self, service, per_account=True):
         if not self.appliance_url:
             fmt = "https://%s-%s-conjur.herokuapp.com"
@@ -42,7 +50,7 @@ class Config:
     def get(self, key, default=None):
         if key in self._config: return self._config[key]
         env_key = 'CONJUR_' + key.upper()
-        if os.environ.has_key(env_key):
+        if env_key in os.environ:
             value = os.environ[env_key]
             self._config[key] = value
             return value
@@ -51,5 +59,6 @@ class Config:
     def set(self, key, value):
         self._config[key] = value
 
+config = Config()
 
-__all__ = ('Config',)
+__all__ = ('Config','config')
