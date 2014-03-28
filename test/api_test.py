@@ -12,3 +12,9 @@ def test_authenticate(mock_post):
     token = api.authenticate()
     assert token == "token token token"
     mock_post.assert_called_with("https://example.com/users/login/authenticate", "api-key")
+
+@patch.object(requests, 'post')
+def test_authenticate_with_cached_token(mock_post):
+    api = conjur.new_from_token("token token")
+    assert api.authenticate() == "token token"
+    mock_post.assert_not_called()
