@@ -29,5 +29,6 @@ def test_auth_header():
 def test_request_with_post(mock_post):
     api = conjur.new_from_token("the token")
     mock_post.return_value = resp = Mock()
+    resp.status_code = 200
     assert api.request('post', 'https://example.com', data="foobar") == resp
     mock_post.assert_called_with('https://example.com', data="foobar", headers={"Authorization": api.auth_header()})

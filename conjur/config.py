@@ -13,6 +13,22 @@ class Config:
         self.set('authn_url', value)
 
     @property
+    def core_url(self):
+        return self.service_url('core')
+
+    @core_url.setter
+    def core_url(self, value):
+        self.set('core_url', value)
+
+    @property
+    def authz_url(self):
+        return self.service_url('authz', False)
+
+    @authz_url.setter
+    def authz_url(self, value):
+        self.set('authz_url', value)
+
+    @property
     def stack(self):
         return self.get('stack')
 

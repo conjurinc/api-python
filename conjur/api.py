@@ -55,7 +55,7 @@ class API(object):
         headers['Authorization'] = self.auth_header()
         response = getattr(requests, method.lower())(url, **kwargs)
         if response.status_code >= 300:
-            raise ConjurException("Request failed: %d"%(response.status_code))
+            raise ConjurException("Request failed: %d"%response.status_code)
         return response
 
     def get(self, url, **kwargs):
@@ -71,10 +71,10 @@ class API(object):
         return Variable(self, id)
 
     def create_variable(self, id=None, mime_type='text/plain', kind='secret'):
-        data = { 'mime_type': mime_type, 'kind': kind }
+        data = {'mime_type': mime_type, 'kind': kind}
         if id:
             data['id'] = id
         attrs = self.post("%s/variables"%(self.config.core_url), data=data).json
         id = id or attrs['id']
-        return Variable(self, id, attrs)
+        return Variable(self, id)
 
