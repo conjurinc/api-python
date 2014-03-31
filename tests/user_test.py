@@ -18,7 +18,7 @@ def test_create_user(mock_post):
         headers={'Authorization': api.auth_header()}
     )
 
-    user_pass = api.create_user('foo', 'bar')
+    api.create_user('foo', 'bar')
     mock_post.assert_called_with(
         '{0}/users'.format(api.config.core_url),
         data={'login': 'foo', 'password': 'bar'},
@@ -36,6 +36,6 @@ def test_user(mock_get):
         '{0}/users/login'.format(api.config.core_url),
         headers={'Authorization': api.auth_header()}
     )
-    
+
 
 
