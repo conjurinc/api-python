@@ -1,7 +1,7 @@
 import requests
 import base64
 from conjur.variable import Variable
-
+from conjur.user import User
 from conjur import ConjurException
 
 
@@ -78,4 +78,21 @@ class API(object):
         attrs = self.post("%s/variables"%(self.config.core_url), data=data).json
         id = id or attrs['id']
         return Variable(self, id)
+
+    def user(self, login):
+        return User(self, login)
+
+    def create_user(self, login, password=None):
+        '''
+        Create a Conjur user with the given login.  If password is not given,
+        the user will only be able to authenticate using the generated api_key
+        attribute of the returned User instance.
+        '''
+        data = {'login': login}
+        if password is not None:
+            data['password'] = password
+        url = "{0}/users".format(self.config.core_url)
+        return User(self, login, self.post(url, data=data).json)
+
+
 
