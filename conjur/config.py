@@ -12,6 +12,7 @@ class Config:
         for k,v in conf:
             self._config[k] = v
 
+
     @property
     def authn_url(self):
         return self.service_url('authn')
@@ -27,6 +28,14 @@ class Config:
     @core_url.setter
     def core_url(self, value):
         self.set('core_url', value)
+
+    @property
+    def pubkeys_url(self):
+        return self.service_url('pubkeys')
+
+    @pubkeys_url.setter
+    def pubkeys_url(self, value):
+        self.set('pubkeys_url', value)
 
     @property
     def authz_url(self):
@@ -61,6 +70,9 @@ class Config:
         self.set('appliance_url', value)
 
     def service_url(self, service, per_account=True):
+        key = '%s_url'%service
+        if key in self._config:
+            return self._config[key]
         if not self.appliance_url:
             fmt = "https://%s-%s-conjur.herokuapp.com"
             if per_account: loc = self.account

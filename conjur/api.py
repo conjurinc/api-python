@@ -3,7 +3,7 @@ import base64
 from conjur.variable import Variable
 from conjur.user import User
 from conjur import ConjurException
-
+from conjur.util import urlescape
 
 class API(object):
     def __init__(self, credentials=None, token=None, config=None):
@@ -68,6 +68,9 @@ class API(object):
     def put(self, url, **kwargs):
         return self.request('put', url, **kwargs)
 
+    def delete(self, url, **kwargs):
+        return self.request('delete', url, **kwargs)
+
     def variable(self, id):
         return Variable(self, id)
 
@@ -93,6 +96,51 @@ class API(object):
             data['password'] = password
         url = "{0}/users".format(self.config.core_url)
         return User(self, login, self.post(url, data=data).json)
+
+    def _public_key_url(self, *args):
+        return '/'.join([self.config.pubkeys_url] + [urlescape(arg) for arg in args])
+
+    def add_public_key(self, username, key):
+        """
+        Upload an openssh formatted key to be made available for the given
+        username.
+        """
+        self.post(self._public_key_url(username), data=key)
+
+    def remove_public_key(self, username, keyname):
+        """
+        Remove a specific public key for this user.  The keyname
+        indicates the name field in the openssh formatted key that was
+        uploaded.
+        """
+        self.delete(self._public_key_url(username, keyname))
+
+    def remove_public_keys(self, username):
+        """
+        Remove all of username's public keys.
+        """
+        for keyname in self.public_key_names(username):
+            self.remove_public_key(username, keyname)
+
+    def public_keys(self, username):
+        """
+        Returns all public keys for :username: as a newline separated
+        str (because this is the format expected by the authorized-keys-command)
+        """
+        return self.get(self._public_key_url(username)).text
+
+    def public_key(self, username, keyname):
+        """
+        Return the contents of a specific public key.  The name of the key
+        is based on the name entry of the openssh formatted key that was uploaded.
+        """
+        return self.get(self._public_key_url(username, keyname)).text
+
+    def public_key_names(self, username):
+        """
+        Return the names of public keys  for this user.
+        """
+        return [k.split(' ')[-1] for k in self.public_keys(username).split('\n')]
 
 
 
