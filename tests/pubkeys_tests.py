@@ -62,6 +62,6 @@ def test_remove_public_keys(mock_get, mock_del):
     mock_get.return_value = Mock(text="a b key1\na b key2")
     api.remove_public_keys('foo')
     mock_del.assert_has_calls([
-        call( api.config.pubkeys_url + '/foo/key1'),
+        call(api.config.pubkeys_url + '/foo/key1'),
         call(api.config.pubkeys_url + '/foo/key2')
         ])

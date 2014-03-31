@@ -27,3 +27,10 @@ except:
 
 def urlescape(s):
     return quote(s, '')
+
+def authzid(obj, kind):
+    if isinstance(obj, str): return obj
+    for attr in (kind, kind + 'id'):
+        if hasattr(obj, attr):
+            return authzid(getattr(obj, attr), kind)
+    raise TypeError("Can't get {0}id from {1}".format(kind, obj))
