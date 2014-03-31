@@ -1,5 +1,6 @@
 from conjur.util import urlescape
 
+
 class User(object):
     def __init__(self, api, login, attrs=None):
         self.api = api
@@ -15,10 +16,8 @@ class User(object):
             raise AttributeError(item)
 
     def _fetch(self):
-        json = self.api.get(
+        self._attrs = self.api.get(
             "{0}/users/{1}".format(self.api.config.core_url,
                                    urlescape(self.login))
         ).json
-        self._attrs = json
-        return self._attrs
 
