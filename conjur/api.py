@@ -34,7 +34,8 @@ class API(object):
         response = requests.post(url, self.api_key)
         if response.status_code != 200:
             raise Exception("Authentication failed: %d"%(response.status_code,))
-        return response.text
+        self.token = response.text
+        return self.token
 
     def auth_header(self):
         """

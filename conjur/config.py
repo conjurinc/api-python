@@ -4,6 +4,14 @@ class Config:
     def __init__(self):
         self._config = {}
 
+    def load(self, input):
+        import yaml
+        if isinstance(input, str):
+            input = open(input, 'r')
+        conf = yaml.safe_load(input)
+        for k,v in conf:
+            self._config[k] = v
+
     @property
     def authn_url(self):
         return self.service_url('authn')
