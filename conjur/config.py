@@ -38,7 +38,6 @@ def _service_url(name, per_account=True, doc=''):
 
 
 class Config:
-    # TODO docstrings
     def __init__(self, **kwargs):
         self._config = {}
         self.update(kwargs)
@@ -84,7 +83,7 @@ class Config:
 
     authn_url = _service_url('authn', doc='URL for the authn service')
     core_url  = _service_url('core', doc='URL for the core service')
-    authz_url = _service_url('authz', doc='URL for the authz service')
+    authz_url = _service_url('authz', per_account=False, doc='URL for the authz service')
     pubkeys_url = _service_url('pubkeys', doc='URL for the pubkeys service')
 
     stack = _setting('stack', 'v4', 'Identifier for shared conjur services (hosted only)')
