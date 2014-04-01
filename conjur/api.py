@@ -4,6 +4,7 @@ from conjur.variable import Variable
 from conjur.user import User
 from conjur import ConjurException
 from conjur.util import urlescape
+from conjur.role import Role
 
 class API(object):
     def __init__(self, credentials=None, token=None, config=None):
@@ -71,14 +72,21 @@ class API(object):
     def delete(self, url, **kwargs):
         return self.request('delete', url, **kwargs)
 
+    def role(self, kind, identifier):
+        return Role(self, kind, identifier)
+
+
     def variable(self, id):
         return Variable(self, id)
 
-    def create_variable(self, id=None, mime_type='text/plain', kind='secret'):
+    def create_variable(self, id=None, mime_type='text/plain', kind='secret', value=None):
         data = {'mime_type': mime_type, 'kind': kind}
-        if id:
+        if id is not None:
             data['id'] = id
-        attrs = self.post("%s/variables"%(self.config.core_url), data=data).json
+        if value is not None:
+            data['value'] = value
+
+        attrs = self.post("%s/variables"%self.config.core_url, data=data).json
         id = id or attrs['id']
         return Variable(self, id)
 

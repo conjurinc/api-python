@@ -50,7 +50,11 @@ class Role(object):
         return url
 
     def _url(self, *args):
-        return "/".join([self.api.config.authz_url, self.api.config.account, 'roles', self.kind, self.identifier] + list(args))
+        return "/".join([self.api.config.authz_url,
+                         self.api.config.account,
+                         'roles',
+                         self.kind,
+                         self.identifier] + list(args))
 
 
 

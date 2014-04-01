@@ -19,14 +19,13 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from conjur.util import urlescape
-from conjur.role import Role
 
 class User(object):
     def __init__(self, api, login, attrs=None):
         self.api = api
         self.login = login
         # support as_role
-        self.role = Role(api, 'user', login)
+        self.role = api.role('user', login)
         self._attrs = attrs
 
     def __getattr__(self, item):

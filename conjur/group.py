@@ -17,13 +17,12 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from conjur.role import Role
 
 class Group(object):
     def __init__(self, api, id):
         self.api = api
         self.id = id
-        self.role = Role(api, 'group', id)
+        self.role = api.role('group', id)
 
     def add_member(self, member, admin=False):
         self.role.grant_to(member, admin)
