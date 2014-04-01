@@ -68,14 +68,15 @@ class Config:
             return "/".join(url_parts)
 
     def get(self, key, default=_DEFAULT):
-        if key in self._config: return self._config[key]
+        if key in self._config:
+            return self._config[key]
         env_key = 'CONJUR_' + key.upper()
         if env_key in os.environ:
             value = os.environ[env_key]
             self._config[key] = value
             return value
         if default is _DEFAULT:
-            raise Exception("config setting %s is required"%key)
+            raise Exception("config setting %s is required" % key)
         return default
 
     def set(self, key, value):
