@@ -87,7 +87,18 @@ def test_role_members(mock_get):
         '{0}/the-account/roles/blah/boo?members'.format(config.authz_url)
     )
 
-
+@patch.object(api, 'put')
+def test_role_grant_to_user(mock_put):
+    role = api.role('somekind', 'admins')
+    user = api.user('somebody')
+    role.grant_to(user)
+    mock_put.assert_called_with(
+        '{0}/the-account/roles/somekind/admins?members&member={1}'.format(
+            config.authz_url,
+            'the-account%3Auser%3Asomebody'
+        ),
+        data={}
+    )
 
 
 
