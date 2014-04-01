@@ -5,6 +5,7 @@ from conjur.user import User
 from conjur import ConjurException
 from conjur.util import urlescape
 from conjur.role import Role
+from conjur.group import Group
 
 class API(object):
     def __init__(self, credentials=None, token=None, config=None):
@@ -74,6 +75,9 @@ class API(object):
 
     def role(self, kind, identifier):
         return Role(self, kind, identifier)
+
+    def group(self, id):
+        return Group(self, id)
 
 
     def variable(self, id):
