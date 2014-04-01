@@ -20,76 +20,39 @@
 
 import os
 
-# TODO remember how to use metaprogramming in python to DRY this shit up a bit...
+_DEFAULT=object()
+
+def _setting(name, default=_DEFAULT, doc=''):
+    def fget(self):
+        return self.get(name, default)
+    def fset(self, value):
+        self.set(name, value)
+    return property(fget, fset, doc=doc)
+
+def _service_url(name, per_account=True, doc=''):
+    def fget(self):
+        return self.service_url(name, per_account)
+    def fset(self, value):
+        self.set(name + '_url', value)
+    return property(fget=fget,fset=fset, doc=doc)
+
+
 class Config:
     # TODO docstrings
-    def __init__(self):
+    def __init__(self, **kwargs):
         self._config = {}
+        self.update(kwargs)
 
     def load(self, input):
         import yaml
         if isinstance(input, str):
             input = open(input, 'r')
         conf = yaml.safe_load(input)
-        for k,v in conf:
-            self._config[k] = v
+        self.update(conf)
 
-
-    @property
-    def authn_url(self):
-        return self.service_url('authn')
-
-    @authn_url.setter
-    def authn_url(self, value):
-        self.set('authn_url', value)
-
-    @property
-    def core_url(self):
-        return self.service_url('core')
-
-    @core_url.setter
-    def core_url(self, value):
-        self.set('core_url', value)
-
-    @property
-    def pubkeys_url(self):
-        return self.service_url('pubkeys')
-
-    @pubkeys_url.setter
-    def pubkeys_url(self, value):
-        self.set('pubkeys_url', value)
-
-    @property
-    def authz_url(self):
-        return self.service_url('authz', False)
-
-    @authz_url.setter
-    def authz_url(self, value):
-        self.set('authz_url', value)
-
-    @property
-    def stack(self):
-        return self.get('stack')
-
-    @stack.setter
-    def stack(self, value):
-        self.set('stack', value)
-
-    @property
-    def account(self):
-        return self.get('account')
-
-    @account.setter
-    def account(self, value):
-        self.set('account', value)
-
-    @property
-    def appliance_url(self):
-        return self.get('appliance_url')
-
-    @appliance_url.setter
-    def appliance_url(self, value):
-        self.set('appliance_url', value)
+    def update(self, *dicts, **kwargs):
+        for d in dicts + (kwargs, ):
+            self._config.update(d)
 
     def service_url(self, service, per_account=True):
         key = '%s_url'%service
@@ -105,17 +68,29 @@ class Config:
             if service != "core": url_parts += ["api", service]
             return "/".join(url_parts)
 
-    def get(self, key, default=None):
+    def get(self, key, default=_DEFAULT):
         if key in self._config: return self._config[key]
         env_key = 'CONJUR_' + key.upper()
         if env_key in os.environ:
             value = os.environ[env_key]
             self._config[key] = value
             return value
+        if default is _DEFAULT:
+            raise Exception("config setting %s is required"%key)
         return default
 
     def set(self, key, value):
         self._config[key] = value
+
+    authn_url = _service_url('authn', doc='URL for the authn service')
+    core_url  = _service_url('core', doc='URL for the core service')
+    authz_url = _service_url('authz', doc='URL for the authz service')
+    pubkeys_url = _service_url('pubkeys', doc='URL for the pubkeys service')
+
+    stack = _setting('stack', 'v4', 'Identifier for shared conjur services (hosted only)')
+    account = _setting('account', 'conjur', 'Conjur account identifier')
+    appliance_url = _setting('appliance_url', None, 'URL for Conjur appliance')
+
 
 config = Config()
 
