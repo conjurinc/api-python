@@ -9,6 +9,13 @@ from conjur.group import Group
 
 class API(object):
     def __init__(self, credentials=None, token=None, config=None):
+        """
+        Creates an API instance configured with the given credentials or token
+        and config.
+
+        Generally you should use `conjur.new_from_key` or `conjur.new_from_token` to
+        get an API instance instead of calling this constructor directly.
+        """
         if credentials:
             self.login, self.api_key = credentials
             self.token = None
@@ -27,6 +34,14 @@ class API(object):
         """
         Authenticate with Conjur and return a token (str) that can be used
         to establish identity to Conjur services.
+
+        Returns the (json formatted) signed Conjur authentication Token.
+
+        It is an error to call this method if the API was created with a token rather
+        than a login and api key.
+
+        :param cached: When True, a cached token value will be used if it is available,
+            otherwise the token will be fetched whether or not a cached value is present.
         """
         if cached and self.token:
             return self.token
@@ -35,7 +50,7 @@ class API(object):
         url = "%s/users/%s/authenticate"%(self.config.authn_url, self.login)
         response = requests.post(url, self.api_key)
         if response.status_code != 200:
-            raise Exception("Authentication failed: %d"%(response.status_code,))
+            raise ConjurException("Authentication failed: %d"%(response.status_code,))
         self.token = response.text
         return self.token
 
@@ -51,8 +66,16 @@ class API(object):
 
     def request(self, method, url, **kwargs):
         """
-        Make an authenticated request.  Additional arguments are passed
-        to requests.method.
+        Make an authenticated request with the given method and url.  Additional arguments are passed
+        to requests.<method>.
+
+        Returns a requests.Response object.
+
+        If the response status is not 2xx, raises a ConjurException.
+
+        :param method: One of the standard HTTP verbs (case insensitive).
+        :param url: The full url to request.
+        :param **kwargs: additional arguments to pass to the requests.<method> call.
         """
         headers = kwargs.setdefault('headers', {})
         headers['Authorization'] = self.auth_header()
@@ -62,28 +85,93 @@ class API(object):
         return response
 
     def get(self, url, **kwargs):
+        """
+        Makes an authenticated GET request to the given :url:.
+
+        Returns a requests.Response object.
+
+        If the response status is not 2xx, raises a ConjurException.
+
+        :param url: the full url to request
+        :param **kwargs: same as requests.get options
+        """
         return self.request('get', url, **kwargs)
 
     def post(self, url, **kwargs):
+        """
+        Makes an authenticated POST request to the given :url:.
+
+        Returns a requests.Response object.
+
+        If the response status is not 2xx, raises a ConjurException.
+
+        :param url: the full url to request
+        :param **kwargs: same as requests.post options
+        """
         return self.request('post', url, **kwargs)
 
     def put(self, url, **kwargs):
+        """
+        Makes an authenticated PUT request to the given :url:.
+
+        Returns a requests.Response object.
+
+        If the response status is not 2xx, raises a ConjurException.
+
+        :param url: the full url to request
+        :param **kwargs: same as requests.put options
+        """
         return self.request('put', url, **kwargs)
 
     def delete(self, url, **kwargs):
+        """
+        Makes an authenticated DELETE request to the given :url:.
+
+        Returns a requests.Response object.
+
+        If the response status is not 2xx, raises a ConjurException.
+
+        :param url: the full url to request
+        :param **kwargs: same as requests.delete options
+        """
         return self.request('delete', url, **kwargs)
 
     def role(self, kind, identifier):
+        """
+        Return a :class `Role <Role>`: object with the given kind and id.
+
+        This method neither creates nor checks for the roles's existence.
+        """
         return Role(self, kind, identifier)
 
     def group(self, id):
+        """
+        Return a :class `Group <Group>`: object with the given id.
+
+        This method neither creates nor checks for the groups's existence.
+        """
         return Group(self, id)
 
-
     def variable(self, id):
+        """
+        Return a :class `Variable <Variable>`: object with the given id.
+
+        This method neither creates nor checks for the variable's existence.
+        """
         return Variable(self, id)
 
     def create_variable(self, id=None, mime_type='text/plain', kind='secret', value=None):
+        """Creates a Conjur variable.
+
+        Returns a :class `Variable <Variable>`: object
+
+        :param id: An id for the new variable.  If not given, a unique id will be generated.
+        :param mime_type: A mime-type indicating the content type stored by the variable.  This
+            determines the Content-Type header of responses returning the variables value.
+        :param kind: Annotation indicating a user defined kind for the variable.  Ignored by Conjur,
+            but useful for making documenting a variable's purpose.
+        :param value: An initial value for the variable.
+        """
         data = {'mime_type': mime_type, 'kind': kind}
         if id is not None:
             data['id'] = id
@@ -95,6 +183,11 @@ class API(object):
         return Variable(self, id)
 
     def user(self, login):
+        """
+        Returns an object representing a Conjur user with the given login.
+
+        The user is *not* created by this method, and may in fact not exist.
+        """
         return User(self, login)
 
     def create_user(self, login, password=None):
