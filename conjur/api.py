@@ -13,7 +13,7 @@ class API(object):
         Creates an API instance configured with the given credentials or token
         and config.
 
-        Generally you should use `conjur.new_from_key` or `conjur.new_from_token` to
+        Generally you should use `conjur.new_from_key`, `conjur.new_from_netrc`, or `conjur.new_from_token` to
         get an API instance instead of calling this constructor directly.
         """
         if credentials:
@@ -27,8 +27,8 @@ class API(object):
         if config:
             self.config = config
         else:
-            from conjur.config import config
-            self.config = config
+            import conjur.config
+            self.config = conjur.config.config
 
     def authenticate(self, cached=True):
         """
