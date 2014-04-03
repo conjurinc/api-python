@@ -37,5 +37,5 @@ def test_new_from_token():
 
 def test_new_with_config():
     cfg = Config()
-    api = conjur.new_from_key("login", "secret",cfg=cfg)
+    api = conjur.new_from_key("login", "secret",cfg)
     assert cfg == api.config

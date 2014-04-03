@@ -191,11 +191,11 @@ class API(object):
         return User(self, login)
 
     def create_user(self, login, password=None):
-        '''
+        """
         Create a Conjur user with the given login.  If password is not given,
         the user will only be able to authenticate using the generated api_key
         attribute of the returned User instance.
-        '''
+        """
         data = {'login': login}
         if password is not None:
             data['password'] = password
