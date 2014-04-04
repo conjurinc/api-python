@@ -21,16 +21,32 @@
 from conjur.util import urlescape
 
 class Variable(object):
-    def __init__(self, api, id):
+    def __init__(self, api, id, attrs=None):
         self.id = id
         self.api = api
+        self._attrs = attrs
 
     def value(self):
         url = "%s/variables/%s/value"%(self.api.config.core_url, urlescape(self.id))
         return self.api.get(url).text
 
     def add_value(self, value):
+        # TODO invalidate attrs because our version_count will change?
         data = {'value': value}
         url = "%s/variables/%s/values"%(self.api.config.core_url, urlescape(self.id))
         self.api.post(url, data=data)
+
+    def __getattr__(self, item):
+        if self._attrs is None:
+            self._fetch()
+        try:
+            return self._attrs[item]
+        except KeyError:
+            raise AttributeError(item)
+
+    def _fetch(self):
+        self._attrs = self.api.get(
+            "{0}/variables/{1}".format(self.api.config.core_url,
+                                   urlescape(self.login))
+        ).json
 

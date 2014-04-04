@@ -1,3 +1,23 @@
+#
+# Copyright (C) 2014 Conjur Inc
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import requests
 import base64
 from conjur.variable import Variable
@@ -46,7 +66,7 @@ class API(object):
         if cached and self.token:
             return self.token
         if not self.login or not self.api_key:
-            raise ConjurException("API created without a token can't authenticate")
+            raise ConjurException("API created without credentials can't authenticate")
         url = "%s/users/%s/authenticate"%(self.config.authn_url, self.login)
         response = requests.post(url, self.api_key)
         if response.status_code != 200:
@@ -180,7 +200,7 @@ class API(object):
 
         attrs = self.post("%s/variables"%self.config.core_url, data=data).json
         id = id or attrs['id']
-        return Variable(self, id)
+        return Variable(self, id, attrs)
 
     def user(self, login):
         """
