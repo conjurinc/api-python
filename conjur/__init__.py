@@ -20,11 +20,25 @@
 
 class ConjurException(Exception): pass
 
+
 def _config(given):
     if given is None:
         import conjur.config
         return conjur.config.config
     return given
+
+def configure(**kwargs):
+    """
+    Convenience function to merge multiple settings into the default global config.
+
+    Example:
+     import conjur
+     conjur.configure(stack='my-stack', account='my-account')
+
+    """
+    import conjur.config
+    conjur.config.config.update(**kwargs)
+    return conjur.config.config
 
 def new_from_netrc(netrc_file=None, config=None):
     """
