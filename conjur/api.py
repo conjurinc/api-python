@@ -68,7 +68,7 @@ class API(object):
         if not self.login or not self.api_key:
             raise ConjurException("API created without credentials can't authenticate")
         url = "%s/users/%s/authenticate"%(self.config.authn_url, self.login)
-        response = requests.post(url, self.api_key)
+        response = requests.post(url, self.api_key, verify=self.config.verify_ssl)
         if response.status_code != 200:
             raise ConjurException("Authentication failed: %d"%(response.status_code,))
         self.token = response.text
@@ -99,8 +99,12 @@ class API(object):
         """
         headers = kwargs.setdefault('headers', {})
         headers['Authorization'] = self.auth_header()
+        if 'verify' not in kwargs: kwargs['verify'] = self.config.verify_ssl
+        check_errors = kwargs.pop('check_errors', True)
+
         response = getattr(requests, method.lower())(url, **kwargs)
-        if response.status_code >= 300:
+
+        if check_errors and response.status_code >= 300:
             raise ConjurException("Request failed: %d"%response.status_code)
         return response
 

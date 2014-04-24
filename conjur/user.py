@@ -28,6 +28,10 @@ class User(object):
         self.role = api.role('user', login)
         self._attrs = attrs
 
+    def exists(self):
+        resp = self.api.get(self.url(), check_errors=False)
+        return resp.status_code != 404
+
     def __getattr__(self, item):
         if self._attrs is None:
             self._fetch()
@@ -37,7 +41,7 @@ class User(object):
             raise AttributeError(item)
 
     def _fetch(self):
-        url = "{0}/users/{1}".format(self.api.config.core_url, urlescape(self.login))
-        print("fetching url ''{0}'".format(url))
-        self._attrs = self.api.get(url).json
+        self._attrs = self.api.get(self.url()).json
 
+    def url(self):
+        return "{0}/users/{1}".format(self.api.config.core_url, urlescape(self.login))
