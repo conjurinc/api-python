@@ -172,6 +172,10 @@ class API(object):
         """
         return Group(self, id)
 
+    def create_group(self, id):
+        self.post('{0}/groups'.format(self.config.core_url), data={'id': id})
+        return Group(self, id)
+
     def variable(self, id):
         """
         Return a :class `Variable <Variable>`: object with the given id.

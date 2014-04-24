@@ -1,4 +1,3 @@
-
 #
 # Copyright (C) 2014 Conjur Inc
 #
@@ -19,18 +18,8 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# 2 vs 3 urlencode moved...
-try:
-    from urllib import urlencode, quote
-except:
-    from urllib.parse import urlencode, quote
 
-def urlescape(s):
-    return quote(s, '')
-
-def authzid(obj, kind):
-    if isinstance(obj, basestring): return obj
-    for attr in (kind, kind + 'id'):
-        if hasattr(obj, attr):
-            return authzid(getattr(obj, attr), kind)
-    raise TypeError("Can't get {0}id from {1}".format(kind, obj))
+class Membership(object):
+    def __init__(self, json):
+        for key in json:
+            setattr(self, key, json[key])
