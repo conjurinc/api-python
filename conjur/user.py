@@ -39,5 +39,5 @@ class User(object):
     def _fetch(self):
         url = "{0}/users/{1}".format(self.api.config.core_url, urlescape(self.login))
         print("fetching url ''{0}'".format(url))
-        self._attrs = self.api.get(url).json()
+        self._attrs = self.api.get(url).json
 

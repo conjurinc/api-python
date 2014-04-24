@@ -64,7 +64,7 @@ class Config:
             return fmt%(service, loc)
         else:
             url_parts = [ self.appliance_url ]
-            if service != "core": url_parts += ["api", service]
+            if service != "core": url_parts += [service]
             return "/".join(url_parts)
 
     def get(self, key, default=_DEFAULT):
