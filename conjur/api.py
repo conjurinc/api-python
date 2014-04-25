@@ -219,6 +219,13 @@ class API(object):
     def layer(self, layer_id):
         return Layer(self, layer_id)
 
+    def host(self, host_id):
+        return Host(self, host_id)
+
+    def create_host(self, host_id):
+        attrs = self.post("{0}/hosts", data={'id': host_id})
+        return Host(self, host_id, attrs)
+
     def user(self, login):
         """
         Returns an object representing a Conjur user with the given login.
