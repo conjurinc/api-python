@@ -26,6 +26,9 @@ from conjur import ConjurException
 from conjur.util import urlescape
 from conjur.role import Role
 from conjur.group import Group
+from conjur.layer import Layer
+from conjur.host import Host
+from conjur.resource import Resource
 
 class API(object):
     def __init__(self, credentials=None, token=None, config=None):
@@ -168,6 +171,9 @@ class API(object):
         """
         return Role(self, kind, identifier)
 
+    def resource(self, kind, identifier):
+        return Resource(self, kind, identifier)
+
     def group(self, id):
         """
         Return a :class `Group <Group>`: object with the given id.
@@ -209,6 +215,9 @@ class API(object):
         attrs = self.post("%s/variables"%self.config.core_url, data=data).json
         id = id or attrs['id']
         return Variable(self, id, attrs)
+
+    def layer(self, layer_id):
+        return Layer(self, layer_id)
 
     def user(self, login):
         """
