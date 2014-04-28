@@ -29,6 +29,7 @@ from conjur.group import Group
 from conjur.layer import Layer
 from conjur.host import Host
 from conjur.resource import Resource
+from conjur.util import urlescape
 
 class API(object):
     def __init__(self, credentials=None, token=None, config=None):
@@ -70,7 +71,7 @@ class API(object):
             return self.token
         if not self.login or not self.api_key:
             raise ConjurException("API created without credentials can't authenticate")
-        url = "%s/users/%s/authenticate"%(self.config.authn_url, self.login)
+        url = "%s/users/%s/authenticate"%(self.config.authn_url, urlescape(self.login))
         response = requests.post(url, self.api_key, verify=self.config.verify_ssl)
         if response.status_code != 200:
             raise ConjurException("Authentication failed: %d"%(response.status_code,))
