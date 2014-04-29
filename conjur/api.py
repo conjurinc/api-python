@@ -224,7 +224,7 @@ class API(object):
         return Host(self, host_id)
 
     def create_host(self, host_id):
-        attrs = self.post("{0}/hosts", data={'id': host_id})
+        attrs = self.post("{0}/hosts".format(self.config.core_url), data={'id': host_id})
         return Host(self, host_id, attrs)
 
     def user(self, login):
