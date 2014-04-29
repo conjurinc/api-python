@@ -29,7 +29,7 @@ class Layer(object):
         self._attrs = attrs
 
     def add_host(self, host):
-        hostid = authzid(host, 'role')
+        hostid = authzid(host, 'role', with_account=False)
         self.api.post(self._hosts_url(), data={'hostid': hostid})
 
     def remove_host(self, host):

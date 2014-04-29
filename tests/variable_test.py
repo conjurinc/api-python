@@ -33,7 +33,8 @@ def test_create_variable(mock_post):
     mock_post.assert_called_with(
         '%s/variables'%api.config.core_url,
         data={'mime_type': 'mimey', 'kind': 'something'},
-        headers={'Authorization': api.auth_header()}
+        headers={'Authorization': api.auth_header()},
+        verify=True
     )
 
 @patch.object(requests, 'get')
@@ -46,7 +47,8 @@ def test_get_variable_value(mock_get):
     assert v.value() == 'teh value'
     mock_get.assert_called_with(
         '%s/variables/my-id/value'%api.config.core_url,
-        headers={ 'Authorization': api.auth_header() }
+        headers={ 'Authorization': api.auth_header() },
+        verify=True
     )
 
 @patch.object(requests, 'post')
@@ -59,5 +61,6 @@ def test_add_variable_value(mock_post):
     mock_post.assert_called_with(
         '%s/variables/var/values'%api.config.core_url,
         headers={'Authorization': api.auth_header()},
-        data={'value': 'boo'}
+        data={'value': 'boo'},
+        verify=True
     )

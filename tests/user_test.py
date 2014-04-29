@@ -35,14 +35,16 @@ def test_create_user(mock_post):
     mock_post.assert_called_with(
         '{0}/users'.format(api.config.core_url),
         data={'login': 'foo'},
-        headers={'Authorization': api.auth_header()}
+        headers={'Authorization': api.auth_header()},
+        verify=True
     )
 
     api.create_user('foo', 'bar')
     mock_post.assert_called_with(
         '{0}/users'.format(api.config.core_url),
         data={'login': 'foo', 'password': 'bar'},
-        headers={'Authorization': api.auth_header()}
+        headers={'Authorization': api.auth_header()},
+        verify=True
     )
 
 
@@ -54,7 +56,8 @@ def test_user(mock_get):
     assert user.foo == 'bar'
     mock_get.assert_called_with(
         '{0}/users/login'.format(api.config.core_url),
-        headers={'Authorization': api.auth_header()}
+        headers={'Authorization': api.auth_header()},
+        verify=True
     )
 
 

@@ -28,8 +28,11 @@ except:
 def urlescape(s):
     return quote(s, '')
 
-def authzid(obj, kind):
-    if isinstance(obj, basestring): return obj
+def authzid(obj, kind, with_account=True):
+    if isinstance(obj, basestring):
+        if not with_account:
+            return ':'.join(obj.split(':')[1:])
+        return obj
     for attr in (kind, kind + 'id'):
         if hasattr(obj, attr):
             return authzid(getattr(obj, attr), kind)
