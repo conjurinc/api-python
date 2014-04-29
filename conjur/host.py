@@ -27,7 +27,7 @@ class Host(object):
         self.api = api
         self.id = id
         self._attrs = attrs
-        self.resource = self.api.resource('host', self.id)
+        self.role = self.api.role('host', self.id)
 
     def exists(self):
         status = self.api.get(self._url(), check_errors=False).status_code
