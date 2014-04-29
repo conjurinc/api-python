@@ -38,7 +38,7 @@ class Host(object):
         raise ConjurException("Request Failed: {0}".format(status))
 
     def _fetch(self):
-        self._attrs = self.api.get(self._url()).json
+        self._attrs = self.api.get(self._url()).json()
 
     def _url(self):
         return "{0}/hosts/{1}".format(self.api.config.core_url, urlescape(self.id))

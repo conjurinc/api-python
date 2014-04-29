@@ -54,7 +54,7 @@ class Layer(object):
         return "{0}/{1}".format(self._hosts_url(), urlescape(host_id))
 
     def _fetch(self):
-        self._attrs = self.api.get(self._url()).json
+        self._attrs = self.api.get(self._url()).json()
 
     def __getattr__(self, item):
         if self._attrs is None:

@@ -41,7 +41,7 @@ class User(object):
             raise AttributeError(item)
 
     def _fetch(self):
-        self._attrs = self.api.get(self.url()).json
+        self._attrs = self.api.get(self.url()).json()
 
     def url(self):
         return "{0}/users/{1}".format(self.api.config.core_url, urlescape(self.login))

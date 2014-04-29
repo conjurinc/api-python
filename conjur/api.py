@@ -213,7 +213,7 @@ class API(object):
         if value is not None:
             data['value'] = value
 
-        attrs = self.post("%s/variables"%self.config.core_url, data=data).json
+        attrs = self.post("%s/variables"%self.config.core_url, data=data).json()
         id = id or attrs['id']
         return Variable(self, id, attrs)
 
@@ -245,7 +245,7 @@ class API(object):
         if password is not None:
             data['password'] = password
         url = "{0}/users".format(self.config.core_url)
-        return User(self, login, self.post(url, data=data).json)
+        return User(self, login, self.post(url, data=data).json())
 
     def _public_key_url(self, *args):
         return '/'.join([self.config.pubkeys_url] + [urlescape(arg) for arg in args])

@@ -51,5 +51,5 @@ class Variable(object):
         self._attrs = self.api.get(
             "{0}/variables/{1}".format(self.api.config.core_url,
                                        urlescape(self.id))
-        ).json
+        ).json()
 

@@ -40,7 +40,7 @@ class Role(object):
         self.api.delete(self._membership_url(member))
 
     def members(self):
-        return self.api.get(self._membership_url()).json
+        return self.api.get(self._membership_url()).json()
 
     def _membership_url(self, member=None):
         url = self._url() + "?members"
