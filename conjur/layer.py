@@ -23,7 +23,7 @@ from conjur import ConjurException
 
 
 class Layer(object):
-    def __init__(self, api, id, attrs):
+    def __init__(self, api, id, attrs = {}):
         self.api = api
         self.id = id
         self._attrs = attrs
