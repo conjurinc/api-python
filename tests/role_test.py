@@ -80,7 +80,7 @@ def test_role_revoke_from(mock_del):
 @patch.object(api, 'get')
 def test_role_members(mock_get):
     members = ['foo', 'bar']
-    mock_get.return_value = Mock(json=members)
+    mock_get.return_value = Mock(json=lambda: members)
     role = api.role('blah', 'boo')
     assert role.members() == members
     mock_get.assert_called_with(

@@ -88,6 +88,7 @@ class Config:
     pubkeys_url = _service_url('pubkeys', doc='URL for the pubkeys service')
 
     verify_ssl = _setting('verify_ssl', True, "Allows SSL verification to be disabled (development only!)")
+    cert_file = _setting('cert_file', None, "Path to certificate to verify ssl requests to appliance")
     stack = _setting('stack', 'v4', 'Identifier for shared conjur services (hosted only)')
     account = _setting('account', 'conjur', 'Conjur account identifier')
     appliance_url = _setting('appliance_url', None, 'URL for Conjur appliance')

@@ -69,13 +69,13 @@ class API(object):
         """
         if cached and self.token:
             return self.token
+
         if not self.login or not self.api_key:
             raise ConjurException("API created without credentials can't authenticate")
+
         url = "%s/users/%s/authenticate"%(self.config.authn_url, urlescape(self.login))
-        response = requests.post(url, self.api_key, verify=self.config.verify_ssl)
-        if response.status_code != 200:
-            raise ConjurException("Authentication failed: %d"%(response.status_code,))
-        self.token = response.text
+
+        self.token = self._request('post', url, self.api_key).text
         return self.token
 
     def auth_header(self):
@@ -103,14 +103,22 @@ class API(object):
         """
         headers = kwargs.setdefault('headers', {})
         headers['Authorization'] = self.auth_header()
-        if 'verify' not in kwargs: kwargs['verify'] = self.config.verify_ssl
+
+        return self._request(method, url, **kwargs)
+
+    def _request(self, method, url, *args, **kwargs):
+        if 'verify' not in kwargs:
+            kwargs['verify'] = self.config.verify_ssl
+        if self.config.cert_file is not None and 'cert' not in kwargs:
+            kwargs['cert'] = self.config.cert_file
         check_errors = kwargs.pop('check_errors', True)
 
-        response = getattr(requests, method.lower())(url, **kwargs)
-
+        response = getattr(requests, method.lower())(url, *args, **kwargs)
         if check_errors and response.status_code >= 300:
             raise ConjurException("Request failed: %d"%response.status_code)
+
         return response
+
 
     def get(self, url, **kwargs):
         """

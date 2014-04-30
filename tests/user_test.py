@@ -27,7 +27,7 @@ def test_create_user(mock_post):
     api = conjur.new_from_token('token')
     mock_post.return_value = resp = Mock()
     resp.status_code = 200
-    resp.json = {'login': 'foo', 'api_key': 'apikey'}
+    resp.json = lambda:  {'login': 'foo', 'api_key': 'apikey'}
 
     user_no_pass = api.create_user('foo')
     assert user_no_pass.login == 'foo'
@@ -51,7 +51,7 @@ def test_create_user(mock_post):
 @patch.object(requests, 'get')
 def test_user(mock_get):
     api = conjur.new_from_token('token')
-    mock_get.return_value = Mock(status_code=200, json={'foo': 'bar'})
+    mock_get.return_value = Mock(status_code=200, json=lambda: {'foo': 'bar'})
     user = api.user('login')
     assert user.foo == 'bar'
     mock_get.assert_called_with(

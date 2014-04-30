@@ -26,7 +26,7 @@ import requests
 def test_create_variable(mock_post):
     mock_post.return_value = mock_response = Mock()
     mock_response.status_code = 201
-    mock_response.json = {'id':'foobar'} # No attribute support now
+    mock_response.json = lambda: {'id':'foobar'} # No attribute support now
     api = conjur.new_from_token('token')
     v = api.create_variable(mime_type='mimey', kind='something')
     assert v.id == 'foobar'
