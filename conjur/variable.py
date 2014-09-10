@@ -27,8 +27,10 @@ class Variable(object):
         self.api = api
         self._attrs = attrs
 
-    def value(self):
+    def value(self, version=None):
         url = "%s/variables/%s/value" % (self.api.config.core_url, urlescape(self.id))
+        if version is not None:
+            url = "%s?version=%s" % (url, version)
         return self.api.get(url).text
 
     def add_value(self, value):
