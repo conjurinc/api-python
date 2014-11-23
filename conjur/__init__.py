@@ -18,14 +18,17 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-class ConjurException(Exception): pass
+
+class ConjurException(Exception):
+    pass
 
 
 def _config(given):
     if given is None:
-        import conjur.config
-        return conjur.config.config
+        from .config import config
+        return config
     return given
+
 
 def configure(**kwargs):
     """
@@ -36,9 +39,11 @@ def configure(**kwargs):
      conjur.configure(stack='my-stack', account='my-account')
 
     """
-    import conjur.config
-    conjur.config.config.update(**kwargs)
-    return conjur.config.config
+    from .config import config
+
+    config.update(**kwargs)
+    return config
+
 
 def new_from_netrc(netrc_file=None, config=None):
     """
@@ -52,6 +57,7 @@ def new_from_netrc(netrc_file=None, config=None):
         create the API instance using the identity.
     """
     import netrc
+
     config = _config(config)
     auth = netrc.netrc(netrc_file).authenticators(config.authn_url)
     if auth is None:
@@ -61,7 +67,6 @@ def new_from_netrc(netrc_file=None, config=None):
         ))
     login, _, api_key = auth
     return new_from_key(login, api_key, config)
-
 
 
 def new_from_key(login, api_key, config=None):
@@ -75,8 +80,9 @@ def new_from_key(login, api_key, config=None):
         (`conjur.config.config`) will be used.
     """
 
-    import conjur.api
-    return conjur.api.API(credentials=(login, api_key), config=_config(config))
+    from .api import API
+
+    return API(credentials=(login, api_key), config=_config(config))
 
 
 def new_from_token(token, config=None):
@@ -90,7 +96,8 @@ def new_from_token(token, config=None):
     :param config: Config instance for the api.  If not given, the global Config instance
         (`conjur.config.config`) will be used.
     """
-    import conjur.api
-    return conjur.api.API(token=token, config=_config(config))
+    from .api import API
+
+    return API(token=token, config=_config(config))
 
 

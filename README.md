@@ -60,3 +60,23 @@ be used to set the variable's initial value.
 To retrieve a variable by id, use the `api.variable(id)` method.  Variable objects are also returned by the `create_variable` method.
 A Variable object's value can be fetched using the `value(version=None)` method, which returns the latest version if no
 version parameter is specified.  It's value can be updated (creating a new version) using the `add_value(value)` method.
+
+---
+
+## Development
+
+Clone the project and run:
+
+```
+pip install -r requirements.txt
+pip install -r requirements_dev.txt
+```
+
+You'll have to set either `CONJUR_ADMIN_PASSWORD` or `CONJUR_ADMIN_PASSWORD_FILE` to enable running tests.
+
+Run tests with:
+
+```
+
+behave
+```

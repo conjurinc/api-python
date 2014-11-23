@@ -40,7 +40,6 @@ class Variable(object):
         url = "%s/variables/%s/values" % (self.api.config.core_url, urlescape(self.id))
         self.api.post(url, data=data)
 
-
     def __getattr__(self, item):
         if self._attrs is None:
             self._fetch()

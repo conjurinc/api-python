@@ -25,8 +25,10 @@ try:
 except:
     from urllib.parse import urlencode, quote
 
+
 def urlescape(s):
     return quote(s, '')
+
 
 def authzid(obj, kind, with_account=True):
     if isinstance(obj, basestring):

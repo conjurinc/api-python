@@ -20,6 +20,7 @@
 
 from conjur.util import urlescape
 
+
 class User(object):
     def __init__(self, api, login, attrs=None):
         self.api = api

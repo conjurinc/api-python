@@ -18,15 +18,12 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from conjur.util import urlescape, authzid
-
 
 class Resource(object):
     def __init__(self, api, kind, identifier):
         self.api = api
         self.kind = kind
         self.identifier = identifier
-
 
     @property
     def resourceid(self):

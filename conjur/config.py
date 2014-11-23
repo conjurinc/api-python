@@ -20,21 +20,27 @@
 
 import os
 
-_DEFAULT=object()
+_DEFAULT = object()
+
 
 def _setting(name, default=_DEFAULT, doc=''):
     def fget(self):
         return self.get(name, default)
+
     def fset(self, value):
         self.set(name, value)
+
     return property(fget, fset, doc=doc)
+
 
 def _service_url(name, per_account=True, doc=''):
     def fget(self):
         return self.service_url(name, per_account)
+
     def fset(self, value):
         self.set(name + '_url', value)
-    return property(fget=fget,fset=fset, doc=doc)
+
+    return property(fget=fget, fset=fset, doc=doc)
 
 
 class Config:
@@ -44,6 +50,7 @@ class Config:
 
     def load(self, input):
         import yaml
+
         if isinstance(input, str):
             input = open(input, 'r')
         conf = yaml.safe_load(input)
@@ -54,17 +61,20 @@ class Config:
             self._config.update(d)
 
     def service_url(self, service, per_account=True):
-        key = '%s_url'%service
+        key = '%s_url' % service
         if key in self._config:
             return self._config[key]
         if not self.appliance_url:
             fmt = "https://%s-%s-conjur.herokuapp.com"
-            if per_account: loc = self.account
-            else: loc = self.stack
-            return fmt%(service, loc)
+            if per_account:
+                loc = self.account
+            else:
+                loc = self.stack
+            return fmt % (service, loc)
         else:
-            url_parts = [ self.appliance_url ]
-            if service != "core": url_parts += [service]
+            url_parts = [self.appliance_url]
+            if service != "core":
+                url_parts.append(service)
             return "/".join(url_parts)
 
     def get(self, key, default=_DEFAULT):
@@ -83,7 +93,7 @@ class Config:
         self._config[key] = value
 
     authn_url = _service_url('authn', doc='URL for the authn service')
-    core_url  = _service_url('core', doc='URL for the core service')
+    core_url = _service_url('core', doc='URL for the core service')
     authz_url = _service_url('authz', per_account=False, doc='URL for the authz service')
     pubkeys_url = _service_url('pubkeys', doc='URL for the pubkeys service')
 
@@ -96,4 +106,4 @@ class Config:
 
 config = Config()
 
-__all__ = ('Config','config')
+__all__ = ('Config', 'config')

@@ -18,18 +18,20 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import requests
 import base64
+
+import requests
+
 from conjur.variable import Variable
 from conjur.user import User
 from conjur import ConjurException
-from conjur.util import urlescape
 from conjur.role import Role
 from conjur.group import Group
 from conjur.layer import Layer
 from conjur.host import Host
 from conjur.resource import Resource
 from conjur.util import urlescape
+
 
 class API(object):
     def __init__(self, credentials=None, token=None, config=None):
@@ -52,6 +54,7 @@ class API(object):
             self.config = config
         else:
             import conjur.config
+
             self.config = conjur.config.config
 
     def authenticate(self, cached=True):
@@ -73,7 +76,7 @@ class API(object):
         if not self.login or not self.api_key:
             raise ConjurException("API created without credentials can't authenticate")
 
-        url = "%s/users/%s/authenticate"%(self.config.authn_url, urlescape(self.login))
+        url = "%s/users/%s/authenticate" % (self.config.authn_url, urlescape(self.login))
 
         self.token = self._request('post', url, self.api_key).text
         return self.token
@@ -85,8 +88,7 @@ class API(object):
         """
         token = self.authenticate()
         enc = base64.b64encode(token)
-        return 'Token token="%s"'%enc
-
+        return 'Token token="%s"' % enc
 
     def request(self, method, url, **kwargs):
         """
@@ -115,10 +117,9 @@ class API(object):
 
         response = getattr(requests, method.lower())(url, *args, **kwargs)
         if check_errors and response.status_code >= 300:
-            raise ConjurException("Request failed: %d"%response.status_code)
+            raise ConjurException("Request failed: %d" % response.status_code)
 
         return response
-
 
     def get(self, url, **kwargs):
         """
@@ -221,7 +222,7 @@ class API(object):
         if value is not None:
             data['value'] = value
 
-        attrs = self.post("%s/variables"%self.config.core_url, data=data).json()
+        attrs = self.post("%s/variables" % self.config.core_url, data=data).json()
         id = id or attrs['id']
         return Variable(self, id, attrs)
 

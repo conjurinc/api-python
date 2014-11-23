@@ -20,6 +20,7 @@
 
 from conjur.util import urlescape, authzid
 
+
 class Role(object):
     def __init__(self, api, kind, identifier):
         self.api = api

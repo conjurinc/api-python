@@ -23,10 +23,10 @@ from conjur import ConjurException
 
 
 class Layer(object):
-    def __init__(self, api, id, attrs = {}):
+    def __init__(self, api, id, attrs=None):
         self.api = api
         self.id = id
-        self._attrs = attrs
+        self._attrs = {} if attrs is None else attrs
 
     def add_host(self, host):
         hostid = authzid(host, 'role', with_account=False)

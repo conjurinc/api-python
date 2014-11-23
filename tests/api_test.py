@@ -18,10 +18,13 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import conjur
+import base64
+
 from mock import patch, Mock
 import requests
-import base64
+
+import conjur
+
 
 @patch.object(requests, 'post')
 def test_authenticate(mock_post):
