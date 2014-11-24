@@ -77,6 +77,6 @@ You'll have to set either `CONJUR_ADMIN_PASSWORD` or `CONJUR_ADMIN_PASSWORD_FILE
 Run tests with:
 
 ```
-
+py.test
 behave
 ```
