@@ -1,3 +1,6 @@
 mock
-pytest
 behave
+pytest
+pytest-cov
+pytest-instafail
+pylint
