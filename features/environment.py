@@ -9,18 +9,25 @@ def admin_password():
         if 'CONJUR_ADMIN_PASSWORD_FILE' in os.environ:
             with open(os.environ['CONJUR_ADMIN_PASSWORD_FILE']) as f:
                 os.environ['CONJUR_ADMIN_PASSWORD'] = f.read()
-    return os.environ['CONJUR_ADMIN_PASSWORD']
+    try:
+        return os.environ['CONJUR_ADMIN_PASSWORD']
+    except KeyError:
+        raise Exception("You need to set CONJUR_ADMIN_PASSWORD or " +
+                        "CONJUR_ADMIN_PASSWORD_FILE before running features")
 
 
-def appliance_url():
-    return os.environ.get('CONJUR_APPLIANCE_URL', None)
+def conjur_env(name):
+    return os.environ.get("CONJUR_%s" % (name.upper(), ), None)
 
 
 def api():
     config.stack = config.account = 'ci'
-    url = appliance_url()
-    if url is not None:
-        config.appliance_url = url
+    appliance_url = conjur_env('appliance_url')
+    if appliance_url is not None:
+        config.appliance_url = appliance_url
+        cert_file = conjur_env('cert_file')
+        if cert_file is not None:
+            config.cert_file = cert_file
     return conjur.new_from_key('admin', admin_password())
 
 
