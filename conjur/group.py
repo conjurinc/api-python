@@ -25,11 +25,11 @@ class Group(object):
         self.id = id
         self.role = api.role('group', id)
 
+    def members(self):
+        return self.role.members()
+
     def add_member(self, member, admin=False):
         self.role.grant_to(member, admin)
 
     def remove_member(self, member):
         self.role.revoke_from(member)
-
-
-
