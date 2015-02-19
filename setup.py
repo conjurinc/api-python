@@ -4,7 +4,7 @@ import sys
 from setuptools import setup, find_packages
 
 NAME = 'Conjur'
-VERSION = '0.3.1'
+VERSION = '0.3.2'
 
 
 # Publish Helper.
