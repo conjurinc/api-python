@@ -4,3 +4,5 @@ pytest
 pytest-cov
 pytest-instafail
 pylint
+
+pypandoc

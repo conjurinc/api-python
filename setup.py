@@ -6,11 +6,11 @@ from setuptools import setup, find_packages
 NAME = 'Conjur'
 VERSION = '0.3.2'
 
-
-# Publish Helper.
-if sys.argv[-1] == 'publish':
-    os.system('python setup.py sdist upload')
-    sys.exit()
+try:
+    import pypandoc
+    long_description = pypandoc.convert('README.md', 'rst')
+except(IOError, ImportError):
+    long_description = open('README.md').read()
 
 setup(
     name=NAME,
@@ -21,7 +21,7 @@ setup(
     author='Jon Mason',
     author_email='jon@conjur.net',
     description='Python client for the Conjur API',
-    long_description=open('README.md').read(),
+    long_description=long_description,
     license='MIT',
     url='https://github.com/conjurinc/api-python',
     classifiers=[
