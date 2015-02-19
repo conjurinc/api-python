@@ -17,6 +17,9 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+import os
+
+from .config import config as default_config
 
 
 class ConjurException(Exception):
@@ -25,8 +28,10 @@ class ConjurException(Exception):
 
 def _config(given):
     if given is None:
-        from .config import config
-        return config
+        env_config_file = os.getenv('CONJURRC')
+        if env_config_file is not None:
+            default_config.load(env_config_file)
+        return default_config
     return given
 
 
@@ -39,10 +44,8 @@ def configure(**kwargs):
      conjur.configure(stack='my-stack', account='my-account')
 
     """
-    from .config import config
-
-    config.update(**kwargs)
-    return config
+    default_config.update(**kwargs)
+    return default_config
 
 
 def new_from_netrc(netrc_file=None, config=None):

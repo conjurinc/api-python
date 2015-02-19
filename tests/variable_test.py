@@ -17,11 +17,16 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+from os import unsetenv
 
-import conjur
 from mock import patch, Mock
 import requests
 
+import conjur
+from .helpers import unset_env_var
+
+
+@unset_env_var('CONJURRC')
 @patch.object(requests, 'post')
 def test_create_variable(mock_post):
     mock_post.return_value = mock_response = Mock()
@@ -37,6 +42,7 @@ def test_create_variable(mock_post):
         verify=True
     )
 
+@unset_env_var('CONJURRC')
 @patch.object(requests, 'get')
 def test_get_variable_value(mock_get):
     mock_get.return_value = resp = Mock()
@@ -51,6 +57,7 @@ def test_get_variable_value(mock_get):
         verify=True
     )
 
+@unset_env_var('CONJURRC')
 @patch.object(requests, 'post')
 def test_add_variable_value(mock_post):
     mock_post.return_value = resp = Mock()

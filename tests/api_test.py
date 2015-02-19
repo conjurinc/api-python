@@ -24,8 +24,10 @@ from mock import patch, Mock
 import requests
 
 import conjur
+from .helpers import unset_env_var
 
 
+@unset_env_var('CONJURRC')
 @patch.object(requests, 'post')
 def test_authenticate(mock_post):
     api = conjur.new_from_key("login", "api-key")
@@ -48,6 +50,7 @@ def test_auth_header():
     expected = 'Token token="%s"'%(base64.b64encode("the token"))
     assert api.auth_header() == expected
 
+@unset_env_var('CONJURRC')
 @patch.object(requests, 'post')
 def test_request_with_post(mock_post):
     api = conjur.new_from_token("the token")
