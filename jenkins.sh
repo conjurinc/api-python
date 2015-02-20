@@ -1,22 +1,14 @@
 #!/bin/bash
 
-DOCDIR=${PWD}/pydocs
+rm -rf artifacts
+docker build -t api-python .
 
-if [ -d ${DOCDIR} ]; then
-    rm -rf ${DOCDIR}
-fi
-mkdir -p ${DOCDIR}
-
-# Install necessary packages
-
-pip install -r requirements.txt
-pip install -r requirements_dev.txt
-for file in conjur/*.py ; do
-    module=` echo "$file" | sed -e 's/\//./' -e 's/.py//g' -e 's/\.__init__//' ` ;
-    pydoc -w ${module} ;
-    mv "$module".html ${DOCDIR}
-done
-cp -v ${DOCDIR}/conjur.html ${DOCDIR}/index.html
-
-pylint -f parseable conjur tests | tee pylint.out
+docker run -Pi \
+-v ${PWD}/artifacts:/artifacts \
+api-python sh <<COMMANDS
+find . -name '*.pyc' -delete
 py.test --cov conjur --cov-report html --cov-report xml --junitxml=pytest.xml --instafail
+pylint -f parseable conjur tests | tee pylint.out
+
+cp -R pytest.xml htmlcov pylint.out /artifacts/.
+COMMANDS
