@@ -10,5 +10,5 @@ find . -name '*.pyc' -delete
 py.test --cov conjur --cov-report html --cov-report xml --junitxml=pytest.xml --instafail
 pylint -f parseable conjur tests | tee pylint.out
 
-cp -R pytest.xml htmlcov pylint.out /artifacts/.
+cp -R coverage.xml pytest.xml htmlcov pylint.out /artifacts/.
 COMMANDS
