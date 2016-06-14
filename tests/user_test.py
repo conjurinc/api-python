@@ -22,10 +22,8 @@ from mock import patch, Mock
 import requests
 
 import conjur
-from .helpers import unset_env_var
 
 
-@unset_env_var('CONJURRC')
 @patch.object(requests, 'post')
 def test_create_user(mock_post):
     api = conjur.new_from_token('token')
@@ -52,7 +50,6 @@ def test_create_user(mock_post):
     )
 
 
-@unset_env_var('CONJURRC')
 @patch.object(requests, 'get')
 def test_user(mock_get):
     api = conjur.new_from_token('token')
