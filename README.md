@@ -10,14 +10,42 @@ Install from [PyPI](https://pypi.python.org/pypi/Conjur)
 pip install conjur
 ```
 
-## Basic Usage
+## Usage
+
+### Configuration
 
 ```python
-import os
+# The `config` member of the conjur.config module is a "global" Configuration
+# used by new API instances by default.
+from conjur.config import config
+
+# Set the conjur appliance url.  This can also be provided
+# by the CONJUR_APPLIANCE_URL environment variable.
+config.appliance_url = 'https://conjur.example.com/api'
+
+# Set the (PEM) certificate file. This is also configurable with the
+# CONJUR_CERT_FILE environment variable.
+config.cert_file = '/path/to/conjur-account.pem'
+```
+
+### Creating and Using an API Instance
+
+```python
 import conjur
 
-api = conjur.new_from_key(login='danny', api_key=os.getenv('CONJUR_API_KEY'))
-mongo_password = api.variable('service_a/mongodb_password').value()
+# For God's sake, don't put passwords in your source code!
+password = 'super-secret'
+login = 'alice'
+
+# Create an API instance that can perform actions as the user 'alice'
+api = conjur.new_from_key(login, password)
+
+# Use the API to fetch the value of a variable
+
+secret = api.variable('my-secret').value()
+
+print("The secret is '{}'".format(secret))
+
 ```
 
 `new_from_key` accepts a Conjur username and an api_key or password
@@ -29,7 +57,9 @@ An instance created with `new_from_key` will cache it's auth token indefinitely.
 Since Conjur auth tokens expire after 8 minutes, you can force an api instance to update its token
 by calling `api.authenticate(cached=False)` or by setting `api.token = None`.
 
-## Advanced Usage
+
+
+### Other Ways to Create an API Instance
 
 If the host running your application has been assigned a Conjur identity
 `new_from_netrc` is the easiest way to create an API instance.
@@ -41,7 +71,6 @@ from conjur.config import config
 config.load('/etc/conjur.conf')
 api = conjur.new_from_netrc('/etc/conjur.identity', config=config)
 ```
-
 ---
 
 If you have an existing authentication token, for example when handling
@@ -55,19 +84,6 @@ api = conjur.new_from_token(request.get_json()['user_token'])
 salesforce_apikey = api.variable('sales/salesforce/api_key')
 ```
 
-##Configuration
-
-Conjur requires endpoint configuration, which can be provided via environment variables or a YAML configuration file.
-
-### Environment variables
-
-Setting `CONJURRC` and `CONJUR_APPLIANCE_URL` variables will allow you to to connect.
-
-Other available variables are named by capitalizing the corresponding config variable and
-prefixing it with `'CONJUR_'`.  For example, the `appliance_url` variable can be configured with `CONJUR_APPLIANCE_URL`. See all variables [at the bottom here](conjur/config.py)
-
-For development purposes you can provide service specific urls, for example, `CONJUR_AUTHN_URL`.
-
 ### YAML file
 
 Conjurized hosts will have this file placed at `/etc/conjur.conf`.
@@ -80,7 +96,7 @@ from conjur.config import config
 config.load('/etc/conjur.conf')
 ```
 
-## Variables
+### Variables
 
 You can create, fetch and update variables like so:
 
@@ -103,14 +119,46 @@ gis_database_password.add_value('lij6det8eJ7pIx')
 
 If no `id` is given, a unique id will be generated.  If a value is provided, it will
 be used to set the variable's initial value. When fetching a variable, you can pass
-`version` to `value()` to retrieve a specific version.
+a `version` keyword argument to `value()` to retrieve a specific version.
 
-## Other Conjur resources
+### Users
 
-Layers, hosts, groups, users and pubkeys can be created/fetched/updated by other methods
-on the [API class](conjur/api.py).
+Create a user `alice` with password `super-secret`.
 
----
+```python
+alice = api.create_user('alice', password='super-secret')
+```
+
+Create a user `bob` without a password, and save the API key.  When creating
+a Conjur user, the API is available in the response.  However, retrieving the
+user in the future **will not** return the API key.
+
+```python
+bob = api.create_user('bob')
+bob_api_key = bob.api_key
+
+print("Created user 'bob' with api key '{}'".format(bob_api_key))
+```
+
+Fetch a user named 'otto', and check whether or not it was found:
+
+```python
+if api.user('otto').exists():
+  print("Otto exists!")
+else:
+  print("Sorry, otto doesn't exist :-(")
+```
+
+
+### Groups
+
+Create a group named 'developers':
+
+```python
+devs = api.create_group('developers')
+```
+
+
 
 ## Development
 

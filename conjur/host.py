@@ -41,7 +41,8 @@ class Host(object):
         self._attrs = self.api.get(self._url()).json()
 
     def _url(self):
-        return "{0}/hosts/{1}".format(self.api.config.core_url, urlescape(self.id))
+        return "{0}/hosts/{1}".format(self.api.config.core_url,
+                                      urlescape(self.id))
 
     def __getattr__(self, item):
         if self._attrs is None:

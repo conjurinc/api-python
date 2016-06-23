@@ -45,7 +45,8 @@ class Layer(object):
         raise ConjurException("Request Failed: {0}".format(resp.status_code))
 
     def _url(self):
-        return "{0}/layers/{1}".format(self.api.config.core_url, urlescape(self.id))
+        return "{0}/layers/{1}".format(self.api.config.core_url,
+                                       urlescape(self.id))
 
     def _hosts_url(self):
         return "{0}/hosts".format(self._url())
@@ -63,4 +64,3 @@ class Layer(object):
             return self._attrs[item]
         except KeyError:
             raise AttributeError(item)
-

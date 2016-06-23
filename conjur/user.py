@@ -45,4 +45,5 @@ class User(object):
         self._attrs = self.api.get(self.url()).json()
 
     def url(self):
-        return "{0}/users/{1}".format(self.api.config.core_url, urlescape(self.login))
+        return "{0}/users/{1}".format(self.api.config.core_url,
+                                      urlescape(self.login))
