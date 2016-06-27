@@ -28,7 +28,8 @@ class Variable(object):
         self._attrs = attrs
 
     def value(self, version=None):
-        url = "%s/variables/%s/value" % (self.api.config.core_url, urlescape(self.id))
+        url = "%s/variables/%s/value" % (self.api.config.core_url,
+                                         urlescape(self.id))
         if version is not None:
             url = "%s?version=%s" % (url, version)
         return self.api.get(url).text
@@ -37,7 +38,8 @@ class Variable(object):
         # Invalidate _attrs since our version count is going to change
         self._attrs = None
         data = {'value': value}
-        url = "%s/variables/%s/values" % (self.api.config.core_url, urlescape(self.id))
+        url = "%s/variables/%s/values" % (self.api.config.core_url,
+                                          urlescape(self.id))
         self.api.post(url, data=data)
 
     def __getattr__(self, item):
@@ -53,4 +55,3 @@ class Variable(object):
             "{0}/variables/{1}".format(self.api.config.core_url,
                                        urlescape(self.id))
         ).json()
-

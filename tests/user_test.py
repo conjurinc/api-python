@@ -64,7 +64,7 @@ def test_user(mock_get):
 
 
 def test_user_role():
-    user = conjur.new_from_key('foo','bar').user('someone')
+    user = conjur.new_from_key('foo', 'bar').user('someone')
     role = user.role
     assert role.kind == 'user'
     assert role.identifier == 'someone'

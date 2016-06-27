@@ -39,8 +39,9 @@ class API(object):
         Creates an API instance configured with the given credentials or token
         and config.
 
-        Generally you should use `conjur.new_from_key`, `conjur.new_from_netrc`, or `conjur.new_from_token` to
-        get an API instance instead of calling this constructor directly.
+        Generally you should use `conjur.new_from_key`, `conjur.new_from_netrc`,
+        or `conjur.new_from_token` to get an API instance instead of calling
+        this constructor directly.
         """
         if credentials:
             self.login, self.api_key = credentials
@@ -64,27 +65,30 @@ class API(object):
 
         Returns the (json formatted) signed Conjur authentication Token.
 
-        It is an error to call this method if the API was created with a token rather
-        than a login and api key.
+        It is an error to call this method if the API was created with a token
+        rather than a login and api key.
 
-        :param cached: When True, a cached token value will be used if it is available,
-            otherwise the token will be fetched whether or not a cached value is present.
+        :param cached: When True, a cached token value will be used if it is
+            available, otherwise the token will be fetched whether or not a
+            cached value is present.
         """
         if cached and self.token:
             return self.token
 
         if not self.login or not self.api_key:
-            raise ConjurException("API created without credentials can't authenticate")
+            raise ConjurException(
+                "API created without credentials can't authenticate")
 
-        url = "%s/users/%s/authenticate" % (self.config.authn_url, urlescape(self.login))
+        url = "%s/users/%s/authenticate" % (self.config.authn_url,
+                                            urlescape(self.login))
 
         self.token = self._request('post', url, self.api_key).text
         return self.token
 
     def auth_header(self):
         """
-        Get the value of an Authorization header to make Conjur requests, performing
-        authentication if necessary.
+        Get the value of an Authorization header to make Conjur requests,
+        performing authentication if necessary.
         """
         token = self.authenticate()
         enc = base64.b64encode(token)
@@ -117,7 +121,7 @@ class API(object):
                 kwargs['verify'] = self.config.verify_ssl
         check_errors = kwargs.pop('check_errors', True)
 
-        response = getattr(requests,method.lower())(url, *args, **kwargs)
+        response = getattr(requests, method.lower())(url, *args, **kwargs)
         if check_errors and response.status_code >= 300:
             raise ConjurException("Request failed: %d" % response.status_code)
 
@@ -212,11 +216,14 @@ class API(object):
 
         Returns a :class `Variable <Variable>`: object
 
-        :param id: An id for the new variable.  If not given, a unique id will be generated.
-        :param mime_type: A mime-type indicating the content type stored by the variable.  This
-            determines the Content-Type header of responses returning the variables value.
-        :param kind: Annotation indicating a user defined kind for the variable.  Ignored by Conjur,
-            but useful for making documenting a variable's purpose.
+        :param id: An id for the new variable.  If not given, a unique id will
+            be generated.
+        :param mime_type: A mime-type indicating the content type stored by the
+            variable.  This determines the Content-Type header of responses
+            returning the variables value.
+        :param kind: Annotation indicating a user defined kind for the variable.
+            Ignored by Conjur, but useful for making documenting a variable's
+            purpose.
         :param value: An initial value for the variable.
         """
         data = {'mime_type': mime_type, 'kind': kind}
@@ -236,7 +243,8 @@ class API(object):
         return Host(self, host_id)
 
     def create_host(self, host_id):
-        attrs = self.post("{0}/hosts".format(self.config.core_url), data={'id': host_id}).json()
+        attrs = self.post("{0}/hosts".format(self.config.core_url),
+                          data={'id': host_id}).json()
         return Host(self, host_id, attrs)
 
     def user(self, login):
@@ -260,7 +268,8 @@ class API(object):
         return User(self, login, self.post(url, data=data).json())
 
     def _public_key_url(self, *args):
-        return '/'.join([self.config.pubkeys_url] + [urlescape(arg) for arg in args])
+        return '/'.join([self.config.pubkeys_url] +
+                        [urlescape(arg) for arg in args])
 
     def add_public_key(self, username, key):
         """

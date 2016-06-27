@@ -25,6 +25,7 @@ import requests
 
 import conjur
 
+
 @patch.object(requests, 'post')
 def test_authenticate(mock_post):
     api = conjur.new_from_key("login", "api-key")
@@ -34,7 +35,9 @@ def test_authenticate(mock_post):
     mock_response.text = "token token token"
     token = api.authenticate()
     assert token == "token token token"
-    mock_post.assert_called_with("https://example.com/users/login/authenticate", "api-key", verify=True)
+    mock_post.assert_called_with("https://example.com/users/login/authenticate",
+                                 "api-key", verify=True)
+
 
 @patch.object(requests, 'post')
 def test_authenticate_with_cached_token(mock_post):
@@ -42,10 +45,12 @@ def test_authenticate_with_cached_token(mock_post):
     assert api.authenticate() == "token token"
     mock_post.assert_not_called()
 
+
 def test_auth_header():
     api = conjur.new_from_token("the token")
-    expected = 'Token token="%s"'%(base64.b64encode("the token"))
+    expected = 'Token token="%s"' % (base64.b64encode("the token"))
     assert api.auth_header() == expected
+
 
 @patch.object(requests, 'post')
 def test_request_with_post(mock_post):
@@ -53,4 +58,6 @@ def test_request_with_post(mock_post):
     mock_post.return_value = resp = Mock()
     resp.status_code = 200
     assert api.request('post', 'https://example.com', data="foobar") == resp
-    mock_post.assert_called_with('https://example.com', data="foobar", headers={"Authorization": api.auth_header()}, verify=True)
+    mock_post.assert_called_with('https://example.com', data="foobar",
+                                 headers={"Authorization": api.auth_header()},
+                                 verify=True)

@@ -103,7 +103,7 @@ class Config:
     verify_ssl = _setting('verify_ssl', True,
                           "Allows SSL verification to be disabled (development \
                           only!)")
-    
+
     cert_file = _setting('cert_file', None,
                          "Path to certificate to verify ssl requests \
                          to appliance")

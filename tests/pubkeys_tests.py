@@ -22,6 +22,7 @@ import conjur
 
 api = conjur.new_from_key('fakeid', 'fakepass')
 
+
 @patch.object(api, 'get')
 def test_public_keys(mock_get):
     response = "a b key1\na b key2"
@@ -31,11 +32,14 @@ def test_public_keys(mock_get):
         '{0}/foo%20bar'.format(api.config.pubkeys_url)
     )
 
+
 @patch.object(api, 'get')
 def test_public_key(mock_get):
     mock_get.return_value = Mock(text="a b c")
     assert api.public_key('foo bar', 'keyname') == 'a b c'
-    mock_get.assert_called_with('{0}/foo%20bar/keyname'.format(api.config.pubkeys_url))
+    mock_get.assert_called_with(
+        '{0}/foo%20bar/keyname'.format(api.config.pubkeys_url))
+
 
 @patch.object(api, 'get')
 def test_public_key_names(mock_get):
@@ -46,15 +50,18 @@ def test_public_key_names(mock_get):
         '{0}/foo%20bar'.format(api.config.pubkeys_url)
     )
 
+
 @patch.object(api, 'post')
 def test_add_public_key(mock_post):
     api.add_public_key('foo', 'a b c')
     mock_post.assert_called_with(api.config.pubkeys_url + '/foo', data='a b c')
 
+
 @patch.object(api, 'delete')
 def test_remove_public_key(mock_del):
     api.remove_public_key('foo', 'bar')
     mock_del.assert_called_with(api.config.pubkeys_url + '/foo/bar')
+
 
 @patch.object(api, 'delete')
 @patch.object(api, 'get')

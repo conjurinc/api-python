@@ -17,17 +17,19 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from mock import patch, Mock
+from mock import patch
 import conjur
 
 api = conjur.new_from_key('foo', 'bar')
 
 group = api.group('v1/admins')
 
+
 def test_group():
     assert group.role.kind == 'group'
     assert group.role.identifier == 'v1/admins'
     assert group.role.roleid == api.config.account + ':group:v1/admins'
+
 
 @patch.object(group.role, 'grant_to')
 def test_add_member(mock_grant_to):
@@ -35,11 +37,13 @@ def test_add_member(mock_grant_to):
     group.add_member(member)
     mock_grant_to.assert_called_with(member, False)
 
+
 @patch.object(group.role, 'grant_to')
 def test_add_member_admin(mock_grant_to):
     member = api.role('something', 'else')
     group.add_member(member, True)
     mock_grant_to.assert_called_with(member, True)
+
 
 @patch.object(group.role, 'revoke_from')
 def test_remove_member(mock_revoke_from):
