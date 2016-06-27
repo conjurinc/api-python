@@ -117,7 +117,7 @@ class API(object):
                 kwargs['verify'] = self.config.verify_ssl
         check_errors = kwargs.pop('check_errors', True)
 
-        response = requests.request(method.lower(), url, *args, **kwargs)
+        response = getattr(requests,method.lower())(url, *args, **kwargs)
         if check_errors and response.status_code >= 300:
             raise ConjurException("Request failed: %d" % response.status_code)
 
