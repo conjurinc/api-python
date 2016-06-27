@@ -92,8 +92,8 @@ class API(object):
 
     def request(self, method, url, **kwargs):
         """
-        Make an authenticated request with the given method and url.  Additional arguments are passed
-        to requests.<method>.
+        Make an authenticated request with the given method and url.
+        Additional arguments are passed to requests.<method>.
 
         Returns a requests.Response object.
 
@@ -101,7 +101,8 @@ class API(object):
 
         :param method: One of the standard HTTP verbs (case insensitive).
         :param url: The full url to request.
-        :param **kwargs: additional arguments to pass to the requests.<method> call.
+        :param **kwargs: additional arguments to pass to the requests.<method>
+        call.
         """
         headers = kwargs.setdefault('headers', {})
         headers['Authorization'] = self.auth_header()
@@ -116,7 +117,7 @@ class API(object):
                 kwargs['verify'] = self.config.verify_ssl
         check_errors = kwargs.pop('check_errors', True)
 
-        response = getattr(requests, method.lower())(url, *args, **kwargs)
+        response = requests.request(method.lower(), url, *args, **kwargs)
         if check_errors and response.status_code >= 300:
             raise ConjurException("Request failed: %d" % response.status_code)
 
@@ -205,7 +206,8 @@ class API(object):
         """
         return Variable(self, id)
 
-    def create_variable(self, id=None, mime_type='text/plain', kind='secret', value=None):
+    def create_variable(self, id=None, mime_type='text/plain', kind='secret',
+                        value=None):
         """Creates a Conjur variable.
 
         Returns a :class `Variable <Variable>`: object
@@ -301,6 +303,3 @@ class API(object):
         Return the names of public keys  for this user.
         """
         return [k.split(' ')[-1] for k in self.public_keys(username).split('\n')]
-
-
-

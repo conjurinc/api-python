@@ -18,6 +18,9 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+from conjur.util import authzid
+from conjur import ConjurException
+
 
 class Resource(object):
     def __init__(self, api, kind, identifier):
@@ -28,3 +31,38 @@ class Resource(object):
     @property
     def resourceid(self):
         return ":".join([self.api.config.account, self.kind, self.identifier])
+
+    def check(self, privilege, role=None):
+        '''
+        Return True if +role+ has +privilege+ on this resource.
+
+        +role+ may be a Role instance, an object with a +role+ method,
+        or a role id as a string.
+        '''
+
+        params = {
+            'check': True,
+            'privilege': privilege
+        }
+
+        if role is not None:
+            roleid = authzid(role)
+            params['acting_as'] = roleid
+        response = self.api.get(self.url(),
+                                params=params,
+                                check_errors=False)
+        if response.status_code == 204:
+            return True
+        elif response.status_code in (404, 403, 409):
+            return False
+        else:
+            raise ConjurException("Request failed: %d" % response.status_code)
+
+    def url(self):
+        return "/".join([
+            self.api.config.authz_url,
+            self.api.config.account,
+            'resources',
+            self.kind,
+            self.identifier
+        ])

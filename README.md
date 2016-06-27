@@ -120,6 +120,7 @@ gis_database_password.add_value('lij6det8eJ7pIx')
 If no `id` is given, a unique id will be generated.  If a value is provided, it will
 be used to set the variable's initial value. When fetching a variable, you can pass
 a `version` keyword argument to `value()` to retrieve a specific version.
+ 
 
 ### Users
 
@@ -152,10 +153,11 @@ else:
 
 ### Groups
 
-Create a group named 'developers':
+Create a group named `developers` and add an existing user `alice` to it.
 
 ```python
 devs = api.create_group('developers')
+
 ```
 
 

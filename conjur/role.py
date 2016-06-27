@@ -56,7 +56,3 @@ class Role(object):
                          'roles',
                          self.kind,
                          self.identifier] + list(args))
-
-
-
-
