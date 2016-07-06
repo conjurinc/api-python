@@ -99,9 +99,6 @@ class Config(object):
 
     pubkeys_url = _service_url('pubkeys', doc='URL for the pubkeys service')
 
-    verify_ssl = _setting('verify_ssl', True,
-                          "Allows SSL verification to be disabled (development \
-                          only!)")
 
     cert_file = _setting('cert_file', None,
                          "Path to certificate to verify ssl requests \
@@ -110,6 +107,17 @@ class Config(object):
     account = _setting('account', 'conjur', 'Conjur account identifier')
 
     appliance_url = _setting('appliance_url', None, 'URL for Conjur appliance')
+
+    @property
+    def verify(self):
+        '''
+        Argument to be passed to `requests` methods `verify` keyword argument.
+        '''
+        if self.cert_file is not None:
+            return self.cert_file
+        else:
+            return True
+
 
 
 config = Config()

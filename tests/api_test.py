@@ -36,7 +36,7 @@ def test_authenticate(mock_post):
     token = api.authenticate()
     assert token == "token token token"
     mock_post.assert_called_with("https://example.com/users/login/authenticate",
-                                 "api-key", verify=api.config.cert_file)
+                                 "api-key", verify=api.config.verify)
 
 
 @patch.object(requests, 'post')
@@ -60,4 +60,4 @@ def test_request_with_post(mock_post):
     assert api.request('post', 'https://example.com', data="foobar") == resp
     mock_post.assert_called_with('https://example.com', data="foobar",
                                  headers={"Authorization": api.auth_header()},
-                                 verify=api.config.cert_file)
+                                 verify=api.config.verify)

@@ -115,10 +115,7 @@ class API(object):
 
     def _request(self, method, url, *args, **kwargs):
         if 'verify' not in kwargs:
-            if self.config.verify_ssl and self.config.cert_file is not None:
-                kwargs['verify'] = self.config.cert_file
-            else:
-                kwargs['verify'] = self.config.verify_ssl
+            kwargs['verify'] = self.config.verify
         check_errors = kwargs.pop('check_errors', True)
 
         response = getattr(requests, method.lower())(url, *args, **kwargs)
