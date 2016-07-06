@@ -23,6 +23,10 @@ import os
 _DEFAULT = object()
 
 
+class ConfigException(Exception):
+    pass
+
+
 def _setting(name, default=_DEFAULT, doc=''):
     def fget(self):
         return self.get(name, default)
@@ -64,18 +68,13 @@ class Config:
         key = '%s_url' % service
         if key in self._config:
             return self._config[key]
-        if not self.appliance_url:
-            fmt = "https://%s-%s-conjur.herokuapp.com"
-            if per_account:
-                loc = self.account
-            else:
-                loc = self.stack
-            return fmt % (service, loc)
-        else:
+        if self.appliance_url is not None:
             url_parts = [self.appliance_url]
             if service != "core":
                 url_parts.append(service)
             return "/".join(url_parts)
+        else:
+            raise ConfigException('Missing appliance_url')
 
     def get(self, key, default=_DEFAULT):
         if key in self._config:
@@ -107,9 +106,6 @@ class Config:
     cert_file = _setting('cert_file', None,
                          "Path to certificate to verify ssl requests \
                          to appliance")
-
-    stack = _setting('stack', 'v4', 'Identifier for shared conjur services \
-                     (deprectated)')
     account = _setting('account', 'conjur', 'Conjur account identifier')
     appliance_url = _setting('appliance_url', None, 'URL for Conjur appliance')
 
