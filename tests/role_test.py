@@ -25,6 +25,7 @@ from conjur.config import Config
 config = Config()
 api = conjur.new_from_key('login', 'pass', config)
 config.account = 'the-account'
+config.appliance_url = 'https://example.com/api'
 
 
 def test_roleid():
