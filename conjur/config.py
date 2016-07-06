@@ -47,7 +47,7 @@ def _service_url(name, per_account=True, doc=''):
     return property(fget=fget, fset=fset, doc=doc)
 
 
-class Config:
+class Config(object):
     def __init__(self, **kwargs):
         self._config = {}
         self.update(kwargs)
@@ -106,7 +106,9 @@ class Config:
     cert_file = _setting('cert_file', None,
                          "Path to certificate to verify ssl requests \
                          to appliance")
+
     account = _setting('account', 'conjur', 'Conjur account identifier')
+
     appliance_url = _setting('appliance_url', None, 'URL for Conjur appliance')
 
 

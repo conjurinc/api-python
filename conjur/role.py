@@ -20,6 +20,7 @@
 
 from conjur.util import urlescape, authzid
 from conjur import ConjurException
+import logging
 
 
 class Role(object):
@@ -57,12 +58,15 @@ class Role(object):
         data = {}
         if admin is not None:
             data['admin'] = 'true' if admin else 'false'
+        logging.info("Adding member with {} and data of {}".format(
+            self._membership_url(member), repr(data)))
         self.api.put(self._membership_url(member), data=data)
 
     def revoke_from(self, member):
         self.api.delete(self._membership_url(member))
 
     def members(self):
+        logging.info('Getting members from {}'.format(self._membership_url()))
         return self.api.get(self._membership_url()).json()
 
     def _membership_url(self, member=None):
