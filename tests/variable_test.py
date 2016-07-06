@@ -37,7 +37,7 @@ def test_create_variable(mock_post):
         '%s/variables' % api.config.core_url,
         data={'mime_type': 'mimey', 'kind': 'something'},
         headers={'Authorization': api.auth_header()},
-        verify=True
+        verify=api.config.cert_file
     )
 
 
@@ -52,7 +52,7 @@ def test_get_variable_value(mock_get):
     mock_get.assert_called_with(
         '%s/variables/my-id/value' % api.config.core_url,
         headers={'Authorization': api.auth_header()},
-        verify=True
+        verify=api.config.cert_file
     )
 
 
@@ -67,5 +67,5 @@ def test_add_variable_value(mock_post):
         '%s/variables/var/values' % api.config.core_url,
         headers={'Authorization': api.auth_header()},
         data={'value': 'boo'},
-        verify=True
+        verify=api.config.cert_file
     )
