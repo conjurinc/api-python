@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from conjur.util import urlescape, authzid
+from conjur import ConjurException
 
 
 class Role(object):
@@ -27,9 +28,30 @@ class Role(object):
         self.kind = kind
         self.identifier = identifier
 
+    @classmethod
+    def from_roleid(cls, api, roleid):
+        tokens = authzid(roleid).split(':', 3)
+        if len(tokens) == 3:
+            tokens.pop(0)
+        return cls(api, *tokens)
+
     @property
     def roleid(self):
         return ':'.join([self.api.config.account, self.kind, self.identifier])
+
+    def is_permitted(self, resource, privilege):
+        params = {
+            'check': 'true',
+            'resource_id': authzid(resource, 'resource'),
+            'privilege': privilege
+        }
+        response = self.api.get(self._url(), params, check_errors=False)
+        if response.status_code < 300:
+            return True
+        elif response.status_code in (404, 409):
+            return False
+        else:
+            raise ConjurException("Request failed: %d" % response.status_code)
 
     def grant_to(self, member, admin=None):
         data = {}

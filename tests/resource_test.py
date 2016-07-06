@@ -19,3 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from mock import patch
+
+
+def test_check_permission_with_role():
+    pass
