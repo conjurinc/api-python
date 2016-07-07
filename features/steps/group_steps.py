@@ -1,6 +1,15 @@
 from behave import when, then
 
 
+def group_has_member(group, user):
+    members = group.members()
+    userid = user.role.roleid
+    for m in members:
+        if m['member'] == userid:
+            return True
+    return False
+
+
 @when('I create a group "{name}"')
 def create_group_impl(context, name):
     name = context.random_string(name)
@@ -22,10 +31,19 @@ def add_user_to_group(context):
     context.group.add_member(context.user)
 
 
+@when('I remove the user from the group')
+def remove_user_from_group(context):
+    context.group.remove_member(context.user)
+
+
 @then('The user is a member of the group')
 def user_is_a_member_of_group(context):
-    members = context.group.members()
-    assert [m for m in members if m['member'] == context.user.role.roleid]
+    assert group_has_member(context.group, context.user)
+
+
+@then('the user is not a member of the group')
+def user_is_not_a_member_of_group(context):
+    assert not group_has_member(context.group, context.user)
 
 
 @then('it succeeds')

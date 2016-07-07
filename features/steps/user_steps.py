@@ -17,7 +17,7 @@ def step_creaet_user_named(context, name):
 @then("I can login as the user using the api key")
 def step_login_as_user(context):
     user_api = context.user_api = conjur.new_from_key(
-        context.user_id, context.user.api_key)
+        context.user_id, context.user.api_key, context.api.config)
     user_api.authenticate(False)
 
 
@@ -30,5 +30,6 @@ def step_create_user_with_password(context):
 
 @then(u'I can login as the user using the password')
 def step_login_as_user_with_password(context):
-    user_api = conjur.new_from_key(context.user_id, context.password)
+    user_api = conjur.new_from_key(context.user_id, context.password,
+                                   context.api.config)
     user_api.authenticate(False)
