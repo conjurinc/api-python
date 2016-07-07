@@ -42,6 +42,6 @@ coverage html
 # pylint -f parseable conjur tests | tee pylint.out
 
 
-cp -r coverage*.xml pytest.xml htmlcov pylint.out /artifacts/.
+cp -r coverage.xml pytest.xml htmlcov /artifacts/.
 
 COMMANDS
