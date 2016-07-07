@@ -5,6 +5,10 @@ pylint.out
 pylint.html
 pydocs
 
+certs
+
+*cid
+
 # Created by https://www.gitignore.io
 
 ### Python ###
