@@ -37,9 +37,9 @@ export CONJUR_CERT_FILE=/certs/cuke-master.pem
 
 py.test --cov conjur --cov-report html --cov-report xml --junitxml=pytest.xml --instafail
 behave
-# pylint -f parseable conjur tests | tee pylint.out
+pylint -f parseable conjur tests | tee pylint.out
 
 
-cp coverage.xml pytest.xml htmlcov pylint.out /artifacts/.
+cp -r coverage.xml pytest.xml htmlcov pylint.out /artifacts/.
 
 COMMANDS
