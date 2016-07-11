@@ -38,7 +38,8 @@ def test_check_permission_with_role(mock_get):
 
     mock_get.assert_called_with(
         'https://example.com/api/authz/conjur/roles/user/bob',
-        {'privilege': 'fry', 'check': 'true', 'resource_id': 'conjur:food:bacon'},
+        params={'privilege': 'fry', 'check': 'true',
+                'resource_id': 'conjur:food:bacon'},
         check_errors=False
     )
 
