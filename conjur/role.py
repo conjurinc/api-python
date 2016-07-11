@@ -46,7 +46,7 @@ class Role(object):
             'resource_id': authzid(resource, 'resource'),
             'privilege': privilege
         }
-        response = self.api.get(self._url(), params,
+        response = self.api.get(self._url(), params=params,
                                 check_errors=False)
         if response.status_code < 300:
             return True
