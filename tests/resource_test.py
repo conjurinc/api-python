@@ -18,8 +18,63 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from mock import patch
+from mock import patch, Mock
+import conjur
+import pytest
+
+api = conjur.new_from_key('admin', 'secret')
+resource = api.resource('food', 'bacon')
+bob = api.user('bob')
 
 
-def test_check_permission_with_role():
-    pass
+def test_resource_id():
+    assert resource.resourceid == api.config.account + ':food:bacon'
+
+
+@patch.object(api, 'get')
+def test_check_permission_with_role(mock_get):
+    mock_get.return_value = Mock(status_code=204)
+    assert resource.check_permission('fry', bob)
+
+    mock_get.assert_called_with(
+        'https://example.com/api/authz/conjur/roles/user/bob',
+        {'privilege': 'fry', 'check': 'true', 'resource_id': 'conjur:food:bacon'},
+        check_errors=False
+    )
+
+
+@patch.object(api, 'get')
+def test_check_permission_self_role(mock_get):
+    mock_get.return_value = Mock(status_code=204)
+    assert resource.check_permission('fry')
+    mock_get.assert_called_with(
+        'https://example.com/api/authz/conjur/resources/food/bacon',  # noqa E501 (line too long)
+        params={'privilege': 'fry', 'check': 'true'},
+        check_errors=False
+    )
+
+
+@patch.object(api, 'get')
+def test_check_permission_fails_with_self_role(mock_get):
+    mock_get.return_value = Mock(status_code=403)
+    assert not resource.check_permission('fry')
+
+
+@patch.object(api, 'get')
+def test_check_permission_fails_with_role(mock_get):
+    mock_get.return_value = Mock(status_code=403)
+    assert not resource.check_permission('fry', bob)
+
+
+@patch.object(api, 'get')
+def test_check_permission_error_self_role(mock_get):
+    mock_get.return_value = Mock(status_code=401)
+    with pytest.raises(conjur.ConjurException):
+        resource.check_permission('fry')
+
+
+@patch.object(api, 'get')
+def test_check_permission_error_with_role(mock_get):
+    mock_get.return_value = Mock(status_code=401)
+    with pytest.raises(conjur.ConjurException):
+        resource.check_permission('fry', bob)
