@@ -32,9 +32,9 @@ def test_resource_id():
 
 
 @patch.object(api, 'get')
-def test_check_permission_with_role(mock_get):
+def test_permitted_with_role(mock_get):
     mock_get.return_value = Mock(status_code=204)
-    assert resource.check_permission('fry', bob)
+    assert resource.permitted('fry', bob)
 
     mock_get.assert_called_with(
         'https://example.com/api/authz/conjur/roles/user/bob',
@@ -45,9 +45,9 @@ def test_check_permission_with_role(mock_get):
 
 
 @patch.object(api, 'get')
-def test_check_permission_self_role(mock_get):
+def test_permitted_self_role(mock_get):
     mock_get.return_value = Mock(status_code=204)
-    assert resource.check_permission('fry')
+    assert resource.permitted('fry')
     mock_get.assert_called_with(
         'https://example.com/api/authz/conjur/resources/food/bacon',  # noqa E501 (line too long)
         params={'privilege': 'fry', 'check': 'true'},
@@ -56,26 +56,26 @@ def test_check_permission_self_role(mock_get):
 
 
 @patch.object(api, 'get')
-def test_check_permission_fails_with_self_role(mock_get):
+def test_permitted_fails_with_self_role(mock_get):
     mock_get.return_value = Mock(status_code=403)
-    assert not resource.check_permission('fry')
+    assert not resource.permitted('fry')
 
 
 @patch.object(api, 'get')
-def test_check_permission_fails_with_role(mock_get):
+def test_permitted_fails_with_role(mock_get):
     mock_get.return_value = Mock(status_code=403)
-    assert not resource.check_permission('fry', bob)
+    assert not resource.permitted('fry', bob)
 
 
 @patch.object(api, 'get')
-def test_check_permission_error_self_role(mock_get):
+def test_permitted_error_self_role(mock_get):
     mock_get.return_value = Mock(status_code=401)
     with pytest.raises(conjur.ConjurException):
-        resource.check_permission('fry')
+        resource.permitted('fry')
 
 
 @patch.object(api, 'get')
-def test_check_permission_error_with_role(mock_get):
+def test_permitted_error_with_role(mock_get):
     mock_get.return_value = Mock(status_code=401)
     with pytest.raises(conjur.ConjurException):
-        resource.check_permission('fry', bob)
+        resource.permitted('fry', bob)
