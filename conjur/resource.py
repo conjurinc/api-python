@@ -68,7 +68,7 @@ class Resource(object):
 
         self.api.post(self.url(), parmas=params)
 
-    def check_permission(self, privilege, role=None):
+    def permitted(self, privilege, role=None):
         '''
         Return True if +role+ has +privilege+ on this resource.
 
@@ -87,7 +87,7 @@ class Resource(object):
                                     check_errors=False)
             if response.status_code == 204:
                 return True
-            elif response.status_code in (404, 403, 409):
+            elif response.status_code in (404, 403):
                 return False
             else:
                 raise ConjurException("Request failed: %d" % response.status_code)

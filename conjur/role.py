@@ -48,9 +48,9 @@ class Role(object):
         }
         response = self.api.get(self._url(), params=params,
                                 check_errors=False)
-        if response.status_code < 300:
+        if response.status_code == 204:
             return True
-        elif response.status_code in (403, 404, 409):
+        elif response.status_code in (403, 404):
             return False
         else:
             raise ConjurException("Request failed: %d" % response.status_code)
