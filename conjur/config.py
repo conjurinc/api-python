@@ -23,6 +23,10 @@ import os
 _DEFAULT = object()
 
 
+class ConfigException(Exception):
+    pass
+
+
 def _setting(name, default=_DEFAULT, doc=''):
     def fget(self):
         return self.get(name, default)
@@ -43,7 +47,7 @@ def _service_url(name, per_account=True, doc=''):
     return property(fget=fget, fset=fset, doc=doc)
 
 
-class Config:
+class Config(object):
     def __init__(self, **kwargs):
         self._config = {}
         self.update(kwargs)
@@ -64,18 +68,13 @@ class Config:
         key = '%s_url' % service
         if key in self._config:
             return self._config[key]
-        if not self.appliance_url:
-            fmt = "https://%s-%s-conjur.herokuapp.com"
-            if per_account:
-                loc = self.account
-            else:
-                loc = self.stack
-            return fmt % (service, loc)
-        else:
+        if self.appliance_url is not None:
             url_parts = [self.appliance_url]
             if service != "core":
                 url_parts.append(service)
             return "/".join(url_parts)
+        else:
+            raise ConfigException('Missing appliance_url')
 
     def get(self, key, default=_DEFAULT):
         if key in self._config:
@@ -100,18 +99,25 @@ class Config:
 
     pubkeys_url = _service_url('pubkeys', doc='URL for the pubkeys service')
 
-    verify_ssl = _setting('verify_ssl', True,
-                          "Allows SSL verification to be disabled (development \
-                          only!)")
-    
+
     cert_file = _setting('cert_file', None,
                          "Path to certificate to verify ssl requests \
                          to appliance")
 
-    stack = _setting('stack', 'v4', 'Identifier for shared conjur services \
-                     (deprectated)')
     account = _setting('account', 'conjur', 'Conjur account identifier')
+
     appliance_url = _setting('appliance_url', None, 'URL for Conjur appliance')
+
+    @property
+    def verify(self):
+        '''
+        Argument to be passed to `requests` methods `verify` keyword argument.
+        '''
+        if self.cert_file is not None:
+            return self.cert_file
+        else:
+            return True
+
 
 
 config = Config()

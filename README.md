@@ -71,7 +71,7 @@ from conjur.config import config
 config.load('/etc/conjur.conf')
 api = conjur.new_from_netrc('/etc/conjur.identity', config=config)
 ```
----
+
 
 If you have an existing authentication token, for example when handling
 an HTTP request that contains an end user's token, use `new_from_token` to create your API instance.
@@ -121,6 +121,7 @@ If no `id` is given, a unique id will be generated.  If a value is provided, it 
 be used to set the variable's initial value. When fetching a variable, you can pass
 a `version` keyword argument to `value()` to retrieve a specific version.
 
+
 ### Users
 
 Create a user `alice` with password `super-secret`.
@@ -152,10 +153,11 @@ else:
 
 ### Groups
 
-Create a group named 'developers':
+Create a group named `developers` and add an existing user `alice` to it.
 
 ```python
 devs = api.create_group('developers')
+
 ```
 
 

@@ -18,6 +18,10 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+from conjur.util import authzid
+from conjur.role import Role
+from conjur import ConjurException
+
 
 class Resource(object):
     def __init__(self, api, kind, identifier):
@@ -28,3 +32,74 @@ class Resource(object):
     @property
     def resourceid(self):
         return ":".join([self.api.config.account, self.kind, self.identifier])
+
+    def permit(self, role, privilege, grant_option=False):
+        '''
+        Permit `role` to perform `privilege` on this resource.  If
+        `grant_option` is True, the role will be able to grant this
+        permission to other resources.
+
+        You must own the resource or have the permission with `grant_option`
+        to call this method.
+        '''
+        data = {}
+        params = {
+            'permit': 'true',
+            'privilege': privilege,
+            'role': authzid(role, 'role')
+        }
+        if grant_option:
+            data['grant_option'] = 'true'
+
+        self.api.post(self.url(), data=data, params=params)
+
+    def deny(self, role, privilege):
+        '''
+        Deny `role` permission to perform `privilege` on this resource.
+
+        You must own the resource or have the permission with `grant_option`
+        on it to call this method.
+        '''
+        params = {
+            'permit': 'true',
+            'privilege': privilege,
+            'role': authzid(role)
+        }
+
+        self.api.post(self.url(), parmas=params)
+
+    def permitted(self, privilege, role=None):
+        '''
+        Return True if +role+ has +privilege+ on this resource.
+
+        +role+ may be a Role instance, an object with a +role+ method,
+        or a role id as a string.
+
+        If +role+ is not given, check the permission for the currently
+        authenticated role.
+        '''
+
+        if role is None:
+            # Handle self role check
+            response = self.api.get(self.url(),
+                                    params={'check': 'true',
+                                            'privilege': privilege},
+                                    check_errors=False)
+            if response.status_code == 204:
+                return True
+            elif response.status_code in (404, 403):
+                return False
+            else:
+                raise ConjurException("Request failed: %d" % response.status_code)
+        else:
+            # Otherwise call role.is_permitted
+            return Role.from_roleid(self.api, role).is_permitted(self, privilege)
+
+    def url(self):
+        return "/".join([
+            self.api.config.authz_url,
+            self.api.config.account,
+            'resources',
+            self.kind,
+            self.identifier
+        ])

@@ -38,7 +38,7 @@ def test_create_user(mock_post):
         '{0}/users'.format(api.config.core_url),
         data={'login': 'foo'},
         headers={'Authorization': api.auth_header()},
-        verify=True
+        verify=api.config.verify
     )
 
     api.create_user('foo', 'bar')
@@ -46,7 +46,7 @@ def test_create_user(mock_post):
         '{0}/users'.format(api.config.core_url),
         data={'login': 'foo', 'password': 'bar'},
         headers={'Authorization': api.auth_header()},
-        verify=True
+        verify=api.config.verify
     )
 
 
@@ -59,12 +59,12 @@ def test_user(mock_get):
     mock_get.assert_called_with(
         '{0}/users/login'.format(api.config.core_url),
         headers={'Authorization': api.auth_header()},
-        verify=True
+        verify=api.config.verify
     )
 
 
 def test_user_role():
-    user = conjur.new_from_key('foo','bar').user('someone')
+    user = conjur.new_from_key('foo', 'bar').user('someone')
     role = user.role
     assert role.kind == 'user'
     assert role.identifier == 'someone'

@@ -21,9 +21,9 @@
 
 # 2 vs 3 urlencode moved...
 try:
-    from urllib import urlencode, quote
+    from urllib import quote
 except:
-    from urllib.parse import urlencode, quote
+    from urllib.parse import quote
 
 
 def urlescape(s):
@@ -31,7 +31,7 @@ def urlescape(s):
 
 
 def authzid(obj, kind, with_account=True):
-    if isinstance(obj, basestring):
+    if isinstance(obj, (str, unicode)):  # noqa F821 (flake8 doesn't know about unicode)
         if not with_account:
             return ':'.join(obj.split(':')[1:])
         return obj

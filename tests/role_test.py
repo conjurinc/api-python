@@ -25,10 +25,13 @@ from conjur.config import Config
 config = Config()
 api = conjur.new_from_key('login', 'pass', config)
 config.account = 'the-account'
+config.appliance_url = 'https://example.com/api'
+
 
 def test_roleid():
     role = api.role('some-kind', 'the-id')
     assert role.roleid == 'the-account:some-kind:the-id'
+
 
 @patch.object(api, 'put')
 def test_role_grant_to_without_admin(mock_put):
@@ -42,6 +45,7 @@ def test_role_grant_to_without_admin(mock_put):
         data={}
     )
 
+
 @patch.object(api, 'put')
 def test_role_grant_to_with_admin_true(mock_put):
     role = api.role('some-kind', 'the-id')
@@ -51,8 +55,9 @@ def test_role_grant_to_with_admin_true(mock_put):
             config.authz_url,
             'some-other-role'
         ),
-        data={'admin':'true'}
+        data={'admin': 'true'}
     )
+
 
 @patch.object(api, 'put')
 def test_role_grant_to_with_admin_false(mock_put):
@@ -63,8 +68,9 @@ def test_role_grant_to_with_admin_false(mock_put):
             config.authz_url,
             'some-other-role'
         ),
-        data={'admin':'false'}
+        data={'admin': 'false'}
     )
+
 
 @patch.object(api, 'delete')
 def test_role_revoke_from(mock_del):
@@ -77,6 +83,7 @@ def test_role_revoke_from(mock_del):
         )
     )
 
+
 @patch.object(api, 'get')
 def test_role_members(mock_get):
     members = ['foo', 'bar']
@@ -86,6 +93,7 @@ def test_role_members(mock_get):
     mock_get.assert_called_with(
         '{0}/the-account/roles/blah/boo?members'.format(config.authz_url)
     )
+
 
 @patch.object(api, 'put')
 def test_role_grant_to_user(mock_put):
@@ -99,6 +107,3 @@ def test_role_grant_to_user(mock_put):
         ),
         data={}
     )
-
-
-

@@ -37,7 +37,8 @@ def _config(given):
 
 def configure(**kwargs):
     """
-    Convenience function to merge multiple settings into the default global config.
+    Convenience function to merge multiple settings into the default global
+    config.
 
     Example:
      import conjur
@@ -79,8 +80,8 @@ def new_from_key(login, api_key, config=None):
 
     :param login: The login Conjur of the Conjur user or host to authenticate as.
     :param api_key: The Conjur api key *or* password to use when authenticating.
-    :param config: The Config instance for the api.  If not given the global Config instance
-        (`conjur.config.config`) will be used.
+    :param config: The Config instance for the api.  If not given the global
+        Config instance (`conjur.config.config`) will be used.
     """
 
     from .api import API
@@ -90,17 +91,16 @@ def new_from_key(login, api_key, config=None):
 
 def new_from_token(token, config=None):
     """
-    Create a Conjur API that will authenticate using the given signed Conjur token.
+    Create a Conjur API that will authenticate using the given signed Conjur
+    token.
 
     This is useful if you want to act on behalf of a the identity of an
     HTTP request containing a user's signed token.
 
     :param token: The json formatted, *not* base64'd, Conjur authentication Token.
-    :param config: Config instance for the api.  If not given, the global Config instance
-        (`conjur.config.config`) will be used.
+    :param config: Config instance for the api.  If not given, the global Config
+        instance (`conjur.config.config`) will be used.
     """
     from .api import API
 
     return API(token=token, config=_config(config))
-
-

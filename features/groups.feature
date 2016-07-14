@@ -6,7 +6,7 @@ Feature: Group Management
 
   Scenario: I can list group memberships
     When I create a group "bar"
-    Then I can list the group memebers
+    Then I can list the group members
 
   Scenario: I can add members to a group
     When I create a group "developers"
