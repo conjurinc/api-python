@@ -36,12 +36,12 @@ find . -name '*.pyc' -delete
 export CONJUR_CERT_FILE=/certs/cuke-master.pem
 
 py.test --cov conjur --junitxml=pytest.xml --instafail
-coverage run --source='conjur/' -a -m behave --junit --junit-directory=artifacts
+coverage run --source='conjur/' -a -m behave --junit --junit-directory=.
 coverage xml -o './coverage.xml'
 coverage html
 # pylint -f parseable conjur tests | tee pylint.out
 
 
-cp -r coverage.xml pytest.xml htmlcov /artifacts/.
+cp -r coverage.xml pytest.xml htmlcov TEST-*.xml /artifacts/.
 
 COMMANDS
