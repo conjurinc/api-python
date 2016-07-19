@@ -19,7 +19,6 @@ docker build -t api-python .
 docker run -d \
   --cidfile=conjur-cid \
   -p 443:443 \
-  --privileged \
   -v ${PWD}/ci:/ci \
   --add-host=conjur:127.0.0.1 \
   registry.tld/conjur-appliance-cuke-master:$APPLIANCE_VERSION
