@@ -4,7 +4,10 @@ function cleanup {
    docker rm -f $(cat conjur-cid)
    rm conjur-cid
 }
-trap cleanup EXIT
+
+if [ -z "$KEEP" ] ; then
+    trap cleanup EXIT
+fi
 
 APPLIANCE_VERSION=4.8-stable
 
@@ -16,6 +19,8 @@ docker build -t api-python .
 docker run -d \
   --cidfile=conjur-cid \
   -p 443:443 \
+  --privileged \
+  -v ${PWD}/ci:/ci \
   --add-host=conjur:127.0.0.1 \
   registry.tld/conjur-appliance-cuke-master:$APPLIANCE_VERSION
 
@@ -25,6 +30,8 @@ docker exec $(cat conjur-cid) /opt/conjur/evoke/bin/wait_for_conjur
 mkdir -p ${PWD}/certs
 
 docker cp $(cat conjur-cid):/opt/conjur/etc/ssl/cuke-master.pem ${PWD}/certs
+
+docker exec $(cat conjur-cid) /ci/setup.sh
 
 docker run --rm -Pi \
   -v ${PWD}/certs:/certs \
