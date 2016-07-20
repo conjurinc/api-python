@@ -4,11 +4,17 @@ A Python client for the Conjur API.
 
 ## Installation
 
+The Conjur Python API requires Python 2.7.  While we love Python 3, Python 2.x is the priority because of its
+widespread use by DevOps tools such as Salt and Ansible.
+
 Install from [PyPI](https://pypi.python.org/pypi/Conjur)
 
 ```
 pip install conjur
 ```
+
+**Note:** If you have the `pandoc` package installed you may need to uninstall it for the above command to work.  You
+can do so with `pip uninstall pypandoc`.
 
 ## Usage
 
