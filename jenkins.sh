@@ -4,7 +4,10 @@ function cleanup {
    docker rm -f $(cat conjur-cid)
    rm conjur-cid
 }
-trap cleanup EXIT
+
+if [ -z "$KEEP" ] ; then
+    trap cleanup EXIT
+fi
 
 APPLIANCE_VERSION=4.8-stable
 
@@ -16,6 +19,7 @@ docker build -t api-python .
 docker run -d \
   --cidfile=conjur-cid \
   -p 443:443 \
+  -v ${PWD}/ci:/ci \
   --add-host=conjur:127.0.0.1 \
   registry.tld/conjur-appliance-cuke-master:$APPLIANCE_VERSION
 
@@ -25,6 +29,8 @@ docker exec $(cat conjur-cid) /opt/conjur/evoke/bin/wait_for_conjur
 mkdir -p ${PWD}/certs
 
 docker cp $(cat conjur-cid):/opt/conjur/etc/ssl/cuke-master.pem ${PWD}/certs
+
+docker exec $(cat conjur-cid) /ci/setup.sh
 
 docker run --rm -Pi \
   -v ${PWD}/certs:/certs \
@@ -36,7 +42,12 @@ find . -name '*.pyc' -delete
 export CONJUR_CERT_FILE=/certs/cuke-master.pem
 
 py.test --cov conjur --junitxml=pytest.xml --instafail
-coverage run --source='conjur/' -a -m behave
+
+# Runs cukes with coverage
+coverage run --source='conjur/' -a -m behave --junit \
+ --junit-directory=/artifacts/ \
+ --tags ~@wip
+ 
 coverage xml -o './coverage.xml'
 coverage html
 # pylint -f parseable conjur tests | tee pylint.out
