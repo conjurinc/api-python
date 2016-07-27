@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>conjur.layer API documentation</title>
+    <title>conjur.group API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -974,14 +974,14 @@ table {
     <li class="set"><h3><a href="#header-classes">Classes</a></h3>
       <ul>
         <li class="mono">
-        <span class="class_name"><a href="#conjur.layer.Layer">Layer</a></span>
+        <span class="class_name"><a href="#conjur.group.Group">Group</a></span>
         
           
   <ul>
-    <li class="mono"><a href="#conjur.layer.Layer.__init__">__init__</a></li>
-    <li class="mono"><a href="#conjur.layer.Layer.add_host">add_host</a></li>
-    <li class="mono"><a href="#conjur.layer.Layer.exists">exists</a></li>
-    <li class="mono"><a href="#conjur.layer.Layer.remove_host">remove_host</a></li>
+    <li class="mono"><a href="#conjur.group.Group.__init__">__init__</a></li>
+    <li class="mono"><a href="#conjur.group.Group.add_member">add_member</a></li>
+    <li class="mono"><a href="#conjur.group.Group.members">members</a></li>
+    <li class="mono"><a href="#conjur.group.Group.remove_member">remove_member</a></li>
   </ul>
 
         </li>
@@ -999,11 +999,11 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">conjur.layer</span> module</h1>
+  <h1 class="title"><span class="name">conjur.group</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.layer" class="source">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.group', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.group" class="source">
     <pre><code>#
 # Copyright (C) 2014 Conjur Inc
 #
@@ -1024,52 +1024,21 @@ table {
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from conjur.util import urlescape, authzid
-from conjur import ConjurException
 
-
-class Layer(object):
-    def __init__(self, api, id, attrs=None):
+class Group(object):
+    def __init__(self, api, id):
         self.api = api
         self.id = id
-        self._attrs = {} if attrs is None else attrs
+        self.role = api.role('group', id)
 
-    def add_host(self, host):
-        hostid = authzid(host, 'role', with_account=False)
-        self.api.post(self._hosts_url(), data={'hostid': hostid})
+    def members(self):
+        return self.role.members()
 
-    def remove_host(self, host):
-        hostid = authzid(host, 'role')
-        self.api.delete(self._host_url(hostid))
+    def add_member(self, member, admin=False):
+        self.role.grant_to(member, admin)
 
-    def exists(self):
-        resp = self.api.get(self._url(), check_errors=False)
-        if resp.status_code == 200:
-            return True
-        if resp.status_code == 404:
-            return False
-        raise ConjurException("Request Failed: {0}".format(resp.status_code))
-
-    def _url(self):
-        return "{0}/layers/{1}".format(self.api.config.core_url,
-                                       urlescape(self.id))
-
-    def _hosts_url(self):
-        return "{0}/hosts".format(self._url())
-
-    def _host_url(self, host_id):
-        return "{0}/{1}".format(self._hosts_url(), urlescape(host_id))
-
-    def _fetch(self):
-        self._attrs = self.api.get(self._url()).json()
-
-    def __getattr__(self, item):
-        if self._attrs is None:
-            self._fetch()
-        try:
-            return self._attrs[item]
-        except KeyError:
-            raise AttributeError(item)
+    def remove_member(self, member):
+        self.role.revoke_from(member)
 </code></pre>
   </div>
 
@@ -1081,54 +1050,26 @@ class Layer(object):
     <h2 class="section-title" id="header-classes">Classes</h2>
       
       <div class="item">
-      <p id="conjur.layer.Layer" class="name">class <span class="ident">Layer</span></p>
+      <p id="conjur.group.Group" class="name">class <span class="ident">Group</span></p>
       
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.layer.Layer" class="source">
-    <pre><code>class Layer(object):
-    def __init__(self, api, id, attrs=None):
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.group.Group', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.group.Group" class="source">
+    <pre><code>class Group(object):
+    def __init__(self, api, id):
         self.api = api
         self.id = id
-        self._attrs = {} if attrs is None else attrs
+        self.role = api.role('group', id)
 
-    def add_host(self, host):
-        hostid = authzid(host, 'role', with_account=False)
-        self.api.post(self._hosts_url(), data={'hostid': hostid})
+    def members(self):
+        return self.role.members()
 
-    def remove_host(self, host):
-        hostid = authzid(host, 'role')
-        self.api.delete(self._host_url(hostid))
+    def add_member(self, member, admin=False):
+        self.role.grant_to(member, admin)
 
-    def exists(self):
-        resp = self.api.get(self._url(), check_errors=False)
-        if resp.status_code == 200:
-            return True
-        if resp.status_code == 404:
-            return False
-        raise ConjurException("Request Failed: {0}".format(resp.status_code))
-
-    def _url(self):
-        return "{0}/layers/{1}".format(self.api.config.core_url,
-                                       urlescape(self.id))
-
-    def _hosts_url(self):
-        return "{0}/hosts".format(self._url())
-
-    def _host_url(self, host_id):
-        return "{0}/{1}".format(self._hosts_url(), urlescape(host_id))
-
-    def _fetch(self):
-        self._attrs = self.api.get(self._url()).json()
-
-    def __getattr__(self, item):
-        if self._attrs is None:
-            self._fetch()
-        try:
-            return self._attrs[item]
-        except KeyError:
-            raise AttributeError(item)
+    def remove_member(self, member):
+        self.role.revoke_from(member)
 </code></pre>
   </div>
 </div>
@@ -1137,12 +1078,12 @@ class Layer(object):
       <div class="class">
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
-          <li><a href="#conjur.layer.Layer">Layer</a></li>
-          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          <li><a href="#conjur.group.Group">Group</a></li>
+          <li>__builtin__.object</li>
           </ul>
           <h3>Instance variables</h3>
             <div class="item">
-            <p id="conjur.layer.Layer.api" class="name">var <span class="ident">api</span></p>
+            <p id="conjur.group.Group.api" class="name">var <span class="ident">api</span></p>
             
 
             
@@ -1152,7 +1093,17 @@ class Layer(object):
 
             </div>
             <div class="item">
-            <p id="conjur.layer.Layer.id" class="name">var <span class="ident">id</span></p>
+            <p id="conjur.group.Group.id" class="name">var <span class="ident">id</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.group.Group.role" class="name">var <span class="ident">role</span></p>
             
 
             
@@ -1164,20 +1115,20 @@ class Layer(object):
           <h3>Methods</h3>
             
   <div class="item">
-    <div class="name def" id="conjur.layer.Layer.__init__">
-    <p>def <span class="ident">__init__</span>(</p><p>self, api, id, attrs=None)</p>
+    <div class="name def" id="conjur.group.Group.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, api, id)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer.__init__', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.layer.Layer.__init__" class="source">
-    <pre><code>def __init__(self, api, id, attrs=None):
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.group.Group.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.group.Group.__init__" class="source">
+    <pre><code>def __init__(self, api, id):
     self.api = api
     self.id = id
-    self._attrs = {} if attrs is None else attrs
+    self.role = api.role('group', id)
 </code></pre>
   </div>
 </div>
@@ -1186,19 +1137,18 @@ class Layer(object):
   
             
   <div class="item">
-    <div class="name def" id="conjur.layer.Layer.add_host">
-    <p>def <span class="ident">add_host</span>(</p><p>self, host)</p>
+    <div class="name def" id="conjur.group.Group.add_member">
+    <p>def <span class="ident">add_member</span>(</p><p>self, member, admin=False)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer.add_host', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.layer.Layer.add_host" class="source">
-    <pre><code>def add_host(self, host):
-    hostid = authzid(host, 'role', with_account=False)
-    self.api.post(self._hosts_url(), data={'hostid': hostid})
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.group.Group.add_member', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.group.Group.add_member" class="source">
+    <pre><code>def add_member(self, member, admin=False):
+    self.role.grant_to(member, admin)
 </code></pre>
   </div>
 </div>
@@ -1207,23 +1157,18 @@ class Layer(object):
   
             
   <div class="item">
-    <div class="name def" id="conjur.layer.Layer.exists">
-    <p>def <span class="ident">exists</span>(</p><p>self)</p>
+    <div class="name def" id="conjur.group.Group.members">
+    <p>def <span class="ident">members</span>(</p><p>self)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer.exists', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.layer.Layer.exists" class="source">
-    <pre><code>def exists(self):
-    resp = self.api.get(self._url(), check_errors=False)
-    if resp.status_code == 200:
-        return True
-    if resp.status_code == 404:
-        return False
-    raise ConjurException("Request Failed: {0}".format(resp.status_code))
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.group.Group.members', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.group.Group.members" class="source">
+    <pre><code>def members(self):
+    return self.role.members()
 </code></pre>
   </div>
 </div>
@@ -1232,19 +1177,18 @@ class Layer(object):
   
             
   <div class="item">
-    <div class="name def" id="conjur.layer.Layer.remove_host">
-    <p>def <span class="ident">remove_host</span>(</p><p>self, host)</p>
+    <div class="name def" id="conjur.group.Group.remove_member">
+    <p>def <span class="ident">remove_member</span>(</p><p>self, member)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer.remove_host', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.layer.Layer.remove_host" class="source">
-    <pre><code>def remove_host(self, host):
-    hostid = authzid(host, 'role')
-    self.api.delete(self._host_url(hostid))
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.group.Group.remove_member', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.group.Group.remove_member" class="source">
+    <pre><code>def remove_member(self, member):
+    self.role.revoke_from(member)
 </code></pre>
   </div>
 </div>

@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>conjur API documentation</title>
+    <title>conjur.resource API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -970,41 +970,25 @@ table {
     <h1>Index</h1>
     <ul id="index">
 
-    <li class="set"><h3><a href="#header-functions">Functions</a></h3>
-      
-  <ul>
-    <li class="mono"><a href="#conjur.configure">configure</a></li>
-    <li class="mono"><a href="#conjur.new_from_key">new_from_key</a></li>
-    <li class="mono"><a href="#conjur.new_from_netrc">new_from_netrc</a></li>
-    <li class="mono"><a href="#conjur.new_from_token">new_from_token</a></li>
-  </ul>
-
-    </li>
 
     <li class="set"><h3><a href="#header-classes">Classes</a></h3>
       <ul>
         <li class="mono">
-        <span class="class_name"><a href="#conjur.ConjurException">ConjurException</a></span>
+        <span class="class_name"><a href="#conjur.resource.Resource">Resource</a></span>
         
+          
+  <ul>
+    <li class="mono"><a href="#conjur.resource.Resource.__init__">__init__</a></li>
+    <li class="mono"><a href="#conjur.resource.Resource.deny">deny</a></li>
+    <li class="mono"><a href="#conjur.resource.Resource.permit">permit</a></li>
+    <li class="mono"><a href="#conjur.resource.Resource.permitted">permitted</a></li>
+    <li class="mono"><a href="#conjur.resource.Resource.url">url</a></li>
+  </ul>
+
         </li>
       </ul>
     </li>
 
-    <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
-      <ul>
-        <li class="mono"><a href="/api-python/conjur/api.m.html">conjur.api</a></li>
-        <li class="mono"><a href="/api-python/conjur/config.m.html">conjur.config</a></li>
-        <li class="mono"><a href="/api-python/conjur/group.m.html">conjur.group</a></li>
-        <li class="mono"><a href="/api-python/conjur/host.m.html">conjur.host</a></li>
-        <li class="mono"><a href="/api-python/conjur/layer.m.html">conjur.layer</a></li>
-        <li class="mono"><a href="/api-python/conjur/membership.m.html">conjur.membership</a></li>
-        <li class="mono"><a href="/api-python/conjur/resource.m.html">conjur.resource</a></li>
-        <li class="mono"><a href="/api-python/conjur/role.m.html">conjur.role</a></li>
-        <li class="mono"><a href="/api-python/conjur/user.m.html">conjur.user</a></li>
-        <li class="mono"><a href="/api-python/conjur/util.m.html">conjur.util</a></li>
-        <li class="mono"><a href="/api-python/conjur/variable.m.html">conjur.variable</a></li>
-      </ul>
-    </li>
     </ul>
   </div>
 
@@ -1016,16 +1000,16 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">conjur</span> module</h1>
+  <h1 class="title"><span class="name">conjur.resource</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur', this);">Show source &equiv;</a></p>
-  <div id="source-conjur" class="source">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.resource', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.resource" class="source">
     <pre><code>#
 # Copyright (C) 2014 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
-# this software and associated documentation files (the "Software"), to deal in
+# this software and associated documentation files (the "Software"), to deal inre
 # the Software without restriction, including without limitation the rights to
 # use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 # the Software, and to permit persons to whom the Software is furnished to do so,
@@ -1040,101 +1024,92 @@ table {
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-import os
 
-from .config import config as default_config
-
-
-class ConjurException(Exception):
-    pass
+from conjur.util import authzid
+from conjur.role import Role
+from conjur import ConjurException
 
 
-def _config(given):
-    if given is None:
-        env_config_file = os.getenv('CONJURRC')
-        if env_config_file is not None:
-            default_config.load(env_config_file)
-        return default_config
-    return given
+class Resource(object):
+    def __init__(self, api, kind, identifier):
+        self.api = api
+        self.kind = kind
+        self.identifier = identifier
 
+    @property
+    def resourceid(self):
+        return ":".join([self.api.config.account, self.kind, self.identifier])
 
-def configure(**kwargs):
-    """
-    Convenience function to merge multiple settings into the default global
-    config.
+    def permit(self, role, privilege, grant_option=False):
+        '''
+        Permit `role` to perform `privilege` on this resource.  If
+        `grant_option` is True, the role will be able to grant this
+        permission to other resources.
 
-    Example:
+        You must own the resource or have the permission with `grant_option`
+        to call this method.
+        '''
+        data = {}
+        params = {
+            'permit': 'true',
+            'privilege': privilege,
+            'role': authzid(role, 'role')
+        }
+        if grant_option:
+            data['grant_option'] = 'true'
 
-    ```
-     import conjur
-     conjur.configure(appliance_url='https://conjur.example.com/api',
-                      account='example',
-                      cert_path='/path/to/cert.pem')
-     ```
-    """
-    default_config.update(**kwargs)
-    return default_config
+        self.api.post(self.url(), data=data, params=params)
 
+    def deny(self, role, privilege):
+        '''
+        Deny `role` permission to perform `privilege` on this resource.
 
-def new_from_netrc(netrc_file=None, config=None):
-    """
-    Create a `conjur.api.API` instance using an identity loaded from netrc.  This method
-    uses the identity stored for the host `config.authn_url`.
+        You must own the resource or have the permission with `grant_option`
+        on it to call this method.
+        '''
+        params = {
+            'permit': 'true',
+            'privilege': privilege,
+            'role': authzid(role)
+        }
 
-    `netrc_file` is an alternative path to the netrc formatted file.  Defaults
-    to ~/.netrc on unixy systems.
+        self.api.post(self.url(), parmas=params)
 
-    `config` is a `conjur.config.Config` instance used to determine the host
-    in the netrc file, and also passed to the `conjur.new_from_key` method to
-    create the API instance using the identity.
-    """
-    import netrc
+    def permitted(self, privilege, role=None):
+        '''
+        Return True if +role+ has +privilege+ on this resource.
 
-    config = _config(config)
-    auth = netrc.netrc(netrc_file).authenticators(config.authn_url)
-    if auth is None:
-        raise ValueError("No authenticators found for authn_url '%s' in %s" % (
-            config.authn_url,
-            (netrc_file or '~/.netrc')
-        ))
-    login, _, api_key = auth
-    return new_from_key(login, api_key, config)
+        +role+ may be a Role instance, an object with a +role+ method,
+        or a role id as a string.
 
+        If +role+ is not given, check the permission for the currently
+        authenticated role.
+        '''
 
-def new_from_key(login, api_key, config=None):
-    """
-    Create a `conjur.api.API` instance that will authenticate on demand as the identity given
-    by `login` and `api_key`.
+        if role is None:
+            # Handle self role check
+            response = self.api.get(self.url(),
+                                    params={'check': 'true',
+                                            'privilege': privilege},
+                                    check_errors=False)
+            if response.status_code == 204:
+                return True
+            elif response.status_code in (404, 403):
+                return False
+            else:
+                raise ConjurException("Request failed: %d" % response.status_code)
+        else:
+            # Otherwise call role.is_permitted
+            return Role.from_roleid(self.api, role).is_permitted(self, privilege)
 
-    `login` is the identity of the Conjur user or host to authenticate as.
-
-    `api_key` is the api key *or* password to use when authenticating.
-
-    `config` is a `conjur.config.Config` instance for the api.  If not given the global
-        Config instance (`conjur.config.config`) will be used.
-    """
-
-    from .api import API
-
-    return API(credentials=(login, api_key), config=_config(config))
-
-
-def new_from_token(token, config=None):
-    """
-    Create a `conjur.api.API` instance that will authenticate using the given signed Conjur
-    token.
-
-    This is useful if you want to act on behalf of a the identity of an
-    HTTP request containing a user's signed token.
-
-    `token` is the json formatted, *not* base64'd, Conjur authentication Token.
-
-    `config` is a conjur.config.Config instance for the api.  If not given, the global Config
-    instance (`conjur.config.config`) will be used.
-    """
-    from .api import API
-
-    return API(token=token, config=_config(config))
+    def url(self):
+        return "/".join([
+            self.api.config.authz_url,
+            self.api.config.account,
+            'resources',
+            self.kind,
+            self.identifier
+        ])
 </code></pre>
   </div>
 
@@ -1142,189 +1117,96 @@ def new_from_token(token, config=None):
 
   <section id="section-items">
 
-    <h2 class="section-title" id="header-functions">Functions</h2>
-      
-  <div class="item">
-    <div class="name def" id="conjur.configure">
-    <p>def <span class="ident">configure</span>(</p><p>**kwargs)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Convenience function to merge multiple settings into the default global
-config.</p>
-<p>Example:</p>
-<p><code>import conjur
- conjur.configure(appliance_url='https://conjur.example.com/api',
-                  account='example',
-                  cert_path='/path/to/cert.pem')</code></p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.configure', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.configure" class="source">
-    <pre><code>def configure(**kwargs):
-    """
-    Convenience function to merge multiple settings into the default global
-    config.
-
-    Example:
-
-    ```
-     import conjur
-     conjur.configure(appliance_url='https://conjur.example.com/api',
-                      account='example',
-                      cert_path='/path/to/cert.pem')
-     ```
-    """
-    default_config.update(**kwargs)
-    return default_config
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="conjur.new_from_key">
-    <p>def <span class="ident">new_from_key</span>(</p><p>login, api_key, config=None)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Create a <a href="/api-python/conjur/api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance that will authenticate on demand as the identity given
-by <code>login</code> and <code>api_key</code>.</p>
-<p><code>login</code> is the identity of the Conjur user or host to authenticate as.</p>
-<p><code>api_key</code> is the api key <em>or</em> password to use when authenticating.</p>
-<p><code>config</code> is a <a href="/api-python/conjur/config.m.html#conjur.config.Config"><code>conjur.config.Config</code></a> instance for the api.  If not given the global
-    Config instance (<a href="/api-python/conjur/config.m.html#conjur.config.config"><code>conjur.config.config</code></a>) will be used.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.new_from_key', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.new_from_key" class="source">
-    <pre><code>def new_from_key(login, api_key, config=None):
-    """
-    Create a `conjur.api.API` instance that will authenticate on demand as the identity given
-    by `login` and `api_key`.
-
-    `login` is the identity of the Conjur user or host to authenticate as.
-
-    `api_key` is the api key *or* password to use when authenticating.
-
-    `config` is a `conjur.config.Config` instance for the api.  If not given the global
-        Config instance (`conjur.config.config`) will be used.
-    """
-
-    from .api import API
-
-    return API(credentials=(login, api_key), config=_config(config))
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="conjur.new_from_netrc">
-    <p>def <span class="ident">new_from_netrc</span>(</p><p>netrc_file=None, config=None)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Create a <a href="/api-python/conjur/api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance using an identity loaded from netrc.  This method
-uses the identity stored for the host <code>config.authn_url</code>.</p>
-<p><code>netrc_file</code> is an alternative path to the netrc formatted file.  Defaults
-to ~/.netrc on unixy systems.</p>
-<p><code>config</code> is a <a href="/api-python/conjur/config.m.html#conjur.config.Config"><code>conjur.config.Config</code></a> instance used to determine the host
-in the netrc file, and also passed to the <a href="#conjur.new_from_key"><code>new_from_key</code></a> method to
-create the API instance using the identity.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.new_from_netrc', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.new_from_netrc" class="source">
-    <pre><code>def new_from_netrc(netrc_file=None, config=None):
-    """
-    Create a `conjur.api.API` instance using an identity loaded from netrc.  This method
-    uses the identity stored for the host `config.authn_url`.
-
-    `netrc_file` is an alternative path to the netrc formatted file.  Defaults
-    to ~/.netrc on unixy systems.
-
-    `config` is a `conjur.config.Config` instance used to determine the host
-    in the netrc file, and also passed to the `conjur.new_from_key` method to
-    create the API instance using the identity.
-    """
-    import netrc
-
-    config = _config(config)
-    auth = netrc.netrc(netrc_file).authenticators(config.authn_url)
-    if auth is None:
-        raise ValueError("No authenticators found for authn_url '%s' in %s" % (
-            config.authn_url,
-            (netrc_file or '~/.netrc')
-        ))
-    login, _, api_key = auth
-    return new_from_key(login, api_key, config)
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="conjur.new_from_token">
-    <p>def <span class="ident">new_from_token</span>(</p><p>token, config=None)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Create a <a href="/api-python/conjur/api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance that will authenticate using the given signed Conjur
-token.</p>
-<p>This is useful if you want to act on behalf of a the identity of an
-HTTP request containing a user's signed token.</p>
-<p><code>token</code> is the json formatted, <em>not</em> base64'd, Conjur authentication Token.</p>
-<p><code>config</code> is a conjur.config.Config instance for the api.  If not given, the global Config
-instance (<a href="/api-python/conjur/config.m.html#conjur.config.config"><code>conjur.config.config</code></a>) will be used.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.new_from_token', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.new_from_token" class="source">
-    <pre><code>def new_from_token(token, config=None):
-    """
-    Create a `conjur.api.API` instance that will authenticate using the given signed Conjur
-    token.
-
-    This is useful if you want to act on behalf of a the identity of an
-    HTTP request containing a user's signed token.
-
-    `token` is the json formatted, *not* base64'd, Conjur authentication Token.
-
-    `config` is a conjur.config.Config instance for the api.  If not given, the global Config
-    instance (`conjur.config.config`) will be used.
-    """
-    from .api import API
-
-    return API(token=token, config=_config(config))
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
 
     <h2 class="section-title" id="header-classes">Classes</h2>
       
       <div class="item">
-      <p id="conjur.ConjurException" class="name">class <span class="ident">ConjurException</span></p>
+      <p id="conjur.resource.Resource" class="name">class <span class="ident">Resource</span></p>
       
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.ConjurException', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.ConjurException" class="source">
-    <pre><code>class ConjurException(Exception):
-    pass
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.resource.Resource', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.resource.Resource" class="source">
+    <pre><code>class Resource(object):
+    def __init__(self, api, kind, identifier):
+        self.api = api
+        self.kind = kind
+        self.identifier = identifier
+
+    @property
+    def resourceid(self):
+        return ":".join([self.api.config.account, self.kind, self.identifier])
+
+    def permit(self, role, privilege, grant_option=False):
+        '''
+        Permit `role` to perform `privilege` on this resource.  If
+        `grant_option` is True, the role will be able to grant this
+        permission to other resources.
+
+        You must own the resource or have the permission with `grant_option`
+        to call this method.
+        '''
+        data = {}
+        params = {
+            'permit': 'true',
+            'privilege': privilege,
+            'role': authzid(role, 'role')
+        }
+        if grant_option:
+            data['grant_option'] = 'true'
+
+        self.api.post(self.url(), data=data, params=params)
+
+    def deny(self, role, privilege):
+        '''
+        Deny `role` permission to perform `privilege` on this resource.
+
+        You must own the resource or have the permission with `grant_option`
+        on it to call this method.
+        '''
+        params = {
+            'permit': 'true',
+            'privilege': privilege,
+            'role': authzid(role)
+        }
+
+        self.api.post(self.url(), parmas=params)
+
+    def permitted(self, privilege, role=None):
+        '''
+        Return True if +role+ has +privilege+ on this resource.
+
+        +role+ may be a Role instance, an object with a +role+ method,
+        or a role id as a string.
+
+        If +role+ is not given, check the permission for the currently
+        authenticated role.
+        '''
+
+        if role is None:
+            # Handle self role check
+            response = self.api.get(self.url(),
+                                    params={'check': 'true',
+                                            'privilege': privilege},
+                                    check_errors=False)
+            if response.status_code == 204:
+                return True
+            elif response.status_code in (404, 403):
+                return False
+            else:
+                raise ConjurException("Request failed: %d" % response.status_code)
+        else:
+            # Otherwise call role.is_permitted
+            return Role.from_roleid(self.api, role).is_permitted(self, privilege)
+
+    def url(self):
+        return "/".join([
+            self.api.config.authz_url,
+            self.api.config.account,
+            'resources',
+            self.kind,
+            self.identifier
+        ])
 </code></pre>
   </div>
 </div>
@@ -1333,14 +1215,12 @@ instance (<a href="/api-python/conjur/config.m.html#conjur.config.config"><code>
       <div class="class">
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
-          <li><a href="#conjur.ConjurException">ConjurException</a></li>
-          <li>exceptions.Exception</li>
-          <li>exceptions.BaseException</li>
+          <li><a href="#conjur.resource.Resource">Resource</a></li>
           <li>__builtin__.object</li>
           </ul>
-          <h3>Class variables</h3>
+          <h3>Instance variables</h3>
             <div class="item">
-            <p id="conjur.ConjurException.args" class="name">var <span class="ident">args</span></p>
+            <p id="conjur.resource.Resource.api" class="name">var <span class="ident">api</span></p>
             
 
             
@@ -1350,7 +1230,7 @@ instance (<a href="/api-python/conjur/config.m.html#conjur.config.config"><code>
 
             </div>
             <div class="item">
-            <p id="conjur.ConjurException.message" class="name">var <span class="ident">message</span></p>
+            <p id="conjur.resource.Resource.identifier" class="name">var <span class="ident">identifier</span></p>
             
 
             
@@ -1359,83 +1239,197 @@ instance (<a href="/api-python/conjur/config.m.html#conjur.config.config"><code>
 </div>
 
             </div>
-      </div>
-      </div>
+            <div class="item">
+            <p id="conjur.resource.Resource.kind" class="name">var <span class="ident">kind</span></p>
+            
 
-    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/api.m.html">conjur.api</a></p>
-      
+            
   
+  <div class="source_cont">
+</div>
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/config.m.html">conjur.config</a></p>
-      
+            </div>
+            <div class="item">
+            <p id="conjur.resource.Resource.resourceid" class="name">var <span class="ident">resourceid</span></p>
+            
+
+            
   
-    <div class="desc"><p>Defines configuration settings needed to connect to a Conjur appliance.</p>
-<p>For convenience, a "global" <a href="/api-python/conjur/config.m.html#conjur.config.Config"><code>conjur.config.Config</code></a> instance is available as
-<a href="/api-python/conjur/config.m.html#conjur.config.config"><code>conjur.config.config</code></a>.  This object is used when a <a href="/api-python/conjur/api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance
-is created without a config.</p>
-<p>Example:
-    ```python
-    from conjur.conf...</p></div>
+  <div class="source_cont">
+</div>
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/group.m.html">conjur.group</a></p>
-      
+            </div>
+          <h3>Methods</h3>
+            
+  <div class="item">
+    <div class="name def" id="conjur.resource.Resource.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, api, kind, identifier)</p>
+    </div>
+    
+
+    
   
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.resource.Resource.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.resource.Resource.__init__" class="source">
+    <pre><code>def __init__(self, api, kind, identifier):
+    self.api = api
+    self.kind = kind
+    self.identifier = identifier
+</code></pre>
+  </div>
+</div>
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/host.m.html">conjur.host</a></p>
-      
+  </div>
   
+            
+  <div class="item">
+    <div class="name def" id="conjur.resource.Resource.deny">
+    <p>def <span class="ident">deny</span>(</p><p>self, role, privilege)</p>
+    </div>
+    
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/layer.m.html">conjur.layer</a></p>
-      
+    
   
+    <div class="desc"><p>Deny <code>role</code> permission to perform <code>privilege</code> on this resource.</p>
+<p>You must own the resource or have the permission with <code>grant_option</code>
+on it to call this method.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.resource.Resource.deny', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.resource.Resource.deny" class="source">
+    <pre><code>def deny(self, role, privilege):
+    '''
+    Deny `role` permission to perform `privilege` on this resource.
+    You must own the resource or have the permission with `grant_option`
+    on it to call this method.
+    '''
+    params = {
+        'permit': 'true',
+        'privilege': privilege,
+        'role': authzid(role)
+    }
+    self.api.post(self.url(), parmas=params)
+</code></pre>
+  </div>
+</div>
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/membership.m.html">conjur.membership</a></p>
-      
+  </div>
   
+            
+  <div class="item">
+    <div class="name def" id="conjur.resource.Resource.permit">
+    <p>def <span class="ident">permit</span>(</p><p>self, role, privilege, grant_option=False)</p>
+    </div>
+    
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/resource.m.html">conjur.resource</a></p>
-      
+    
   
+    <div class="desc"><p>Permit <code>role</code> to perform <code>privilege</code> on this resource.  If
+<code>grant_option</code> is True, the role will be able to grant this
+permission to other resources.</p>
+<p>You must own the resource or have the permission with <code>grant_option</code>
+to call this method.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.resource.Resource.permit', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.resource.Resource.permit" class="source">
+    <pre><code>def permit(self, role, privilege, grant_option=False):
+    '''
+    Permit `role` to perform `privilege` on this resource.  If
+    `grant_option` is True, the role will be able to grant this
+    permission to other resources.
+    You must own the resource or have the permission with `grant_option`
+    to call this method.
+    '''
+    data = {}
+    params = {
+        'permit': 'true',
+        'privilege': privilege,
+        'role': authzid(role, 'role')
+    }
+    if grant_option:
+        data['grant_option'] = 'true'
+    self.api.post(self.url(), data=data, params=params)
+</code></pre>
+  </div>
+</div>
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/role.m.html">conjur.role</a></p>
-      
+  </div>
   
+            
+  <div class="item">
+    <div class="name def" id="conjur.resource.Resource.permitted">
+    <p>def <span class="ident">permitted</span>(</p><p>self, privilege, role=None)</p>
+    </div>
+    
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/user.m.html">conjur.user</a></p>
-      
+    
   
+    <div class="desc"><p>Return True if +role+ has +privilege+ on this resource.</p>
+<p>+role+ may be a Role instance, an object with a +role+ method,
+or a role id as a string.</p>
+<p>If +role+ is not given, check the permission for the currently
+authenticated role.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.resource.Resource.permitted', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.resource.Resource.permitted" class="source">
+    <pre><code>def permitted(self, privilege, role=None):
+    '''
+    Return True if +role+ has +privilege+ on this resource.
+    +role+ may be a Role instance, an object with a +role+ method,
+    or a role id as a string.
+    If +role+ is not given, check the permission for the currently
+    authenticated role.
+    '''
+    if role is None:
+        # Handle self role check
+        response = self.api.get(self.url(),
+                                params={'check': 'true',
+                                        'privilege': privilege},
+                                check_errors=False)
+        if response.status_code == 204:
+            return True
+        elif response.status_code in (404, 403):
+            return False
+        else:
+            raise ConjurException("Request failed: %d" % response.status_code)
+    else:
+        # Otherwise call role.is_permitted
+        return Role.from_roleid(self.api, role).is_permitted(self, privilege)
+</code></pre>
+  </div>
+</div>
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/util.m.html">conjur.util</a></p>
-      
+  </div>
   
+            
+  <div class="item">
+    <div class="name def" id="conjur.resource.Resource.url">
+    <p>def <span class="ident">url</span>(</p><p>self)</p>
+    </div>
+    
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="/api-python/conjur/variable.m.html">conjur.variable</a></p>
-      
+    
   
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.resource.Resource.url', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.resource.Resource.url" class="source">
+    <pre><code>def url(self):
+    return "/".join([
+        self.api.config.authz_url,
+        self.api.config.account,
+        'resources',
+        self.kind,
+        self.identifier
+    ])
+</code></pre>
+  </div>
+</div>
 
+  </div>
+  
       </div>
+      </div>
+
   </section>
 
     </article>

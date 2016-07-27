@@ -3,8 +3,10 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>conjur.host API documentation</title>
-    <meta name="description" content="" />
+    <title>conjur.config API documentation</title>
+    <meta name="description" content="Defines configuration settings needed to connect to a Conjur appliance.
+
+For convenience, a "global"..." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -969,17 +971,29 @@ table {
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
+    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#conjur.config.config">config</a></li>
+    <li class="mono"><a href="#conjur.config.default">default</a></li>
+  </ul>
+
+    </li>
 
 
     <li class="set"><h3><a href="#header-classes">Classes</a></h3>
       <ul>
         <li class="mono">
-        <span class="class_name"><a href="#conjur.host.Host">Host</a></span>
+        <span class="class_name"><a href="#conjur.config.Config">Config</a></span>
         
           
   <ul>
-    <li class="mono"><a href="#conjur.host.Host.__init__">__init__</a></li>
-    <li class="mono"><a href="#conjur.host.Host.exists">exists</a></li>
+    <li class="mono"><a href="#conjur.config.Config.__init__">__init__</a></li>
+    <li class="mono"><a href="#conjur.config.Config.get">get</a></li>
+    <li class="mono"><a href="#conjur.config.Config.load">load</a></li>
+    <li class="mono"><a href="#conjur.config.Config.service_url">service_url</a></li>
+    <li class="mono"><a href="#conjur.config.Config.set">set</a></li>
+    <li class="mono"><a href="#conjur.config.Config.update">update</a></li>
   </ul>
 
         </li>
@@ -997,11 +1011,39 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">conjur.host</span> module</h1>
+  <h1 class="title"><span class="name">conjur.config</span> module</h1>
+  <p>Defines configuration settings needed to connect to a Conjur appliance.</p>
+<p>For convenience, a "global" <a href="#conjur.config.Config"><code>Config</code></a> instance is available as
+<a href="#conjur.config.config"><code>config</code></a>.  This object is used when a <code>conjur.api.API</code> instance
+is created without a config.</p>
+<p>Example:
+    ```python
+    from conjur.config import config</p>
+<pre><code># Set multiple keys using the `update
+</code></pre>
+<p>The most important settings are <code>appliance_url</code>, <code>account</code>, and <code>cert_file</code>.</p>
+<ul>
+<li>
+<p><code>appliance_url</code> points the client to your Conjur appliance.  Suppose the hostname of
+    the appliance is <code>conjur.example.com</code>.  Then the appliance url is <code>https://conjur.example.com/api</code>.
+    Note that the <code>scheme</code> <strong>must</strong> be <code>https</code>, and the <code>/api</code> path is required.</p>
+</li>
+<li>
+<p><code>account</code> is an organizational name chosen when you deploy your conjur appliance.  The CLI command
+     <code>conjur authn whoami</code> will show you this value.  This value is required.</p>
+</li>
+<li>
+<p><code>cert_file</code> is the path to a <code>pem</code> formated certificate used to make a secure connection to the
+     Conjur appliance.  The CLI command <code>conjur init -h &lt;conjur hostname&gt;</code> is the standard way to install
+     such a certificate.  This option is <strong>required</strong> if you are using a self-signed certificate (which is
+     the most common use case).</p>
+</li>
+</ul>
+<p>While endpoints for specific services can also be configured, this is not normally needed
+outside of development work.</p>
   
-  
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.host', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.host" class="source">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.config', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.config" class="source">
     <pre><code>#
 # Copyright (C) 2014 Conjur Inc
 #
@@ -1022,85 +1064,246 @@ table {
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from conjur.util import urlescape
-from conjur import ConjurException
+"""
+Defines configuration settings needed to connect to a Conjur appliance.
+
+For convenience, a "global" `conjur.config.Config` instance is available as
+`conjur.config.config`.  This object is used when a `conjur.api.API` instance
+is created without a config.
+
+Example:
+    ```python
+    from conjur.config import config
+
+    # Set multiple keys using the `update
+
+The most important settings are `appliance_url`, `account`, and `cert_file`.
+
+  * `appliance_url` points the client to your Conjur appliance.  Suppose the hostname of
+    the appliance is `conjur.example.com`.  Then the appliance url is `https://conjur.example.com/api`.
+    Note that the `scheme` **must** be `https`, and the `/api` path is required.
+
+  * `account` is an organizational name chosen when you deploy your conjur appliance.  The CLI command
+     `conjur authn whoami` will show you this value.  This value is required.
+
+  * `cert_file` is the path to a `pem` formated certificate used to make a secure connection to the
+     Conjur appliance.  The CLI command `conjur init -h <conjur hostname>` is the standard way to install
+     such a certificate.  This option is **required** if you are using a self-signed certificate (which is
+     the most common use case).
+
+While endpoints for specific services can also be configured, this is not normally needed
+outside of development work.
+"""
+
+import os
+
+_DEFAULT = object()
+
+class ConfigException(Exception):
+    pass
 
 
-class Host(object):
-    def __init__(self, api, id, attrs=None):
-        self.api = api
-        self.id = id
-        self._attrs = attrs
-        self.role = self.api.role('host', self.id)
+def _setting(name, default=_DEFAULT, doc=''):
+    def fget(self):
+        return self.get(name, default)
 
-    def exists(self):
-        status = self.api.get(self._url(), check_errors=False).status_code
-        if status == 200:
+    def fset(self, value):
+        self.set(name, value)
+
+    return property(fget, fset, doc=doc)
+
+
+def _service_url(name, per_account=True, doc=''):
+    def fget(self):
+        return self.service_url(name, per_account)
+
+    def fset(self, value):
+        self.set(name + '_url', value)
+
+    return property(fget=fget, fset=fset, doc=doc)
+
+
+class Config(object):
+    def __init__(self, **kwargs):
+        self._config = {}
+        self.update(kwargs)
+
+    def load(self, input):
+        import yaml
+
+        if isinstance(input, str):
+            input = open(input, 'r')
+        conf = yaml.safe_load(input)
+        self.update(conf)
+
+    def update(self, *dicts, **kwargs):
+        for d in dicts + (kwargs, ):
+            self._config.update(d)
+
+    def service_url(self, service, per_account=True):
+        key = '%s_url' % service
+        if key in self._config:
+            return self._config[key]
+        if self.appliance_url is not None:
+            url_parts = [self.appliance_url]
+            if service != "core":
+                url_parts.append(service)
+            return "/".join(url_parts)
+        else:
+            raise ConfigException('Missing appliance_url')
+
+    def get(self, key, default=_DEFAULT):
+        if key in self._config:
+            return self._config[key]
+        env_key = 'CONJUR_' + key.upper()
+        if env_key in os.environ:
+            value = os.environ[env_key]
+            self._config[key] = value
+            return value
+        if default is _DEFAULT:
+            raise Exception("config setting %s is required" % key)
+        return default
+
+    def set(self, key, value):
+        self._config[key] = value
+
+    authn_url = _service_url('authn', doc='URL for the authn service')
+    core_url = _service_url('core', doc='URL for the core service')
+    authz_url = _service_url('authz',
+                             per_account=False,
+                             doc='URL for the authz service')
+
+    pubkeys_url = _service_url('pubkeys', doc='URL for the pubkeys service')
+
+
+    cert_file = _setting('cert_file', None,
+                         "Path to certificate to verify ssl requests \
+                         to appliance")
+
+    account = _setting('account', 'conjur', 'Conjur account identifier')
+
+    appliance_url = _setting('appliance_url', None, 'URL for Conjur appliance')
+
+    @property
+    def verify(self):
+        '''
+        Argument to be passed to `requests` methods `verify` keyword argument.
+        '''
+        if self.cert_file is not None:
+            return self.cert_file
+        else:
             return True
-        if status == 404:
-            return False
-        raise ConjurException("Request Failed: {0}".format(status))
 
-    def _fetch(self):
-        self._attrs = self.api.get(self._url()).json()
 
-    def _url(self):
-        return "{0}/hosts/{1}".format(self.api.config.core_url,
-                                      urlescape(self.id))
 
-    def __getattr__(self, item):
-        if self._attrs is None:
-            self._fetch()
-        try:
-            return self._attrs[item]
-        except KeyError:
-            raise AttributeError(item)
+config = Config()
+default = config
+
+__all__ = ('Config', 'config', 'default')
 </code></pre>
   </div>
 
   </header>
 
   <section id="section-items">
+    <h2 class="section-title" id="header-variables">Module variables</h2>
+      <div class="item">
+      <p id="conjur.config.config" class="name">var <span class="ident">config</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="conjur.config.default" class="name">var <span class="ident">default</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
 
 
     <h2 class="section-title" id="header-classes">Classes</h2>
       
       <div class="item">
-      <p id="conjur.host.Host" class="name">class <span class="ident">Host</span></p>
+      <p id="conjur.config.Config" class="name">class <span class="ident">Config</span></p>
       
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.host.Host', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.host.Host" class="source">
-    <pre><code>class Host(object):
-    def __init__(self, api, id, attrs=None):
-        self.api = api
-        self.id = id
-        self._attrs = attrs
-        self.role = self.api.role('host', self.id)
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.config.Config', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.config.Config" class="source">
+    <pre><code>class Config(object):
+    def __init__(self, **kwargs):
+        self._config = {}
+        self.update(kwargs)
 
-    def exists(self):
-        status = self.api.get(self._url(), check_errors=False).status_code
-        if status == 200:
+    def load(self, input):
+        import yaml
+
+        if isinstance(input, str):
+            input = open(input, 'r')
+        conf = yaml.safe_load(input)
+        self.update(conf)
+
+    def update(self, *dicts, **kwargs):
+        for d in dicts + (kwargs, ):
+            self._config.update(d)
+
+    def service_url(self, service, per_account=True):
+        key = '%s_url' % service
+        if key in self._config:
+            return self._config[key]
+        if self.appliance_url is not None:
+            url_parts = [self.appliance_url]
+            if service != "core":
+                url_parts.append(service)
+            return "/".join(url_parts)
+        else:
+            raise ConfigException('Missing appliance_url')
+
+    def get(self, key, default=_DEFAULT):
+        if key in self._config:
+            return self._config[key]
+        env_key = 'CONJUR_' + key.upper()
+        if env_key in os.environ:
+            value = os.environ[env_key]
+            self._config[key] = value
+            return value
+        if default is _DEFAULT:
+            raise Exception("config setting %s is required" % key)
+        return default
+
+    def set(self, key, value):
+        self._config[key] = value
+
+    authn_url = _service_url('authn', doc='URL for the authn service')
+    core_url = _service_url('core', doc='URL for the core service')
+    authz_url = _service_url('authz',
+                             per_account=False,
+                             doc='URL for the authz service')
+
+    pubkeys_url = _service_url('pubkeys', doc='URL for the pubkeys service')
+
+
+    cert_file = _setting('cert_file', None,
+                         "Path to certificate to verify ssl requests \
+                         to appliance")
+
+    account = _setting('account', 'conjur', 'Conjur account identifier')
+
+    appliance_url = _setting('appliance_url', None, 'URL for Conjur appliance')
+
+    @property
+    def verify(self):
+        '''
+        Argument to be passed to `requests` methods `verify` keyword argument.
+        '''
+        if self.cert_file is not None:
+            return self.cert_file
+        else:
             return True
-        if status == 404:
-            return False
-        raise ConjurException("Request Failed: {0}".format(status))
-
-    def _fetch(self):
-        self._attrs = self.api.get(self._url()).json()
-
-    def _url(self):
-        return "{0}/hosts/{1}".format(self.api.config.core_url,
-                                      urlescape(self.id))
-
-    def __getattr__(self, item):
-        if self._attrs is None:
-            self._fetch()
-        try:
-            return self._attrs[item]
-        except KeyError:
-            raise AttributeError(item)
 </code></pre>
   </div>
 </div>
@@ -1109,36 +1312,165 @@ class Host(object):
       <div class="class">
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
-          <li><a href="#conjur.host.Host">Host</a></li>
-          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          <li><a href="#conjur.config.Config">Config</a></li>
+          <li>__builtin__.object</li>
           </ul>
+          <h3>Class variables</h3>
+            <div class="item">
+            <p id="conjur.config.Config.account" class="name">var <span class="ident">account</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.appliance_url" class="name">var <span class="ident">appliance_url</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.authn_url" class="name">var <span class="ident">authn_url</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.authz_url" class="name">var <span class="ident">authz_url</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.cert_file" class="name">var <span class="ident">cert_file</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.core_url" class="name">var <span class="ident">core_url</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.pubkeys_url" class="name">var <span class="ident">pubkeys_url</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
           <h3>Instance variables</h3>
             <div class="item">
-            <p id="conjur.host.Host.api" class="name">var <span class="ident">api</span></p>
+            <p id="conjur.config.Config.account" class="name">var <span class="ident">account</span></p>
             
 
             
   
+    <div class="desc"><p>Conjur account identifier</p></div>
   <div class="source_cont">
 </div>
 
             </div>
             <div class="item">
-            <p id="conjur.host.Host.id" class="name">var <span class="ident">id</span></p>
+            <p id="conjur.config.Config.appliance_url" class="name">var <span class="ident">appliance_url</span></p>
             
 
             
   
+    <div class="desc"><p>URL for Conjur appliance</p></div>
   <div class="source_cont">
 </div>
 
             </div>
             <div class="item">
-            <p id="conjur.host.Host.role" class="name">var <span class="ident">role</span></p>
+            <p id="conjur.config.Config.authn_url" class="name">var <span class="ident">authn_url</span></p>
             
 
             
   
+    <div class="desc"><p>URL for the authn service</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.authz_url" class="name">var <span class="ident">authz_url</span></p>
+            
+
+            
+  
+    <div class="desc"><p>URL for the authz service</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.cert_file" class="name">var <span class="ident">cert_file</span></p>
+            
+
+            
+  
+    <div class="desc"><p>Path to certificate to verify ssl requests                          to appliance</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.core_url" class="name">var <span class="ident">core_url</span></p>
+            
+
+            
+  
+    <div class="desc"><p>URL for the core service</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.pubkeys_url" class="name">var <span class="ident">pubkeys_url</span></p>
+            
+
+            
+  
+    <div class="desc"><p>URL for the pubkeys service</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.config.Config.verify" class="name">var <span class="ident">verify</span></p>
+            
+
+            
+  
+    <div class="desc"><p>Argument to be passed to <code>requests</code> methods <code>verify</code> keyword argument.</p></div>
   <div class="source_cont">
 </div>
 
@@ -1146,21 +1478,19 @@ class Host(object):
           <h3>Methods</h3>
             
   <div class="item">
-    <div class="name def" id="conjur.host.Host.__init__">
-    <p>def <span class="ident">__init__</span>(</p><p>self, api, id, attrs=None)</p>
+    <div class="name def" id="conjur.config.Config.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, **kwargs)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.host.Host.__init__', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.host.Host.__init__" class="source">
-    <pre><code>def __init__(self, api, id, attrs=None):
-    self.api = api
-    self.id = id
-    self._attrs = attrs
-    self.role = self.api.role('host', self.id)
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.config.Config.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.config.Config.__init__" class="source">
+    <pre><code>def __init__(self, **kwargs):
+    self._config = {}
+    self.update(kwargs)
 </code></pre>
   </div>
 </div>
@@ -1169,23 +1499,121 @@ class Host(object):
   
             
   <div class="item">
-    <div class="name def" id="conjur.host.Host.exists">
-    <p>def <span class="ident">exists</span>(</p><p>self)</p>
+    <div class="name def" id="conjur.config.Config.get">
+    <p>def <span class="ident">get</span>(</p><p>self, key, default=&lt;object object at 0x7fd8256c30e0&gt;)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.host.Host.exists', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.host.Host.exists" class="source">
-    <pre><code>def exists(self):
-    status = self.api.get(self._url(), check_errors=False).status_code
-    if status == 200:
-        return True
-    if status == 404:
-        return False
-    raise ConjurException("Request Failed: {0}".format(status))
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.config.Config.get', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.config.Config.get" class="source">
+    <pre><code>def get(self, key, default=_DEFAULT):
+    if key in self._config:
+        return self._config[key]
+    env_key = 'CONJUR_' + key.upper()
+    if env_key in os.environ:
+        value = os.environ[env_key]
+        self._config[key] = value
+        return value
+    if default is _DEFAULT:
+        raise Exception("config setting %s is required" % key)
+    return default
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="conjur.config.Config.load">
+    <p>def <span class="ident">load</span>(</p><p>self, input)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.config.Config.load', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.config.Config.load" class="source">
+    <pre><code>def load(self, input):
+    import yaml
+    if isinstance(input, str):
+        input = open(input, 'r')
+    conf = yaml.safe_load(input)
+    self.update(conf)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="conjur.config.Config.service_url">
+    <p>def <span class="ident">service_url</span>(</p><p>self, service, per_account=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.config.Config.service_url', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.config.Config.service_url" class="source">
+    <pre><code>def service_url(self, service, per_account=True):
+    key = '%s_url' % service
+    if key in self._config:
+        return self._config[key]
+    if self.appliance_url is not None:
+        url_parts = [self.appliance_url]
+        if service != "core":
+            url_parts.append(service)
+        return "/".join(url_parts)
+    else:
+        raise ConfigException('Missing appliance_url')
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="conjur.config.Config.set">
+    <p>def <span class="ident">set</span>(</p><p>self, key, value)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.config.Config.set', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.config.Config.set" class="source">
+    <pre><code>def set(self, key, value):
+    self._config[key] = value
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="conjur.config.Config.update">
+    <p>def <span class="ident">update</span>(</p><p>self, *dicts, **kwargs)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.config.Config.update', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.config.Config.update" class="source">
+    <pre><code>def update(self, *dicts, **kwargs):
+    for d in dicts + (kwargs, ):
+        self._config.update(d)
 </code></pre>
   </div>
 </div>

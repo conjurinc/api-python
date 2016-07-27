@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>conjur.role API documentation</title>
+    <title>conjur.layer API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -974,16 +974,14 @@ table {
     <li class="set"><h3><a href="#header-classes">Classes</a></h3>
       <ul>
         <li class="mono">
-        <span class="class_name"><a href="#conjur.role.Role">Role</a></span>
+        <span class="class_name"><a href="#conjur.layer.Layer">Layer</a></span>
         
           
   <ul>
-    <li class="mono"><a href="#conjur.role.Role.__init__">__init__</a></li>
-    <li class="mono"><a href="#conjur.role.Role.from_roleid">from_roleid</a></li>
-    <li class="mono"><a href="#conjur.role.Role.grant_to">grant_to</a></li>
-    <li class="mono"><a href="#conjur.role.Role.is_permitted">is_permitted</a></li>
-    <li class="mono"><a href="#conjur.role.Role.members">members</a></li>
-    <li class="mono"><a href="#conjur.role.Role.revoke_from">revoke_from</a></li>
+    <li class="mono"><a href="#conjur.layer.Layer.__init__">__init__</a></li>
+    <li class="mono"><a href="#conjur.layer.Layer.add_host">add_host</a></li>
+    <li class="mono"><a href="#conjur.layer.Layer.exists">exists</a></li>
+    <li class="mono"><a href="#conjur.layer.Layer.remove_host">remove_host</a></li>
   </ul>
 
         </li>
@@ -1001,11 +999,11 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">conjur.role</span> module</h1>
+  <h1 class="title"><span class="name">conjur.layer</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.role', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.role" class="source">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.layer" class="source">
     <pre><code>#
 # Copyright (C) 2014 Conjur Inc
 #
@@ -1028,69 +1026,50 @@ table {
 
 from conjur.util import urlescape, authzid
 from conjur import ConjurException
-import logging
 
 
-class Role(object):
-    def __init__(self, api, kind, identifier):
+class Layer(object):
+    def __init__(self, api, id, attrs=None):
         self.api = api
-        self.kind = kind
-        self.identifier = identifier
+        self.id = id
+        self._attrs = {} if attrs is None else attrs
 
-    @classmethod
-    def from_roleid(cls, api, roleid):
-        tokens = authzid(roleid, 'role').split(':', 3)
-        if len(tokens) == 3:
-            tokens.pop(0)
-        return cls(api, *tokens)
+    def add_host(self, host):
+        hostid = authzid(host, 'role', with_account=False)
+        self.api.post(self._hosts_url(), data={'hostid': hostid})
 
-    @property
-    def roleid(self):
-        return ':'.join([self.api.config.account, self.kind, self.identifier])
+    def remove_host(self, host):
+        hostid = authzid(host, 'role')
+        self.api.delete(self._host_url(hostid))
 
-    def is_permitted(self, resource, privilege):
-        params = {
-            'check': 'true',
-            'resource_id': authzid(resource, 'resource'),
-            'privilege': privilege
-        }
-        response = self.api.get(self._url(), params=params,
-                                check_errors=False)
-        if response.status_code == 204:
+    def exists(self):
+        resp = self.api.get(self._url(), check_errors=False)
+        if resp.status_code == 200:
             return True
-        elif response.status_code in (403, 404):
+        if resp.status_code == 404:
             return False
-        else:
-            raise ConjurException("Request failed: %d" % response.status_code)
+        raise ConjurException("Request Failed: {0}".format(resp.status_code))
 
-    def grant_to(self, member, admin=None):
-        data = {}
-        if admin is not None:
-            data['admin'] = 'true' if admin else 'false'
-        logging.info("Adding member with {} and data of {}".format(
-            self._membership_url(member), repr(data)))
-        self.api.put(self._membership_url(member), data=data)
+    def _url(self):
+        return "{0}/layers/{1}".format(self.api.config.core_url,
+                                       urlescape(self.id))
 
-    def revoke_from(self, member):
-        self.api.delete(self._membership_url(member))
+    def _hosts_url(self):
+        return "{0}/hosts".format(self._url())
 
-    def members(self):
-        logging.info('Getting members from {}'.format(self._membership_url()))
-        return self.api.get(self._membership_url()).json()
+    def _host_url(self, host_id):
+        return "{0}/{1}".format(self._hosts_url(), urlescape(host_id))
 
-    def _membership_url(self, member=None):
-        url = self._url() + "?members"
-        if member is not None:
-            memberid = authzid(member, 'role')
-            url += "&member=" + urlescape(memberid)
-        return url
+    def _fetch(self):
+        self._attrs = self.api.get(self._url()).json()
 
-    def _url(self, *args):
-        return "/".join([self.api.config.authz_url,
-                         self.api.config.account,
-                         'roles',
-                         self.kind,
-                         self.identifier] + list(args))
+    def __getattr__(self, item):
+        if self._attrs is None:
+            self._fetch()
+        try:
+            return self._attrs[item]
+        except KeyError:
+            raise AttributeError(item)
 </code></pre>
   </div>
 
@@ -1102,72 +1081,54 @@ class Role(object):
     <h2 class="section-title" id="header-classes">Classes</h2>
       
       <div class="item">
-      <p id="conjur.role.Role" class="name">class <span class="ident">Role</span></p>
+      <p id="conjur.layer.Layer" class="name">class <span class="ident">Layer</span></p>
       
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.role.Role', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.role.Role" class="source">
-    <pre><code>class Role(object):
-    def __init__(self, api, kind, identifier):
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.layer.Layer" class="source">
+    <pre><code>class Layer(object):
+    def __init__(self, api, id, attrs=None):
         self.api = api
-        self.kind = kind
-        self.identifier = identifier
+        self.id = id
+        self._attrs = {} if attrs is None else attrs
 
-    @classmethod
-    def from_roleid(cls, api, roleid):
-        tokens = authzid(roleid, 'role').split(':', 3)
-        if len(tokens) == 3:
-            tokens.pop(0)
-        return cls(api, *tokens)
+    def add_host(self, host):
+        hostid = authzid(host, 'role', with_account=False)
+        self.api.post(self._hosts_url(), data={'hostid': hostid})
 
-    @property
-    def roleid(self):
-        return ':'.join([self.api.config.account, self.kind, self.identifier])
+    def remove_host(self, host):
+        hostid = authzid(host, 'role')
+        self.api.delete(self._host_url(hostid))
 
-    def is_permitted(self, resource, privilege):
-        params = {
-            'check': 'true',
-            'resource_id': authzid(resource, 'resource'),
-            'privilege': privilege
-        }
-        response = self.api.get(self._url(), params=params,
-                                check_errors=False)
-        if response.status_code == 204:
+    def exists(self):
+        resp = self.api.get(self._url(), check_errors=False)
+        if resp.status_code == 200:
             return True
-        elif response.status_code in (403, 404):
+        if resp.status_code == 404:
             return False
-        else:
-            raise ConjurException("Request failed: %d" % response.status_code)
+        raise ConjurException("Request Failed: {0}".format(resp.status_code))
 
-    def grant_to(self, member, admin=None):
-        data = {}
-        if admin is not None:
-            data['admin'] = 'true' if admin else 'false'
-        logging.info("Adding member with {} and data of {}".format(
-            self._membership_url(member), repr(data)))
-        self.api.put(self._membership_url(member), data=data)
+    def _url(self):
+        return "{0}/layers/{1}".format(self.api.config.core_url,
+                                       urlescape(self.id))
 
-    def revoke_from(self, member):
-        self.api.delete(self._membership_url(member))
+    def _hosts_url(self):
+        return "{0}/hosts".format(self._url())
 
-    def members(self):
-        logging.info('Getting members from {}'.format(self._membership_url()))
-        return self.api.get(self._membership_url()).json()
+    def _host_url(self, host_id):
+        return "{0}/{1}".format(self._hosts_url(), urlescape(host_id))
 
-    def _membership_url(self, member=None):
-        url = self._url() + "?members"
-        if member is not None:
-            memberid = authzid(member, 'role')
-            url += "&member=" + urlescape(memberid)
-        return url
+    def _fetch(self):
+        self._attrs = self.api.get(self._url()).json()
 
-    def _url(self, *args):
-        return "/".join([self.api.config.authz_url,
-                         self.api.config.account,
-                         'roles',
-                         self.kind,
-                         self.identifier] + list(args))
+    def __getattr__(self, item):
+        if self._attrs is None:
+            self._fetch()
+        try:
+            return self._attrs[item]
+        except KeyError:
+            raise AttributeError(item)
 </code></pre>
   </div>
 </div>
@@ -1176,12 +1137,12 @@ class Role(object):
       <div class="class">
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
-          <li><a href="#conjur.role.Role">Role</a></li>
-          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          <li><a href="#conjur.layer.Layer">Layer</a></li>
+          <li>__builtin__.object</li>
           </ul>
           <h3>Instance variables</h3>
             <div class="item">
-            <p id="conjur.role.Role.api" class="name">var <span class="ident">api</span></p>
+            <p id="conjur.layer.Layer.api" class="name">var <span class="ident">api</span></p>
             
 
             
@@ -1191,27 +1152,7 @@ class Role(object):
 
             </div>
             <div class="item">
-            <p id="conjur.role.Role.identifier" class="name">var <span class="ident">identifier</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-            <div class="item">
-            <p id="conjur.role.Role.kind" class="name">var <span class="ident">kind</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-            <div class="item">
-            <p id="conjur.role.Role.roleid" class="name">var <span class="ident">roleid</span></p>
+            <p id="conjur.layer.Layer.id" class="name">var <span class="ident">id</span></p>
             
 
             
@@ -1223,20 +1164,20 @@ class Role(object):
           <h3>Methods</h3>
             
   <div class="item">
-    <div class="name def" id="conjur.role.Role.__init__">
-    <p>def <span class="ident">__init__</span>(</p><p>self, api, kind, identifier)</p>
+    <div class="name def" id="conjur.layer.Layer.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, api, id, attrs=None)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.role.Role.__init__', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.role.Role.__init__" class="source">
-    <pre><code>def __init__(self, api, kind, identifier):
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.layer.Layer.__init__" class="source">
+    <pre><code>def __init__(self, api, id, attrs=None):
     self.api = api
-    self.kind = kind
-    self.identifier = identifier
+    self.id = id
+    self._attrs = {} if attrs is None else attrs
 </code></pre>
   </div>
 </div>
@@ -1245,22 +1186,19 @@ class Role(object):
   
             
   <div class="item">
-    <div class="name def" id="conjur.role.Role.from_roleid">
-    <p>def <span class="ident">from_roleid</span>(</p><p>cls, api, roleid)</p>
+    <div class="name def" id="conjur.layer.Layer.add_host">
+    <p>def <span class="ident">add_host</span>(</p><p>self, host)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.role.Role.from_roleid', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.role.Role.from_roleid" class="source">
-    <pre><code>@classmethod
-def from_roleid(cls, api, roleid):
-    tokens = authzid(roleid, 'role').split(':', 3)
-    if len(tokens) == 3:
-        tokens.pop(0)
-    return cls(api, *tokens)
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer.add_host', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.layer.Layer.add_host" class="source">
+    <pre><code>def add_host(self, host):
+    hostid = authzid(host, 'role', with_account=False)
+    self.api.post(self._hosts_url(), data={'hostid': hostid})
 </code></pre>
   </div>
 </div>
@@ -1269,55 +1207,23 @@ def from_roleid(cls, api, roleid):
   
             
   <div class="item">
-    <div class="name def" id="conjur.role.Role.grant_to">
-    <p>def <span class="ident">grant_to</span>(</p><p>self, member, admin=None)</p>
+    <div class="name def" id="conjur.layer.Layer.exists">
+    <p>def <span class="ident">exists</span>(</p><p>self)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.role.Role.grant_to', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.role.Role.grant_to" class="source">
-    <pre><code>def grant_to(self, member, admin=None):
-    data = {}
-    if admin is not None:
-        data['admin'] = 'true' if admin else 'false'
-    logging.info("Adding member with {} and data of {}".format(
-        self._membership_url(member), repr(data)))
-    self.api.put(self._membership_url(member), data=data)
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
-    <div class="name def" id="conjur.role.Role.is_permitted">
-    <p>def <span class="ident">is_permitted</span>(</p><p>self, resource, privilege)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.role.Role.is_permitted', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.role.Role.is_permitted" class="source">
-    <pre><code>def is_permitted(self, resource, privilege):
-    params = {
-        'check': 'true',
-        'resource_id': authzid(resource, 'resource'),
-        'privilege': privilege
-    }
-    response = self.api.get(self._url(), params=params,
-                            check_errors=False)
-    if response.status_code == 204:
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer.exists', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.layer.Layer.exists" class="source">
+    <pre><code>def exists(self):
+    resp = self.api.get(self._url(), check_errors=False)
+    if resp.status_code == 200:
         return True
-    elif response.status_code in (403, 404):
+    if resp.status_code == 404:
         return False
-    else:
-        raise ConjurException("Request failed: %d" % response.status_code)
+    raise ConjurException("Request Failed: {0}".format(resp.status_code))
 </code></pre>
   </div>
 </div>
@@ -1326,39 +1232,19 @@ def from_roleid(cls, api, roleid):
   
             
   <div class="item">
-    <div class="name def" id="conjur.role.Role.members">
-    <p>def <span class="ident">members</span>(</p><p>self)</p>
+    <div class="name def" id="conjur.layer.Layer.remove_host">
+    <p>def <span class="ident">remove_host</span>(</p><p>self, host)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.role.Role.members', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.role.Role.members" class="source">
-    <pre><code>def members(self):
-    logging.info('Getting members from {}'.format(self._membership_url()))
-    return self.api.get(self._membership_url()).json()
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
-    <div class="name def" id="conjur.role.Role.revoke_from">
-    <p>def <span class="ident">revoke_from</span>(</p><p>self, member)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.role.Role.revoke_from', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.role.Role.revoke_from" class="source">
-    <pre><code>def revoke_from(self, member):
-    self.api.delete(self._membership_url(member))
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.layer.Layer.remove_host', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.layer.Layer.remove_host" class="source">
+    <pre><code>def remove_host(self, host):
+    hostid = authzid(host, 'role')
+    self.api.delete(self._host_url(hostid))
 </code></pre>
   </div>
 </div>

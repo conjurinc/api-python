@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>conjur.user API documentation</title>
+    <title>conjur.host API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -974,13 +974,12 @@ table {
     <li class="set"><h3><a href="#header-classes">Classes</a></h3>
       <ul>
         <li class="mono">
-        <span class="class_name"><a href="#conjur.user.User">User</a></span>
+        <span class="class_name"><a href="#conjur.host.Host">Host</a></span>
         
           
   <ul>
-    <li class="mono"><a href="#conjur.user.User.__init__">__init__</a></li>
-    <li class="mono"><a href="#conjur.user.User.exists">exists</a></li>
-    <li class="mono"><a href="#conjur.user.User.url">url</a></li>
+    <li class="mono"><a href="#conjur.host.Host.__init__">__init__</a></li>
+    <li class="mono"><a href="#conjur.host.Host.exists">exists</a></li>
   </ul>
 
         </li>
@@ -998,11 +997,11 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">conjur.user</span> module</h1>
+  <h1 class="title"><span class="name">conjur.host</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.user" class="source">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.host', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.host" class="source">
     <pre><code>#
 # Copyright (C) 2014 Conjur Inc
 #
@@ -1024,19 +1023,30 @@ table {
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from conjur.util import urlescape
+from conjur import ConjurException
 
 
-class User(object):
-    def __init__(self, api, login, attrs=None):
+class Host(object):
+    def __init__(self, api, id, attrs=None):
         self.api = api
-        self.login = login
-        # support as_role
-        self.role = api.role('user', login)
+        self.id = id
         self._attrs = attrs
+        self.role = self.api.role('host', self.id)
 
     def exists(self):
-        resp = self.api.get(self.url(), check_errors=False)
-        return resp.status_code != 404
+        status = self.api.get(self._url(), check_errors=False).status_code
+        if status == 200:
+            return True
+        if status == 404:
+            return False
+        raise ConjurException("Request Failed: {0}".format(status))
+
+    def _fetch(self):
+        self._attrs = self.api.get(self._url()).json()
+
+    def _url(self):
+        return "{0}/hosts/{1}".format(self.api.config.core_url,
+                                      urlescape(self.id))
 
     def __getattr__(self, item):
         if self._attrs is None:
@@ -1045,13 +1055,6 @@ class User(object):
             return self._attrs[item]
         except KeyError:
             raise AttributeError(item)
-
-    def _fetch(self):
-        self._attrs = self.api.get(self.url()).json()
-
-    def url(self):
-        return "{0}/users/{1}".format(self.api.config.core_url,
-                                      urlescape(self.login))
 </code></pre>
   </div>
 
@@ -1063,23 +1066,33 @@ class User(object):
     <h2 class="section-title" id="header-classes">Classes</h2>
       
       <div class="item">
-      <p id="conjur.user.User" class="name">class <span class="ident">User</span></p>
+      <p id="conjur.host.Host" class="name">class <span class="ident">Host</span></p>
       
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user.User', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.user.User" class="source">
-    <pre><code>class User(object):
-    def __init__(self, api, login, attrs=None):
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.host.Host', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.host.Host" class="source">
+    <pre><code>class Host(object):
+    def __init__(self, api, id, attrs=None):
         self.api = api
-        self.login = login
-        # support as_role
-        self.role = api.role('user', login)
+        self.id = id
         self._attrs = attrs
+        self.role = self.api.role('host', self.id)
 
     def exists(self):
-        resp = self.api.get(self.url(), check_errors=False)
-        return resp.status_code != 404
+        status = self.api.get(self._url(), check_errors=False).status_code
+        if status == 200:
+            return True
+        if status == 404:
+            return False
+        raise ConjurException("Request Failed: {0}".format(status))
+
+    def _fetch(self):
+        self._attrs = self.api.get(self._url()).json()
+
+    def _url(self):
+        return "{0}/hosts/{1}".format(self.api.config.core_url,
+                                      urlescape(self.id))
 
     def __getattr__(self, item):
         if self._attrs is None:
@@ -1088,13 +1101,6 @@ class User(object):
             return self._attrs[item]
         except KeyError:
             raise AttributeError(item)
-
-    def _fetch(self):
-        self._attrs = self.api.get(self.url()).json()
-
-    def url(self):
-        return "{0}/users/{1}".format(self.api.config.core_url,
-                                      urlescape(self.login))
 </code></pre>
   </div>
 </div>
@@ -1103,12 +1109,12 @@ class User(object):
       <div class="class">
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
-          <li><a href="#conjur.user.User">User</a></li>
-          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          <li><a href="#conjur.host.Host">Host</a></li>
+          <li>__builtin__.object</li>
           </ul>
           <h3>Instance variables</h3>
             <div class="item">
-            <p id="conjur.user.User.api" class="name">var <span class="ident">api</span></p>
+            <p id="conjur.host.Host.api" class="name">var <span class="ident">api</span></p>
             
 
             
@@ -1118,7 +1124,7 @@ class User(object):
 
             </div>
             <div class="item">
-            <p id="conjur.user.User.login" class="name">var <span class="ident">login</span></p>
+            <p id="conjur.host.Host.id" class="name">var <span class="ident">id</span></p>
             
 
             
@@ -1128,7 +1134,7 @@ class User(object):
 
             </div>
             <div class="item">
-            <p id="conjur.user.User.role" class="name">var <span class="ident">role</span></p>
+            <p id="conjur.host.Host.role" class="name">var <span class="ident">role</span></p>
             
 
             
@@ -1140,22 +1146,21 @@ class User(object):
           <h3>Methods</h3>
             
   <div class="item">
-    <div class="name def" id="conjur.user.User.__init__">
-    <p>def <span class="ident">__init__</span>(</p><p>self, api, login, attrs=None)</p>
+    <div class="name def" id="conjur.host.Host.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, api, id, attrs=None)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user.User.__init__', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.user.User.__init__" class="source">
-    <pre><code>def __init__(self, api, login, attrs=None):
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.host.Host.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.host.Host.__init__" class="source">
+    <pre><code>def __init__(self, api, id, attrs=None):
     self.api = api
-    self.login = login
-    # support as_role
-    self.role = api.role('user', login)
+    self.id = id
     self._attrs = attrs
+    self.role = self.api.role('host', self.id)
 </code></pre>
   </div>
 </div>
@@ -1164,7 +1169,7 @@ class User(object):
   
             
   <div class="item">
-    <div class="name def" id="conjur.user.User.exists">
+    <div class="name def" id="conjur.host.Host.exists">
     <p>def <span class="ident">exists</span>(</p><p>self)</p>
     </div>
     
@@ -1172,32 +1177,15 @@ class User(object):
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user.User.exists', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.user.User.exists" class="source">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.host.Host.exists', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.host.Host.exists" class="source">
     <pre><code>def exists(self):
-    resp = self.api.get(self.url(), check_errors=False)
-    return resp.status_code != 404
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
-    <div class="name def" id="conjur.user.User.url">
-    <p>def <span class="ident">url</span>(</p><p>self)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user.User.url', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.user.User.url" class="source">
-    <pre><code>def url(self):
-    return "{0}/users/{1}".format(self.api.config.core_url,
-                                  urlescape(self.login))
+    status = self.api.get(self._url(), check_errors=False).status_code
+    if status == 200:
+        return True
+    if status == 404:
+        return False
+    raise ConjurException("Request Failed: {0}".format(status))
 </code></pre>
   </div>
 </div>

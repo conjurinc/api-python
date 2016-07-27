@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>conjur.variable API documentation</title>
+    <title>conjur.user API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -974,13 +974,13 @@ table {
     <li class="set"><h3><a href="#header-classes">Classes</a></h3>
       <ul>
         <li class="mono">
-        <span class="class_name"><a href="#conjur.variable.Variable">Variable</a></span>
+        <span class="class_name"><a href="#conjur.user.User">User</a></span>
         
           
   <ul>
-    <li class="mono"><a href="#conjur.variable.Variable.__init__">__init__</a></li>
-    <li class="mono"><a href="#conjur.variable.Variable.add_value">add_value</a></li>
-    <li class="mono"><a href="#conjur.variable.Variable.value">value</a></li>
+    <li class="mono"><a href="#conjur.user.User.__init__">__init__</a></li>
+    <li class="mono"><a href="#conjur.user.User.exists">exists</a></li>
+    <li class="mono"><a href="#conjur.user.User.url">url</a></li>
   </ul>
 
         </li>
@@ -998,11 +998,11 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">conjur.variable</span> module</h1>
+  <h1 class="title"><span class="name">conjur.user</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.variable', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.variable" class="source">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.user" class="source">
     <pre><code>#
 # Copyright (C) 2014 Conjur Inc
 #
@@ -1026,26 +1026,17 @@ table {
 from conjur.util import urlescape
 
 
-class Variable(object):
-    def __init__(self, api, id, attrs=None):
-        self.id = id
+class User(object):
+    def __init__(self, api, login, attrs=None):
         self.api = api
+        self.login = login
+        # support as_role
+        self.role = api.role('user', login)
         self._attrs = attrs
 
-    def value(self, version=None):
-        url = "%s/variables/%s/value" % (self.api.config.core_url,
-                                         urlescape(self.id))
-        if version is not None:
-            url = "%s?version=%s" % (url, version)
-        return self.api.get(url).text
-
-    def add_value(self, value):
-        # Invalidate _attrs since our version count is going to change
-        self._attrs = None
-        data = {'value': value}
-        url = "%s/variables/%s/values" % (self.api.config.core_url,
-                                          urlescape(self.id))
-        self.api.post(url, data=data)
+    def exists(self):
+        resp = self.api.get(self.url(), check_errors=False)
+        return resp.status_code != 404
 
     def __getattr__(self, item):
         if self._attrs is None:
@@ -1056,10 +1047,11 @@ class Variable(object):
             raise AttributeError(item)
 
     def _fetch(self):
-        self._attrs = self.api.get(
-            "{0}/variables/{1}".format(self.api.config.core_url,
-                                       urlescape(self.id))
-        ).json()
+        self._attrs = self.api.get(self.url()).json()
+
+    def url(self):
+        return "{0}/users/{1}".format(self.api.config.core_url,
+                                      urlescape(self.login))
 </code></pre>
   </div>
 
@@ -1071,32 +1063,23 @@ class Variable(object):
     <h2 class="section-title" id="header-classes">Classes</h2>
       
       <div class="item">
-      <p id="conjur.variable.Variable" class="name">class <span class="ident">Variable</span></p>
+      <p id="conjur.user.User" class="name">class <span class="ident">User</span></p>
       
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.variable.Variable', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.variable.Variable" class="source">
-    <pre><code>class Variable(object):
-    def __init__(self, api, id, attrs=None):
-        self.id = id
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user.User', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.user.User" class="source">
+    <pre><code>class User(object):
+    def __init__(self, api, login, attrs=None):
         self.api = api
+        self.login = login
+        # support as_role
+        self.role = api.role('user', login)
         self._attrs = attrs
 
-    def value(self, version=None):
-        url = "%s/variables/%s/value" % (self.api.config.core_url,
-                                         urlescape(self.id))
-        if version is not None:
-            url = "%s?version=%s" % (url, version)
-        return self.api.get(url).text
-
-    def add_value(self, value):
-        # Invalidate _attrs since our version count is going to change
-        self._attrs = None
-        data = {'value': value}
-        url = "%s/variables/%s/values" % (self.api.config.core_url,
-                                          urlescape(self.id))
-        self.api.post(url, data=data)
+    def exists(self):
+        resp = self.api.get(self.url(), check_errors=False)
+        return resp.status_code != 404
 
     def __getattr__(self, item):
         if self._attrs is None:
@@ -1107,10 +1090,11 @@ class Variable(object):
             raise AttributeError(item)
 
     def _fetch(self):
-        self._attrs = self.api.get(
-            "{0}/variables/{1}".format(self.api.config.core_url,
-                                       urlescape(self.id))
-        ).json()
+        self._attrs = self.api.get(self.url()).json()
+
+    def url(self):
+        return "{0}/users/{1}".format(self.api.config.core_url,
+                                      urlescape(self.login))
 </code></pre>
   </div>
 </div>
@@ -1119,12 +1103,12 @@ class Variable(object):
       <div class="class">
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
-          <li><a href="#conjur.variable.Variable">Variable</a></li>
-          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          <li><a href="#conjur.user.User">User</a></li>
+          <li>__builtin__.object</li>
           </ul>
           <h3>Instance variables</h3>
             <div class="item">
-            <p id="conjur.variable.Variable.api" class="name">var <span class="ident">api</span></p>
+            <p id="conjur.user.User.api" class="name">var <span class="ident">api</span></p>
             
 
             
@@ -1134,7 +1118,17 @@ class Variable(object):
 
             </div>
             <div class="item">
-            <p id="conjur.variable.Variable.id" class="name">var <span class="ident">id</span></p>
+            <p id="conjur.user.User.login" class="name">var <span class="ident">login</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="conjur.user.User.role" class="name">var <span class="ident">role</span></p>
             
 
             
@@ -1146,19 +1140,21 @@ class Variable(object):
           <h3>Methods</h3>
             
   <div class="item">
-    <div class="name def" id="conjur.variable.Variable.__init__">
-    <p>def <span class="ident">__init__</span>(</p><p>self, api, id, attrs=None)</p>
+    <div class="name def" id="conjur.user.User.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, api, login, attrs=None)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.variable.Variable.__init__', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.variable.Variable.__init__" class="source">
-    <pre><code>def __init__(self, api, id, attrs=None):
-    self.id = id
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user.User.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.user.User.__init__" class="source">
+    <pre><code>def __init__(self, api, login, attrs=None):
     self.api = api
+    self.login = login
+    # support as_role
+    self.role = api.role('user', login)
     self._attrs = attrs
 </code></pre>
   </div>
@@ -1168,23 +1164,19 @@ class Variable(object):
   
             
   <div class="item">
-    <div class="name def" id="conjur.variable.Variable.add_value">
-    <p>def <span class="ident">add_value</span>(</p><p>self, value)</p>
+    <div class="name def" id="conjur.user.User.exists">
+    <p>def <span class="ident">exists</span>(</p><p>self)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.variable.Variable.add_value', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.variable.Variable.add_value" class="source">
-    <pre><code>def add_value(self, value):
-    # Invalidate _attrs since our version count is going to change
-    self._attrs = None
-    data = {'value': value}
-    url = "%s/variables/%s/values" % (self.api.config.core_url,
-                                      urlescape(self.id))
-    self.api.post(url, data=data)
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user.User.exists', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.user.User.exists" class="source">
+    <pre><code>def exists(self):
+    resp = self.api.get(self.url(), check_errors=False)
+    return resp.status_code != 404
 </code></pre>
   </div>
 </div>
@@ -1193,22 +1185,19 @@ class Variable(object):
   
             
   <div class="item">
-    <div class="name def" id="conjur.variable.Variable.value">
-    <p>def <span class="ident">value</span>(</p><p>self, version=None)</p>
+    <div class="name def" id="conjur.user.User.url">
+    <p>def <span class="ident">url</span>(</p><p>self)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.variable.Variable.value', this);">Show source &equiv;</a></p>
-  <div id="source-conjur.variable.Variable.value" class="source">
-    <pre><code>def value(self, version=None):
-    url = "%s/variables/%s/value" % (self.api.config.core_url,
-                                     urlescape(self.id))
-    if version is not None:
-        url = "%s?version=%s" % (url, version)
-    return self.api.get(url).text
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.user.User.url', this);">Show source &equiv;</a></p>
+  <div id="source-conjur.user.User.url" class="source">
+    <pre><code>def url(self):
+    return "{0}/users/{1}".format(self.api.config.core_url,
+                                  urlescape(self.login))
 </code></pre>
   </div>
 </div>
