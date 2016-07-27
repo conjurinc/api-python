@@ -18,10 +18,40 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+"""
+Defines configuration settings needed to connect to a Conjur appliance.
+
+For convenience, a "global" `conjur.config.Config` instance is available as
+`conjur.config.config`.  This object is used when a `conjur.api.API` instance
+is created without a config.
+
+Example:
+    ```python
+    from conjur.config import config
+
+    # Set multiple keys using the `update
+
+The most important settings are `appliance_url`, `account`, and `cert_file`.
+
+  * `appliance_url` points the client to your Conjur appliance.  Suppose the hostname of
+    the appliance is `conjur.example.com`.  Then the appliance url is `https://conjur.example.com/api`.
+    Note that the `scheme` **must** be `https`, and the `/api` path is required.
+
+  * `account` is an organizational name chosen when you deploy your conjur appliance.  The CLI command
+     `conjur authn whoami` will show you this value.  This value is required.
+
+  * `cert_file` is the path to a `pem` formated certificate used to make a secure connection to the
+     Conjur appliance.  The CLI command `conjur init -h <conjur hostname>` is the standard way to install
+     such a certificate.  This option is **required** if you are using a self-signed certificate (which is
+     the most common use case).
+
+While endpoints for specific services can also be configured, this is not normally needed
+outside of development work.
+"""
+
 import os
 
 _DEFAULT = object()
-
 
 class ConfigException(Exception):
     pass
