@@ -1810,7 +1810,7 @@ class API(object):
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
           <li><a href="#conjur.api.API">API</a></li>
-          <li>__builtin__.object</li>
+          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
           </ul>
           <h3>Methods</h3>
             
@@ -1824,12 +1824,12 @@ class API(object):
   
     <div class="desc"><p>Creates an API instance configured with the given credentials or token
 and config.</p>
-<p>Generally you should use <code>conjur.new_from_key</code>, <code>conjur.new_from_netrc</code>,
-or <code>conjur.new_from_token</code> to get an API instance instead of calling
+<p>Generally you should use <a href="/conjur.new_from_key.ext"><code>conjur.new_from_key</code></a>, <a href="/conjur.new_from_netrc.ext"><code>conjur.new_from_netrc</code></a>,
+or <a href="/conjur.new_from_token.ext"><code>conjur.new_from_token</code></a> to get an API instance instead of calling
 this constructor directly.</p>
 <p><code>credentials</code> should be a <code>(login,api_key)</code> tuple if present.</p>
 <p><code>token</code> should be a string containing a Conjur JSON token to use when authenticating.</p>
-<p><code>config</code> should be a <code>conjur.config.Config</code> instance, and defaults to <code>conjur.config.config</code>.</p></div>
+<p><code>config</code> should be a <a href="/conjur.config.Config.ext"><code>conjur.config.Config</code></a> instance, and defaults to <a href="/conjur.config.config.ext"><code>conjur.config.config</code></a>.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.api.API.__init__', this);">Show source &equiv;</a></p>
   <div id="source-conjur.api.API.__init__" class="source">
@@ -1976,7 +1976,7 @@ cached value is present.</p></div>
 
     
   
-    <div class="desc"><p>Creates a Conjur Group and returns a <code>conjur.group.Group</code> object representing it.</p>
+    <div class="desc"><p>Creates a Conjur Group and returns a <a href="/conjur.group.Group.ext"><code>conjur.group.Group</code></a> object representing it.</p>
 <p><code>id</code> is the identifier of the group to create.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.api.API.create_group', this);">Show source &equiv;</a></p>
@@ -2003,8 +2003,8 @@ cached value is present.</p></div>
 
     
   
-    <div class="desc"><p>Creates a Conjur Host and returns a <code>conjur.host.Host</code> object that represents it.</p>
-<p><code>host_id</code> is the id of the Host to be created.  The <code>conjur.host.Host</code> object returned by
+    <div class="desc"><p>Creates a Conjur Host and returns a <a href="/conjur.host.Host.ext"><code>conjur.host.Host</code></a> object that represents it.</p>
+<p><code>host_id</code> is the id of the Host to be created.  The <a href="/conjur.host.Host.ext"><code>conjur.host.Host</code></a> object returned by
 this method will have an <code>api_key</code> attribute, but when the Host is fetched in the future this attribute
 is not available.</p></div>
   <div class="source_cont">
@@ -2035,7 +2035,7 @@ is not available.</p></div>
 
     
   
-    <div class="desc"><p>Create a Conjur user with the given <code>login</code> and password, and returns a <code>conjur.user.User</code> object
+    <div class="desc"><p>Create a Conjur user with the given <code>login</code> and password, and returns a <a href="/conjur.user.User.ext"><code>conjur.user.User</code></a> object
 representing it.</p>
 <p>If <code>password</code> is not given, the user will only be able to authenticate using the generated api_key
 attribute of the returned User instance.  Note that this <code>api_key</code> will not be available when the User
@@ -2072,7 +2072,7 @@ is fetched in the future.</p></div>
     
   
     <div class="desc"><p>Creates a Conjur variable.</p>
-<p>Returns a <code>conjur.variable.Variable</code> object.</p>
+<p>Returns a <a href="/conjur.variable.Variable.ext"><code>conjur.variable.Variable</code></a> object.</p>
 <p><code>id</code> is an identifier for the new variable.  If not given, a unique id will
 be generated.</p>
 <p><code>mime_type</code> is a string like <code>text/plain</code> indicating the content type stored by the
@@ -2123,10 +2123,10 @@ purpose.</p>
   
     <div class="desc"><p><strong>NOTE</strong> You will generally not need to use this method directly.</p>
 <p>Makes an authenticated <code>DELETE</code> request to the given <code>url</code></p>
-<p>Returns a <code>requests.Response</code> object.</p>
+<p>Returns a <a href="/requests.Response.ext"><code>requests.Response</code></a> object.</p>
 <p>If the response status is not 2xx, raises a <code>ConjurException</code>.</p>
 <p><code>url</code> is the full url to request.
- Keyword arguments are passed through to <code>requests.delete</code>.</p></div>
+ Keyword arguments are passed through to <a href="/requests.delete.ext"><code>requests.delete</code></a>.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.api.API.delete', this);">Show source &equiv;</a></p>
   <div id="source-conjur.api.API.delete" class="source">
@@ -2160,7 +2160,7 @@ purpose.</p>
 <p>Returns a requests.Response object.</p>
 <p>If the response status is not 2xx, raises a ConjurException.</p>
 <p><code>url</code> is the full url to request.
- Keyword arguments are passed through to <code>requests.get</code>.</p></div>
+ Keyword arguments are passed through to <a href="/requests.get.ext"><code>requests.get</code></a>.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.api.API.get', this);">Show source &equiv;</a></p>
   <div id="source-conjur.api.API.get" class="source">
@@ -2189,7 +2189,7 @@ purpose.</p>
 
     
   
-    <div class="desc"><p>Return a <code>conjur.group.Group</code> object with the given id.</p>
+    <div class="desc"><p>Return a <a href="/conjur.group.Group.ext"><code>conjur.group.Group</code></a> object with the given id.</p>
 <p>This method neither creates nor checks for the groups's existence.</p>
 <p><code>id</code> is the <em>unqualified</em> id of the group, and does not include the account or kind.</p></div>
   <div class="source_cont">
@@ -2217,7 +2217,7 @@ purpose.</p>
 
     
   
-    <div class="desc"><p>Return a <code>conjur.host.Host</code> object with the given <code>host_id</code>.</p>
+    <div class="desc"><p>Return a <a href="/conjur.host.Host.ext"><code>conjur.host.Host</code></a> object with the given <code>host_id</code>.</p>
 <p>This method neither creates nor checks for the host's existence.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.api.API.host', this);">Show source &equiv;</a></p>
@@ -2243,7 +2243,7 @@ purpose.</p>
 
     
   
-    <div class="desc"><p>Return a <code>conjur.layer.Layer</code> object with the given <code>layer_id</code>.</p>
+    <div class="desc"><p>Return a <a href="/conjur.layer.Layer.ext"><code>conjur.layer.Layer</code></a> object with the given <code>layer_id</code>.</p>
 <p>This method neither creates nor checks for the layer's existence.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.api.API.layer', this);">Show source &equiv;</a></p>
@@ -2271,10 +2271,10 @@ purpose.</p>
   
     <div class="desc"><p><strong>NOTE</strong> You will generally not need to use this method directly.</p>
 <p>Makes an authenticated <code>POST</code> request to the given <code>url</code></p>
-<p>Returns a <code>requests.Response</code> object.</p>
+<p>Returns a <a href="/requests.Response.ext"><code>requests.Response</code></a> object.</p>
 <p>If the response status is not 2xx, raises a <code>ConjurException</code>.</p>
 <p><code>url</code> is the full url to request.
- Keyword arguments are passed through to <code>requests.post</code>.</p></div>
+ Keyword arguments are passed through to <a href="/requests.post.ext"><code>requests.post</code></a>.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.api.API.post', this);">Show source &equiv;</a></p>
   <div id="source-conjur.api.API.post" class="source">
@@ -2393,10 +2393,10 @@ the <code>keyname</code> should be <code>bob@example.com</code></p></div>
   
     <div class="desc"><p><strong>NOTE</strong> You will generally not need to use this method directly.</p>
 <p>Makes an authenticated <code>PUT</code> request to the given <code>url</code></p>
-<p>Returns a <code>requests.Response</code> object.</p>
+<p>Returns a <a href="/requests.Response.ext"><code>requests.Response</code></a> object.</p>
 <p>If the response status is not 2xx, raises a <code>ConjurException</code>.</p>
 <p><code>url</code> is the full url to request.
- Keyword arguments are passed through to <code>requests.put</code>.</p></div>
+ Keyword arguments are passed through to <a href="/requests.put.ext"><code>requests.put</code></a>.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.api.API.put', this);">Show source &equiv;</a></p>
   <div id="source-conjur.api.API.put" class="source">
@@ -2484,12 +2484,12 @@ the <code>keyname</code> should be <code>bob@example.com</code></p></div>
   
     <div class="desc"><p>Make an authenticated request with the given method and url.
 Additional arguments are passed to requests.<method>.</p>
-<p>Returns a <code>requests.Response</code> object.</p>
+<p>Returns a <a href="/requests.Response.ext"><code>requests.Response</code></a> object.</p>
 <p>If the response status is not 2xx, raises a ConjurException.</p>
 <p><code>method</code> is of the standard HTTP verbs (case insensitive).</p>
 <p><code>url</code> is the full url to request.</p>
-<p>If <code>kwargs['check_errors']</code> is <code>True</code>, non-2xx responses will raise a <code>conjur.ConjurException</code>.
-Otherwise, it is the callers responsibility to check the status of the returned <code>requests.Response</code>.</p>
+<p>If <code>kwargs['check_errors']</code> is <code>True</code>, non-2xx responses will raise a <a href="/conjur.ConjurException.ext"><code>conjur.ConjurException</code></a>.
+Otherwise, it is the callers responsibility to check the status of the returned <a href="/requests.Response.ext"><code>requests.Response</code></a>.</p>
 <p>Additional are passed through to the requests.<method> call after adding an <code>Authorization</code>
 header and HTTPS verification settings.</p></div>
   <div class="source_cont">
@@ -2526,7 +2526,7 @@ header and HTTPS verification settings.</p></div>
 
     
   
-    <div class="desc"><p>Return a <code>conjur.resource.Resource</code> object with the given kind and id.</p>
+    <div class="desc"><p>Return a <a href="/conjur.resource.Resource.ext"><code>conjur.resource.Resource</code></a> object with the given kind and id.</p>
 <p>This method neither creates nor checks for the resource's existence.</p>
 <p><code>kind</code> should be the resource kind - for example, <code>"variable"</code>, <code>"webservice"</code>,
 or <code>"configuration"</code>.</p>
@@ -2562,7 +2562,7 @@ get the resource for a user variable named db_password, you would call
 
     
   
-    <div class="desc"><p>Return a <code>conjur.role.Role</code> object with the given kind and id.</p>
+    <div class="desc"><p>Return a <a href="/conjur.role.Role.ext"><code>conjur.role.Role</code></a> object with the given kind and id.</p>
 <p>This method neither creates nor checks for the roles's existence.</p>
 <p><code>kind</code> should be the role kind - for example, <code>"group"</code>, <code>"user"</code>,
 or <code>"host"</code>.</p>
@@ -2622,7 +2622,7 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
     
   
-    <div class="desc"><p>Return a <code>conjur.variable.Variable</code> object with the given <code>id</code>.</p>
+    <div class="desc"><p>Return a <a href="/conjur.variable.Variable.ext"><code>conjur.variable.Variable</code></a> object with the given <code>id</code>.</p>
 <p>This method neither creates nor checks for the variable's existence.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.api.API.variable', this);">Show source &equiv;</a></p>

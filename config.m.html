@@ -1014,7 +1014,7 @@ table {
   <h1 class="title"><span class="name">conjur.config</span> module</h1>
   <p>Defines configuration settings needed to connect to a Conjur appliance.</p>
 <p>For convenience, a "global" <a href="#conjur.config.Config"><code>Config</code></a> instance is available as
-<a href="#conjur.config.config"><code>config</code></a>.  This object is used when a <code>conjur.api.API</code> instance
+<a href="#conjur.config.config"><code>config</code></a>.  This object is used when a <a href="/conjur.api.API.ext"><code>conjur.api.API</code></a> instance
 is created without a config.</p>
 <p>Example:
     ```python
@@ -1025,7 +1025,7 @@ is created without a config.</p>
 <ul>
 <li>
 <p><code>appliance_url</code> points the client to your Conjur appliance.  Suppose the hostname of
-    the appliance is <code>conjur.example.com</code>.  Then the appliance url is <code>https://conjur.example.com/api</code>.
+    the appliance is <a href="/conjur.example.com.ext"><code>conjur.example.com</code></a>.  Then the appliance url is <code>https://conjur.example.com/api</code>.
     Note that the <code>scheme</code> <strong>must</strong> be <code>https</code>, and the <code>/api</code> path is required.</p>
 </li>
 <li>
@@ -1313,7 +1313,7 @@ __all__ = ('Config', 'config', 'default')
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
           <li><a href="#conjur.config.Config">Config</a></li>
-          <li>__builtin__.object</li>
+          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
           </ul>
           <h3>Class variables</h3>
             <div class="item">
@@ -1500,7 +1500,7 @@ __all__ = ('Config', 'config', 'default')
             
   <div class="item">
     <div class="name def" id="conjur.config.Config.get">
-    <p>def <span class="ident">get</span>(</p><p>self, key, default=&lt;object object at 0x7fdd4cab50e0&gt;)</p>
+    <p>def <span class="ident">get</span>(</p><p>self, key, default=&lt;object object at 0x7f59f37030e0&gt;)</p>
     </div>
     
 
