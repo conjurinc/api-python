@@ -41,9 +41,13 @@ def configure(**kwargs):
     config.
 
     Example:
-     import conjur
-     conjur.configure(stack='my-stack', account='my-account')
 
+    ```
+     import conjur
+     conjur.configure(appliance_url='https://conjur.example.com/api',
+                      account='example',
+                      cert_path='/path/to/cert.pem')
+     ```
     """
     default_config.update(**kwargs)
     return default_config
@@ -51,14 +55,15 @@ def configure(**kwargs):
 
 def new_from_netrc(netrc_file=None, config=None):
     """
-    Create a Conjur API using an identity loaded from netrc.  This method
+    Create a `conjur.api.API` instance using an identity loaded from netrc.  This method
     uses the identity stored for the host `config.authn_url`.
 
-    :param netrc_file: An alternative path to the netrc formatted file.  Defaults
-        to ~/.netrc on unixy systems.
-    :param config: A `conjur.config.Config` instance used to determine the host
-        in the netrc file, and also passed to the `conjur.new_from_key` method to
-        create the API instance using the identity.
+    `netrc_file` is an alternative path to the netrc formatted file.  Defaults
+    to ~/.netrc on unixy systems.
+
+    `config` is a `conjur.config.Config` instance used to determine the host
+    in the netrc file, and also passed to the `conjur.new_from_key` method to
+    create the API instance using the identity.
     """
     import netrc
 
@@ -75,12 +80,14 @@ def new_from_netrc(netrc_file=None, config=None):
 
 def new_from_key(login, api_key, config=None):
     """
-    Create a Conjur API that will authenticate on demand as the identity given
-    by login and api_key.
+    Create a `conjur.api.API` instance that will authenticate on demand as the identity given
+    by `login` and `api_key`.
 
-    :param login: The login Conjur of the Conjur user or host to authenticate as.
-    :param api_key: The Conjur api key *or* password to use when authenticating.
-    :param config: The Config instance for the api.  If not given the global
+    `login` is the identity of the Conjur user or host to authenticate as.
+
+    `api_key` is the api key *or* password to use when authenticating.
+
+    `config` is a `conjur.config.Config` instance for the api.  If not given the global
         Config instance (`conjur.config.config`) will be used.
     """
 
@@ -91,15 +98,16 @@ def new_from_key(login, api_key, config=None):
 
 def new_from_token(token, config=None):
     """
-    Create a Conjur API that will authenticate using the given signed Conjur
+    Create a `conjur.api.API` instance that will authenticate using the given signed Conjur
     token.
 
     This is useful if you want to act on behalf of a the identity of an
     HTTP request containing a user's signed token.
 
-    :param token: The json formatted, *not* base64'd, Conjur authentication Token.
-    :param config: Config instance for the api.  If not given, the global Config
-        instance (`conjur.config.config`) will be used.
+    `token` is the json formatted, *not* base64'd, Conjur authentication Token.
+
+    `config` is a conjur.config.Config instance for the api.  If not given, the global Config
+    instance (`conjur.config.config`) will be used.
     """
     from .api import API
 
