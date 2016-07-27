@@ -4,7 +4,9 @@ htmlcov
 pylint.out
 pylint.html
 pydocs
-
+docs
+junit
+reports
 certs
 
 *cid

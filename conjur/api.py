@@ -42,6 +42,12 @@ class API(object):
         Generally you should use `conjur.new_from_key`, `conjur.new_from_netrc`,
         or `conjur.new_from_token` to get an API instance instead of calling
         this constructor directly.
+
+        `credentials` should be a `(login,api_key)` tuple if present.
+
+        `token` should be a string containing a Conjur JSON token to use when authenticating.
+
+        `config` should be a `conjur.config.Config` instance, and defaults to `conjur.config.config`.
         """
         if credentials:
             self.login, self.api_key = credentials
@@ -63,14 +69,14 @@ class API(object):
         Authenticate with Conjur and return a token (str) that can be used
         to establish identity to Conjur services.
 
-        Returns the (json formatted) signed Conjur authentication Token.
+        Returns the json formatted signed Conjur authentication Token.
 
         It is an error to call this method if the API was created with a token
         rather than a login and api key.
 
-        :param cached: When True, a cached token value will be used if it is
-            available, otherwise the token will be fetched whether or not a
-            cached value is present.
+        When `cached` is True, a cached token value will be used if it is
+        available, otherwise the token will be fetched whether or not a
+        cached value is present.
         """
         if cached and self.token:
             return self.token
@@ -89,6 +95,8 @@ class API(object):
         """
         Get the value of an Authorization header to make Conjur requests,
         performing authentication if necessary.
+
+        Returns a string suitable for use as an `Authorization` header value.
         """
         token = self.authenticate()
         enc = base64.b64encode(token)
@@ -99,14 +107,19 @@ class API(object):
         Make an authenticated request with the given method and url.
         Additional arguments are passed to requests.<method>.
 
-        Returns a requests.Response object.
+        Returns a `requests.Response` object.
 
         If the response status is not 2xx, raises a ConjurException.
 
-        :param method: One of the standard HTTP verbs (case insensitive).
-        :param url: The full url to request.
-        :param **kwargs: additional arguments to pass to the requests.<method>
-        call.
+        `method` is of the standard HTTP verbs (case insensitive).
+
+        `url` is the full url to request.
+
+        If `kwargs['check_errors']` is `True`, non-2xx responses will raise a `conjur.ConjurException`.
+        Otherwise, it is the callers responsibility to check the status of the returned `requests.Response`.
+
+        Additional are passed through to the requests.<method> call after adding an `Authorization`
+        header and HTTPS verification settings.
         """
         headers = kwargs.setdefault('headers', {})
         headers['Authorization'] = self.auth_header()
@@ -126,82 +139,116 @@ class API(object):
 
     def get(self, url, **kwargs):
         """
+        **NOTE** You will generally not need to use this method directly.
+
         Makes an authenticated GET request to the given :url:.
 
         Returns a requests.Response object.
 
         If the response status is not 2xx, raises a ConjurException.
 
-        :param url: the full url to request
-        :param **kwargs: same as requests.get options
+        `url` is the full url to request.
+         Keyword arguments are passed through to `requests.get`.
         """
         return self.request('get', url, **kwargs)
 
     def post(self, url, **kwargs):
         """
-        Makes an authenticated POST request to the given :url:.
+        **NOTE** You will generally not need to use this method directly.
 
-        Returns a requests.Response object.
+        Makes an authenticated `POST` request to the given `url`
 
-        If the response status is not 2xx, raises a ConjurException.
+        Returns a `requests.Response` object.
 
-        :param url: the full url to request
-        :param **kwargs: same as requests.post options
+        If the response status is not 2xx, raises a `ConjurException`.
+
+        `url` is the full url to request.
+         Keyword arguments are passed through to `requests.post`.
         """
         return self.request('post', url, **kwargs)
 
-    def put(self, url, **kwargs):
+    def put(self,url, **kwargs):
         """
-        Makes an authenticated PUT request to the given :url:.
+        **NOTE** You will generally not need to use this method directly.
 
-        Returns a requests.Response object.
+        Makes an authenticated `PUT` request to the given `url`
 
-        If the response status is not 2xx, raises a ConjurException.
+        Returns a `requests.Response` object.
 
-        :param url: the full url to request
-        :param **kwargs: same as requests.put options
+        If the response status is not 2xx, raises a `ConjurException`.
+
+        `url` is the full url to request.
+         Keyword arguments are passed through to `requests.put`.
         """
         return self.request('put', url, **kwargs)
 
     def delete(self, url, **kwargs):
         """
-        Makes an authenticated DELETE request to the given :url:.
+        **NOTE** You will generally not need to use this method directly.
 
-        Returns a requests.Response object.
+        Makes an authenticated `DELETE` request to the given `url`
 
-        If the response status is not 2xx, raises a ConjurException.
+        Returns a `requests.Response` object.
 
-        :param url: the full url to request
-        :param **kwargs: same as requests.delete options
+        If the response status is not 2xx, raises a `ConjurException`.
+
+        `url` is the full url to request.
+         Keyword arguments are passed through to `requests.delete`.
         """
         return self.request('delete', url, **kwargs)
 
     def role(self, kind, identifier):
         """
-        Return a :class `Role <Role>`: object with the given kind and id.
+        Return a `conjur.role.Role` object with the given kind and id.
 
         This method neither creates nor checks for the roles's existence.
+
+        `kind` should be the role kind - for example, `"group"`, `"user"`,
+        or `"host"`.
+
+        `identifier` should be the *unqualified* Conjur id.  For example, to
+        get the role for a user named bub, you would call `api.role('user', 'bub')`.
         """
         return Role(self, kind, identifier)
 
     def resource(self, kind, identifier):
+        """
+        Return a `conjur.resource.Resource` object with the given kind and id.
+
+        This method neither creates nor checks for the resource's existence.
+
+        `kind` should be the resource kind - for example, `"variable"`, `"webservice"`,
+        or `"configuration"`.
+
+        `identifier` should be the *unqualified* Conjur id.  For example, to
+        get the resource for a user variable named db_password, you would call
+        `api.resource('variable', 'db_password')`.
+        """
         return Resource(self, kind, identifier)
 
     def group(self, id):
         """
-        Return a :class `Group <Group>`: object with the given id.
+        Return a `conjur.group.Group` object with the given id.
 
         This method neither creates nor checks for the groups's existence.
+
+        `id` is the *unqualified* id of the group, and does not include the account or kind.
         """
         return Group(self, id)
 
     def create_group(self, id):
+        """
+        Creates a Conjur Group and returns a `conjur.group.Group` object representing it.
+
+        `id` is the identifier of the group to create.
+        """
+
         self.post('{0}/groups'.format(self.config.core_url), data={'id': id})
         return Group(self, id)
 
     def variable(self, id):
         """
-        Return a :class `Variable <Variable>`: object with the given id.
+        Return a `conjur.variable.Variable` object with the given `id`.
 
         This method neither creates nor checks for the variable's existence.
         """
@@ -209,19 +256,22 @@ class API(object):
 
     def create_variable(self, id=None, mime_type='text/plain', kind='secret',
                         value=None):
-        """Creates a Conjur variable.
+        """
+        Creates a Conjur variable.
 
-        Returns a :class `Variable <Variable>`: object
+        Returns a `conjur.variable.Variable` object.
 
-        :param id: An id for the new variable.  If not given, a unique id will
-            be generated.
-        :param mime_type: A mime-type indicating the content type stored by the
-            variable.  This determines the Content-Type header of responses
-            returning the variables value.
-        :param kind: Annotation indicating a user defined kind for the variable.
-            Ignored by Conjur, but useful for making documenting a variable's
-            purpose.
-        :param value: An initial value for the variable.
+        `id` is an identifier for the new variable.  If not given, a unique id will
+        be generated.
+
+        `mime_type` is a string like `text/plain` indicating the content type stored by the
+        variable.  This determines the Content-Type header of responses returning the variable's value.
+
+        `kind`  is a string indicating a user defined role for the variable.
+        Ignored by Conjur, but useful for making a variable's
+        purpose.
+
+        `value` is a string assigning an initial value for the variable.
         """
         data = {'mime_type': mime_type, 'kind': kind}
         if id is not None:
@@ -234,12 +284,29 @@ class API(object):
         return Variable(self, id, attrs)
 
     def layer(self, layer_id):
+        """
+        Return a `conjur.layer.Layer` object with the given `layer_id`.
+
+        This method neither creates nor checks for the layer's existence.
+        """
         return Layer(self, layer_id)
 
     def host(self, host_id):
+        """
+        Return a `conjur.host.Host` object with the given `host_id`.
+
+        This method neither creates nor checks for the host's existence.
+        """
         return Host(self, host_id)
 
     def create_host(self, host_id):
+        """
+        Creates a Conjur Host and returns a `conjur.host.Host` object that represents it.
+
+        `host_id` is the id of the Host to be created.  The `conjur.host.Host` object returned by
+        this method will have an `api_key` attribute, but when the Host is fetched in the future this attribute
+        is not available.
+        """
         attrs = self.post("{0}/hosts".format(self.config.core_url),
                           data={'id': host_id}).json()
         return Host(self, host_id, attrs)
@@ -254,9 +321,12 @@ class API(object):
 
     def create_user(self, login, password=None):
         """
-        Create a Conjur user with the given login.  If password is not given,
-        the user will only be able to authenticate using the generated api_key
-        attribute of the returned User instance.
+        Create a Conjur user with the given `login` and password, and returns a `conjur.user.User` object
+        representing it.
+
+        If `password` is not given, the user will only be able to authenticate using the generated api_key
+        attribute of the returned User instance.  Note that this `api_key` will not be available when the User
+        is fetched in the future.
         """
         data = {'login': login}
         if password is not None:
@@ -270,42 +340,58 @@ class API(object):
 
     def add_public_key(self, username, key):
         """
-        Upload an openssh formatted key to be made available for the given
-        username.
+        Upload an openssh formatted public key to be made available for the user
+        given by `username`.
+
+        The key should be formatted like `ssh-rsa <data...> bob@example.com`.
         """
         self.post(self._public_key_url(username), data=key)
 
     def remove_public_key(self, username, keyname):
         """
-        Remove a specific public key for this user.  The keyname
-        indicates the name field in the openssh formatted key that was
-        uploaded.
+        Remove a specific public key for the user identified by `username`.
+        The `keyname` argument refers to the name field in the openssh formatted key
+        to be deleted.
+
+        For example, if they key contents are `ssh-rsa <data...> bob@example.com`,
+        the `keyname` should be `bob@example.com`
         """
         self.delete(self._public_key_url(username, keyname))
 
     def remove_public_keys(self, username):
         """
-        Remove all of username's public keys.
+        Remove all public keys for the user represented by `username`.
         """
         for keyname in self.public_key_names(username):
             self.remove_public_key(username, keyname)
 
     def public_keys(self, username):
         """
-        Returns all public keys for :username: as a newline separated
-        str (because this is the format expected by the authorized-keys-command)
+        Returns all keys for the user given by `username`, as a newline delimited string.
+
+        The odd format is chosen to support the Conjur SSH login implementation.
         """
         return self.get(self._public_key_url(username)).text
 
     def public_key(self, username, keyname):
         """
-        Return the contents of a specific public key.  The name of the key
-        is based on the name entry of the openssh formatted key that was uploaded.
+        Return the contents of a specific public key given by `keyname`,
+        for the user given by `username` as a string.
+
+        The name of the key is based on the name entry of the openssh formatted key that was uploaded.
+
+        For example, if they key contents are `ssh-rsa <data...> bob@example.com`,
+        the `keyname` should be `bob@example.com`
         """
         return self.get(self._public_key_url(username, keyname)).text
 
     def public_key_names(self, username):
         """
-        Return the names of public keys  for this user.
+        Return the names of public keys for the user given by `username`.
+
+        The names of the keys are based on the name entry of the openssh formatted key that was uploaded.
+
+        For example, if they key contents are `ssh-rsa <data...> bob@example.com`,
+        the `keyname` should be `bob@example.com`
         """
         return [k.split(' ')[-1] for k in self.public_keys(username).split('\n')]

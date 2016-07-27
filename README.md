@@ -102,6 +102,11 @@ from conjur.config import config
 config.load('/etc/conjur.conf')
 ```
 
+
+### API Methods
+
+
+
 ### Variables
 
 You can create, fetch and update variables like so:

@@ -52,7 +52,9 @@ coverage xml -o './coverage.xml'
 coverage html
 # pylint -f parseable conjur tests | tee pylint.out
 
+# Generate html documentation
+PYTHONPATH=/app pdoc --html --html-dir docs --overwrite conjur
 
-cp -r coverage.xml pytest.xml htmlcov /artifacts/.
+cp -r coverage.xml pytest.xml htmlcov docs /artifacts/.
 
 COMMANDS
