@@ -992,17 +992,17 @@ table {
 
     <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
       <ul>
-        <li class="mono"><a href="api.m.html">conjur.api</a></li>
-        <li class="mono"><a href="config.m.html">conjur.config</a></li>
-        <li class="mono"><a href="group.m.html">conjur.group</a></li>
-        <li class="mono"><a href="host.m.html">conjur.host</a></li>
-        <li class="mono"><a href="layer.m.html">conjur.layer</a></li>
-        <li class="mono"><a href="membership.m.html">conjur.membership</a></li>
-        <li class="mono"><a href="resource.m.html">conjur.resource</a></li>
-        <li class="mono"><a href="role.m.html">conjur.role</a></li>
-        <li class="mono"><a href="user.m.html">conjur.user</a></li>
-        <li class="mono"><a href="util.m.html">conjur.util</a></li>
-        <li class="mono"><a href="variable.m.html">conjur.variable</a></li>
+        <li class="mono"><a href="/api-python/conjur/api.m.html">conjur.api</a></li>
+        <li class="mono"><a href="/api-python/conjur/config.m.html">conjur.config</a></li>
+        <li class="mono"><a href="/api-python/conjur/group.m.html">conjur.group</a></li>
+        <li class="mono"><a href="/api-python/conjur/host.m.html">conjur.host</a></li>
+        <li class="mono"><a href="/api-python/conjur/layer.m.html">conjur.layer</a></li>
+        <li class="mono"><a href="/api-python/conjur/membership.m.html">conjur.membership</a></li>
+        <li class="mono"><a href="/api-python/conjur/resource.m.html">conjur.resource</a></li>
+        <li class="mono"><a href="/api-python/conjur/role.m.html">conjur.role</a></li>
+        <li class="mono"><a href="/api-python/conjur/user.m.html">conjur.user</a></li>
+        <li class="mono"><a href="/api-python/conjur/util.m.html">conjur.util</a></li>
+        <li class="mono"><a href="/api-python/conjur/variable.m.html">conjur.variable</a></li>
       </ul>
     </li>
     </ul>
@@ -1193,12 +1193,12 @@ config.</p>
 
     
   
-    <div class="desc"><p>Create a <a href="api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance that will authenticate on demand as the identity given
+    <div class="desc"><p>Create a <a href="/api-python/conjur/api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance that will authenticate on demand as the identity given
 by <code>login</code> and <code>api_key</code>.</p>
 <p><code>login</code> is the identity of the Conjur user or host to authenticate as.</p>
 <p><code>api_key</code> is the api key <em>or</em> password to use when authenticating.</p>
-<p><code>config</code> is a <a href="config.m.html#conjur.config.Config"><code>conjur.config.Config</code></a> instance for the api.  If not given the global
-    Config instance (<a href="config.m.html#conjur.config.config"><code>conjur.config.config</code></a>) will be used.</p></div>
+<p><code>config</code> is a <a href="/api-python/conjur/config.m.html#conjur.config.Config"><code>conjur.config.Config</code></a> instance for the api.  If not given the global
+    Config instance (<a href="/api-python/conjur/config.m.html#conjur.config.config"><code>conjur.config.config</code></a>) will be used.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.new_from_key', this);">Show source &equiv;</a></p>
   <div id="source-conjur.new_from_key" class="source">
@@ -1233,11 +1233,11 @@ by <code>login</code> and <code>api_key</code>.</p>
 
     
   
-    <div class="desc"><p>Create a <a href="api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance using an identity loaded from netrc.  This method
+    <div class="desc"><p>Create a <a href="/api-python/conjur/api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance using an identity loaded from netrc.  This method
 uses the identity stored for the host <a href="/config.authn_url.ext"><code>config.authn_url</code></a>.</p>
 <p><code>netrc_file</code> is an alternative path to the netrc formatted file.  Defaults
 to ~/.netrc on unixy systems.</p>
-<p><code>config</code> is a <a href="config.m.html#conjur.config.Config"><code>conjur.config.Config</code></a> instance used to determine the host
+<p><code>config</code> is a <a href="/api-python/conjur/config.m.html#conjur.config.Config"><code>conjur.config.Config</code></a> instance used to determine the host
 in the netrc file, and also passed to the <a href="#conjur.new_from_key"><code>new_from_key</code></a> method to
 create the API instance using the identity.</p></div>
   <div class="source_cont">
@@ -1281,13 +1281,13 @@ create the API instance using the identity.</p></div>
 
     
   
-    <div class="desc"><p>Create a <a href="api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance that will authenticate using the given signed Conjur
+    <div class="desc"><p>Create a <a href="/api-python/conjur/api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance that will authenticate using the given signed Conjur
 token.</p>
 <p>This is useful if you want to act on behalf of a the identity of an
 HTTP request containing a user's signed token.</p>
 <p><code>token</code> is the json formatted, <em>not</em> base64'd, Conjur authentication Token.</p>
 <p><code>config</code> is a conjur.config.Config instance for the api.  If not given, the global Config
-instance (<a href="config.m.html#conjur.config.config"><code>conjur.config.config</code></a>) will be used.</p></div>
+instance (<a href="/api-python/conjur/config.m.html#conjur.config.config"><code>conjur.config.config</code></a>) will be used.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.new_from_token', this);">Show source &equiv;</a></p>
   <div id="source-conjur.new_from_token" class="source">
@@ -1364,18 +1364,18 @@ instance (<a href="config.m.html#conjur.config.config"><code>conjur.config.confi
 
     <h2 class="section-title" id="header-submodules">Sub-modules</h2>
       <div class="item">
-      <p class="name"><a href="api.m.html">conjur.api</a></p>
+      <p class="name"><a href="/api-python/conjur/api.m.html">conjur.api</a></p>
       
   
 
       </div>
       <div class="item">
-      <p class="name"><a href="config.m.html">conjur.config</a></p>
+      <p class="name"><a href="/api-python/conjur/config.m.html">conjur.config</a></p>
       
   
     <div class="desc"><p>Defines configuration settings needed to connect to a Conjur appliance.</p>
-<p>For convenience, a "global" <a href="config.m.html#conjur.config.Config"><code>conjur.config.Config</code></a> instance is available as
-<a href="config.m.html#conjur.config.config"><code>conjur.config.config</code></a>.  This object is used when a <a href="api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance
+<p>For convenience, a "global" <a href="/api-python/conjur/config.m.html#conjur.config.Config"><code>conjur.config.Config</code></a> instance is available as
+<a href="/api-python/conjur/config.m.html#conjur.config.config"><code>conjur.config.config</code></a>.  This object is used when a <a href="/api-python/conjur/api.m.html#conjur.api.API"><code>conjur.api.API</code></a> instance
 is created without a config.</p>
 <p>Example:
     ```python
@@ -1383,55 +1383,55 @@ is created without a config.</p>
 
       </div>
       <div class="item">
-      <p class="name"><a href="group.m.html">conjur.group</a></p>
+      <p class="name"><a href="/api-python/conjur/group.m.html">conjur.group</a></p>
       
   
 
       </div>
       <div class="item">
-      <p class="name"><a href="host.m.html">conjur.host</a></p>
+      <p class="name"><a href="/api-python/conjur/host.m.html">conjur.host</a></p>
       
   
 
       </div>
       <div class="item">
-      <p class="name"><a href="layer.m.html">conjur.layer</a></p>
+      <p class="name"><a href="/api-python/conjur/layer.m.html">conjur.layer</a></p>
       
   
 
       </div>
       <div class="item">
-      <p class="name"><a href="membership.m.html">conjur.membership</a></p>
+      <p class="name"><a href="/api-python/conjur/membership.m.html">conjur.membership</a></p>
       
   
 
       </div>
       <div class="item">
-      <p class="name"><a href="resource.m.html">conjur.resource</a></p>
+      <p class="name"><a href="/api-python/conjur/resource.m.html">conjur.resource</a></p>
       
   
 
       </div>
       <div class="item">
-      <p class="name"><a href="role.m.html">conjur.role</a></p>
+      <p class="name"><a href="/api-python/conjur/role.m.html">conjur.role</a></p>
       
   
 
       </div>
       <div class="item">
-      <p class="name"><a href="user.m.html">conjur.user</a></p>
+      <p class="name"><a href="/api-python/conjur/user.m.html">conjur.user</a></p>
       
   
 
       </div>
       <div class="item">
-      <p class="name"><a href="util.m.html">conjur.util</a></p>
+      <p class="name"><a href="/api-python/conjur/util.m.html">conjur.util</a></p>
       
   
 
       </div>
       <div class="item">
-      <p class="name"><a href="variable.m.html">conjur.variable</a></p>
+      <p class="name"><a href="/api-python/conjur/variable.m.html">conjur.variable</a></p>
       
   
 
