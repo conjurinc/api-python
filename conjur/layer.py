@@ -19,7 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from conjur.util import urlescape, authzid
-from conjur import ConjurException
+from conjur.exceptions import ConjurException
 
 
 class Layer(object):

@@ -18,6 +18,7 @@ docker build -t api-python .
 
 docker run -d \
   --cidfile=conjur-cid \
+  --privileged \
   -p 443:443 \
   -v ${PWD}/ci:/ci \
   --add-host=conjur:127.0.0.1 \

@@ -149,8 +149,12 @@ class Config(object):
             return True
 
 
-
 config = Config()
+"""
+A global `conjur.Config` instance, used when creating an `conjur.API` instance
+by default.
+"""
+
 default = config
 
 __all__ = ('Config', 'config', 'default')

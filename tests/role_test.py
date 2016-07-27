@@ -19,11 +19,9 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from mock import patch, Mock
-import conjur
-from conjur.config import Config
-
+from conjur import Config, new_from_key
 config = Config()
-api = conjur.new_from_key('login', 'pass', config)
+api = new_from_key('login', 'pass', config)
 config.account = 'the-account'
 config.appliance_url = 'https://example.com/api'
 

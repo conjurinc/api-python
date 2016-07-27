@@ -20,7 +20,7 @@
 
 from conjur.util import authzid
 from conjur.role import Role
-from conjur import ConjurException
+from conjur.exceptions import ConjurException
 
 
 class Resource(object):

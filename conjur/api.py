@@ -24,14 +24,13 @@ import requests
 
 from conjur.variable import Variable
 from conjur.user import User
-from conjur import ConjurException
 from conjur.role import Role
 from conjur.group import Group
 from conjur.layer import Layer
 from conjur.host import Host
 from conjur.resource import Resource
 from conjur.util import urlescape
-
+from conjur.exceptions import ConjurException
 
 class API(object):
     def __init__(self, credentials=None, token=None, config=None):
@@ -47,7 +46,7 @@ class API(object):
 
         `token` should be a string containing a Conjur JSON token to use when authenticating.
 
-        `config` should be a `conjur.config.Config` instance, and defaults to `conjur.config.config`.
+        `config` should be a `conjur.Config` instance, and defaults to `conjur.config`.
         """
         if credentials:
             self.login, self.api_key = credentials
@@ -60,9 +59,9 @@ class API(object):
         if config:
             self.config = config
         else:
-            import conjur.config
+            from conjur.config import config as default_config
 
-            self.config = conjur.config.config
+            self.config = default_config
 
     def authenticate(self, cached=True):
         """
@@ -109,7 +108,7 @@ class API(object):
 
         Returns a `requests.Response` object.
 
-        If the response status is not 2xx, raises a ConjurException.
+        If the response status is not 2xx, raises a `conjur.ConjurException`.
 
         `method` is of the standard HTTP verbs (case insensitive).
 
@@ -160,7 +159,7 @@ class API(object):
 
         Returns a `requests.Response` object.
 
-        If the response status is not 2xx, raises a `ConjurException`.
+        If the response status is not 2xx, raises a `conjur.ConjurException`.
 
         `url` is the full url to request.
          Keyword arguments are passed through to `requests.post`.
@@ -175,7 +174,7 @@ class API(object):
 
         Returns a `requests.Response` object.
 
-        If the response status is not 2xx, raises a `ConjurException`.
+        If the response status is not 2xx, raises a `conjur.ConjurException`.
 
         `url` is the full url to request.
          Keyword arguments are passed through to `requests.put`.
@@ -190,7 +189,7 @@ class API(object):
 
         Returns a `requests.Response` object.
 
-        If the response status is not 2xx, raises a `ConjurException`.
+        If the response status is not 2xx, raises a `conjur.ConjurException`.
 
         `url` is the full url to request.
          Keyword arguments are passed through to `requests.delete`.
@@ -199,7 +198,7 @@ class API(object):
 
     def role(self, kind, identifier):
         """
-        Return a `conjur.role.Role` object with the given kind and id.
+        Return a `conjur.Role` object with the given kind and id.
 
         This method neither creates nor checks for the roles's existence.
 
@@ -213,7 +212,7 @@ class API(object):
 
     def resource(self, kind, identifier):
         """
-        Return a `conjur.resource.Resource` object with the given kind and id.
+        Return a `conjur.Resource` object with the given kind and id.
 
         This method neither creates nor checks for the resource's existence.
 
@@ -228,7 +227,7 @@ class API(object):
 
     def group(self, id):
         """
-        Return a `conjur.group.Group` object with the given id.
+        Return a `conjur.Group` object with the given id.
 
         This method neither creates nor checks for the groups's existence.
 
@@ -238,7 +237,7 @@ class API(object):
 
     def create_group(self, id):
         """
-        Creates a Conjur Group and returns a `conjur.group.Group` object representing it.
+        Creates a Conjur Group and returns a `conjur.Group` object representing it.
 
         `id` is the identifier of the group to create.
         """
@@ -248,7 +247,7 @@ class API(object):
 
     def variable(self, id):
         """
-        Return a `conjur.variable.Variable` object with the given `id`.
+        Return a `conjur.Variable` object with the given `id`.
 
         This method neither creates nor checks for the variable's existence.
         """
@@ -259,7 +258,7 @@ class API(object):
         """
         Creates a Conjur variable.
 
-        Returns a `conjur.variable.Variable` object.
+        Returns a `conjur.Variable` object.
 
         `id` is an identifier for the new variable.  If not given, a unique id will
         be generated.
@@ -285,7 +284,7 @@ class API(object):
 
     def layer(self, layer_id):
         """
-        Return a `conjur.layer.Layer` object with the given `layer_id`.
+        Return a `conjur.Layer` object with the given `layer_id`.
 
         This method neither creates nor checks for the layer's existence.
         """
@@ -293,7 +292,7 @@ class API(object):
 
     def host(self, host_id):
         """
-        Return a `conjur.host.Host` object with the given `host_id`.
+        Return a `conjur.Host` object with the given `host_id`.
 
         This method neither creates nor checks for the host's existence.
         """
@@ -301,9 +300,9 @@ class API(object):
 
     def create_host(self, host_id):
         """
-        Creates a Conjur Host and returns a `conjur.host.Host` object that represents it.
+        Creates a Conjur Host and returns a `conjur.Host` object that represents it.
 
-        `host_id` is the id of the Host to be created.  The `conjur.host.Host` object returned by
+        `host_id` is the id of the Host to be created.  The `conjur.Host` object returned by
         this method will have an `api_key` attribute, but when the Host is fetched in the future this attribute
         is not available.
         """
@@ -321,7 +320,7 @@ class API(object):
 
     def create_user(self, login, password=None):
         """
-        Create a Conjur user with the given `login` and password, and returns a `conjur.user.User` object
+        Create a Conjur user with the given `login` and password, and returns a `conjur.User` object
         representing it.
 
         If `password` is not given, the user will only be able to authenticate using the generated api_key

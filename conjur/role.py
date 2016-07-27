@@ -19,18 +19,64 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from conjur.util import urlescape, authzid
-from conjur import ConjurException
+from conjur.exceptions import ConjurException
 import logging
 
 
 class Role(object):
+    """
+    Represents a Conjur [role](https://developer.conjur.net/key_concepts/rbac.html#rbac-roles).
+
+    An instance of this class does not know whether the role in question exists.
+
+    Generally you should create instances of this class through the `conjur.API.role` method,
+    or the `Role.from_roleid` classmethod.
+
+    Roles can provide information about their members and can check whether the role they represent
+    is allowed to perform certain operations on resources.
+
+    `conjur.User` and `conjur.Group` objects have `role` members that reference the role corresponding
+    to that Conjur asset.
+    """
     def __init__(self, api, kind, identifier):
+        """
+        Create a role to represent the Conjur role with id `<kind>:<identifier>`.  For
+        example, to represent the role associated with a user named bob,
+
+            role = Role(api, 'user', 'bob')
+
+        `api` must be a `conjur.API` instance, used to implement this classes interactions with Conjur
+
+        `kind` is a string giving the role kind
+
+        `identifier` is the unqualified identifier of the role.
+        """
+
         self.api = api
+        """
+        The `conjur.API` instance used to implement our methods.
+        """
+
         self.kind = kind
+        """
+        The `kind` portion of the role's id.
+        """
+
         self.identifier = identifier
+        """
+        The `identifier` portion of the role's id.
+        """
 
     @classmethod
     def from_roleid(cls, api, roleid):
+        """
+        Creates an instance of `conjur.Role` from a full role id string.
+
+        `api` is an instance of `conjur.API`
+
+        `roleid` is a fully or partially qualified Conjur identifier, for example,
+        `"the-account:service:some-service"` or `"service:some-service"` resolve to the same role.
+        """
         tokens = authzid(roleid, 'role').split(':', 3)
         if len(tokens) == 3:
             tokens.pop(0)
@@ -38,6 +84,16 @@ class Role(object):
 
     @property
     def roleid(self):
+        """
+        Return the full role id as a string.
+
+        Example:
+
+            >>> role = api.role('user', 'bob')
+            >>> role.roleid
+            'the-account:user:bob'
+
+         """
         return ':'.join([self.api.config.account, self.kind, self.identifier])
 
     def is_permitted(self, resource, privilege):

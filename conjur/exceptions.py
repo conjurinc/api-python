@@ -19,22 +19,5 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-class Group(object):
-    """
-    Represents a Conjur [group](https://developer.conjur.net/reference/services/directory/group).
-
-    Generally you won't create instances of this class.
-    """
-    def __init__(self, api, id):
-        self.api = api
-        self.id = id
-        self.role = api.role('group', id)
-
-    def members(self):
-        return self.role.members()
-
-    def add_member(self, member, admin=False):
-        self.role.grant_to(member, admin)
-
-    def remove_member(self, member):
-        self.role.revoke_from(member)
+class ConjurException(Exception):
+    pass
