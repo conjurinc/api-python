@@ -101,14 +101,18 @@ class Role(object):
         Check whether `resource` has `privilege` on this role.
 
         `resource` is a qualified identifier for the resource.
+
         `privilege` is a string like `"update"` or `"execute"`.
 
-        Example: See if `user:alice` can fetch the value of `variable:db-password`
+
+        Example:
+
             >>> role = api.role('user', 'alice')
             >>> if role.is_permitted('variable:db-password', 'execute'):
             ...     print("Alice can fetch the database password")
             ... else:
             ...     print("Alice cannot fetch the database password")
+
         """
         params = {
             'check': 'true',
@@ -130,6 +134,7 @@ class Role(object):
 
         `member` is a string or object with a `role` attribute or `roleid` method,
             such as a `conjur.User` or `conjur.Group`.
+            
         `admin` whether the member can grant this role to others.
 
         """

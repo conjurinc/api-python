@@ -24,6 +24,13 @@ from conjur.exceptions import ConjurException
 
 
 class Resource(object):
+    """
+    A `Resource` represents an object on which `Role`s can
+    be permitted to perform certain actions.
+
+    Generally you will not construct these directly, but call the `conjur.API.role` method
+    to do so.
+    """
     def __init__(self, api, kind, identifier):
         self.api = api
         self.kind = kind
@@ -31,17 +38,25 @@ class Resource(object):
 
     @property
     def resourceid(self):
+        """
+        The fully qualified resource id as a string, like `'the-account:variable:db-password`.
+        """
         return ":".join([self.api.config.account, self.kind, self.identifier])
 
     def permit(self, role, privilege, grant_option=False):
-        '''
-        Permit `role` to perform `privilege` on this resource.  If
-        `grant_option` is True, the role will be able to grant this
+        """
+        Permit `role` to perform `privilege` on this resource.
+
+        `role` is a qualified conjur identifier (e.g. `'user:alice`') or an object
+            with a `role` attribute or `roleid` method, such as a `conjur.User` or
+            `conjur.Group`.
+
+        If `grant_option` is True, the role will be able to grant this
         permission to other resources.
 
         You must own the resource or have the permission with `grant_option`
         to call this method.
-        '''
+        """
         data = {}
         params = {
             'permit': 'true',
@@ -54,30 +69,49 @@ class Resource(object):
         self.api.post(self.url(), data=data, params=params)
 
     def deny(self, role, privilege):
-        '''
+        """
         Deny `role` permission to perform `privilege` on this resource.
 
         You must own the resource or have the permission with `grant_option`
         on it to call this method.
-        '''
+        """
         params = {
             'permit': 'true',
             'privilege': privilege,
             'role': authzid(role)
         }
 
-        self.api.post(self.url(), parmas=params)
+        self.api.post(self.url(), params=params)
 
     def permitted(self, privilege, role=None):
-        '''
-        Return True if +role+ has +privilege+ on this resource.
+        """
+        Return True if `role` has `privilege` on this resource.
 
-        +role+ may be a Role instance, an object with a +role+ method,
-        or a role id as a string.
+        `role` may be a `conjur.Role` instance, an object with a `role` method,
+        or a qualified role id as a string.
 
-        If +role+ is not given, check the permission for the currently
+        If `role` is not given, check the permission for the currently
         authenticated role.
-        '''
+
+        Example: Check that the currently authenticated role is allowed to `'read'`
+            a resource.
+
+            >>> service = api.resource('service', 'gateway')
+            >>> if service.permitted('read'):
+            ...     print("I can read 'service:gateway'")
+            ... else:
+            ...     print("I cannot read 'service:gateway'")
+
+        Example: Check whether members of group 'security_admin' can 'update'
+            a resource.
+
+            >>> service = api.resource('service', 'gateway')
+            >>> security_admin = api.group('security_admin')
+            >>> if service.permitted('update', security_admin):
+            ...     print("security_admin members can update service:gateway")
+            >>> else:
+            ...     print("security_admin members cannot update service:gateway")
+        """
 
         if role is None:
             # Handle self role check
@@ -96,6 +130,9 @@ class Resource(object):
             return Role.from_roleid(self.api, role).is_permitted(self, privilege)
 
     def url(self):
+        """
+        Internal method to return a url for this object as a string.
+        """
         return "/".join([
             self.api.config.authz_url,
             self.api.config.account,
