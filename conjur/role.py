@@ -97,6 +97,19 @@ class Role(object):
         return ':'.join([self.api.config.account, self.kind, self.identifier])
 
     def is_permitted(self, resource, privilege):
+        """
+        Check whether `resource` has `privilege` on this role.
+
+        `resource` is a qualified identifier for the resource.
+        `privilege` is a string like `"update"` or `"execute"`.
+
+        Example: See if `user:alice` can fetch the value of `variable:db-password`
+            >>> role = api.role('user', 'alice')
+            >>> if role.is_permitted('variable:db-password', 'execute'):
+            ...     print("Alice can fetch the database password")
+            ... else:
+            ...     print("Alice cannot fetch the database password")
+        """
         params = {
             'check': 'true',
             'resource_id': authzid(resource, 'resource'),
@@ -112,18 +125,39 @@ class Role(object):
             raise ConjurException("Request failed: %d" % response.status_code)
 
     def grant_to(self, member, admin=None):
+        """
+        Grant this role to `member`.
+
+        `member` is a string or object with a `role` attribute or `roleid` method,
+            such as a `conjur.User` or `conjur.Group`.
+        `admin` whether the member can grant this role to others.
+
+        """
         data = {}
         if admin is not None:
             data['admin'] = 'true' if admin else 'false'
-        logging.info("Adding member with {} and data of {}".format(
-            self._membership_url(member), repr(data)))
         self.api.put(self._membership_url(member), data=data)
 
     def revoke_from(self, member):
+        """
+        The inverse of `conjur.Role.grant_to`.  Removes `member` from the members of this
+        role.
+
+        `member` is a string or object with a `role` attribute or `roleid` method,
+            such as a `conjur.User` or `conjur.Group`.
+        """
         self.api.delete(self._membership_url(member))
 
     def members(self):
-        logging.info('Getting members from {}'.format(self._membership_url()))
+        """
+        Return a list of members of this role.  Members are returned as `dict`s
+        with the following keys:
+
+        * `'member'` the fully qualified identifier of the group
+        * `'role'` the fully qualified identifier of the group (redundant)
+        * `'grantor'` the role that granted the membership
+        * `'admin_option'` whether this member can grant membership in the group to other roles.
+        """
         return self.api.get(self._membership_url()).json()
 
     def _membership_url(self, member=None):
