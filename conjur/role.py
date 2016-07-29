@@ -134,7 +134,7 @@ class Role(object):
 
         `member` is a string or object with a `role` attribute or `roleid` method,
             such as a `conjur.User` or `conjur.Group`.
-            
+
         `admin` whether the member can grant this role to others.
 
         """

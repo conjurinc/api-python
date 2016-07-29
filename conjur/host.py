@@ -23,6 +23,35 @@ from conjur.exceptions import ConjurException
 
 
 class Host(object):
+    """
+    A Conjur `Host` is a role corresponding to a machine or machine identity.
+
+    The `Host` class provides the ability to check for existence and read attributes of the
+    host.
+
+    Attributes (such as the `ownerid`) are fetched lazily.
+
+    Newly created hosts, as returned by `conjur.API.create_host`, have an `api_key` attribute,
+    but existing hosts retrieved with `conjur.API.host` or the constructor of this class *do not*
+    have one.
+
+    Example:
+
+        >>> # Create a host and save it's api key to a file.
+        >>> host = api.create_host('jenkins')
+        >>> api_key = host.api_key
+        >>> with open('/etc/conjur.identity') as f:
+        ...     f.write(api_key)
+
+    Example:
+
+        >>> # See if a host named `jenkins` exists:
+        >>> if api.host('jenkins').exists():
+        ...     print("Host 'jenkins' exists")
+        ... else:
+        ...     print("Host 'jenkins' does not exist")
+
+    """
     def __init__(self, api, id, attrs=None):
         self.api = api
         self.id = id
@@ -30,6 +59,9 @@ class Host(object):
         self.role = self.api.role('host', self.id)
 
     def exists(self):
+        """
+        Return `True` if this host exists.
+        """
         status = self.api.get(self._url(), check_errors=False).status_code
         if status == 200:
             return True
