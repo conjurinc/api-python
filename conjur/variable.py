@@ -22,12 +22,43 @@ from conjur.util import urlescape
 
 
 class Variable(object):
+    """
+    A `Variable` represents a versioned secret stored in Conjur.
+
+    Generally you will get an instance of this class by calling `conjur.API.create_variable`
+    or `conjur.API.variable`.
+
+    Instances of this class allow you to fetch values of the variable, and store new ones.
+
+    Example:
+
+        >>> # Print the current value of the variable `mysql-password`
+        >>> variable = api.variable('mysql-password')
+        >>> print("mysql-password is {}".format(variable.value()))
+
+    Example:
+
+        >>> # Print all versions of the same variable
+        >>> variable = api.variable('mysql-password')
+        >>> for i in range(1, variable.version_count + 1): # version numbers are 1 based
+        ...     print("version {} of 'mysql-password' is {}".format(i, variable.value(i)))
+
+    """
     def __init__(self, api, id, attrs=None):
         self.id = id
         self.api = api
         self._attrs = attrs
 
     def value(self, version=None):
+        """
+        Retrieve the secret stored in a variable.
+
+        `version` is a *one based* index of the version to be retrieved.
+
+        If no such version exists, a 404 error is raised.
+
+        Returns the value of the variable as a string.
+        """
         url = "%s/variables/%s/value" % (self.api.config.core_url,
                                          urlescape(self.id))
         if version is not None:
@@ -35,7 +66,13 @@ class Variable(object):
         return self.api.get(url).text
 
     def add_value(self, value):
-        # Invalidate _attrs since our version count is going to change
+        """
+        Stores a new version of the secret in this variable.
+
+        `value` is a string giving the new value to store.
+
+        This increments the variable's `version_count` member by one.
+        """
         self._attrs = None
         data = {'value': value}
         url = "%s/variables/%s/values" % (self.api.config.core_url,
