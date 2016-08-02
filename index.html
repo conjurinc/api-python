@@ -2932,7 +2932,7 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
             
   <div class="item">
     <div class="name def" id="conjur.Config.get">
-    <p>def <span class="ident">get</span>(</p><p>self, key, default=&lt;object object at 0x7f0efc22c0e0&gt;)</p>
+    <p>def <span class="ident">get</span>(</p><p>self, key, default=&lt;object object at 0x7f42b7b900e0&gt;)</p>
     </div>
     
 
@@ -3106,7 +3106,10 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
       
   
     <div class="desc"><p>Represents a Conjur <a href="https://developer.conjur.net/reference/services/directory/group">group</a>.</p>
-<p>Generally you won't create instances of this class.</p></div>
+<p>Generally you won't create instances of this class, but use the <code>conjur.API.group(id)</code> method.</p>
+<p>A group is a role that contains other roles, typically users and other groups.  A <a href="#conjur.Group"><code>Group</code></a>
+object can list its members with the <code>members</code> method, and also manage them with the <code>add_member</code>
+and <code>remove_member</code> methods.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Group', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Group" class="source">
@@ -3114,20 +3117,68 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
     """
     Represents a Conjur [group](https://developer.conjur.net/reference/services/directory/group).
 
-    Generally you won't create instances of this class.
+    Generally you won't create instances of this class, but use the `conjur.API.group(id)` method.
+
+    A group is a role that contains other roles, typically users and other groups.  A `conjur.Group`
+    object can list its members with the `members` method, and also manage them with the `add_member`
+    and `remove_member` methods.
     """
     def __init__(self, api, id):
         self.api = api
+        """
+        Instance of `conjur.API` used to implement Conjur operations.
+        """
+
         self.id = id
+        """
+        Identifier (unqualified) of the group.
+        """
+
         self.role = api.role('group', id)
+        """
+        Represents the `conjur.Role` associated with this group.
+        """
 
     def members(self):
+        """
+        Return a list of members of this group.  Members are returned as `dict`s
+        with the following keys:
+
+        * `'member'` the fully qualified identifier of the group
+        * `'role'` the fully qualified identifier of the group (redundant)
+        * `'grantor'` the role that granted the membership
+        * `'admin_option'` whether this member can grant membership in the group to other roles.
+
+        Example: print member ids (fully qualified) and whether they are admins of the group.
+            >>> group = api.group('security_admin')
+            >>> for member in group.members():
+            ...     print('{} is a member of security_admin ({} admin option)'.format(
+            ...         member['member'],
+            ...         'with' if member['admin_option'] else 'without'
+            ...     ))
+        """
         return self.role.members()
 
     def add_member(self, member, admin=False):
+        """
+        Add a member to this group.
+
+        `member` is the member we want to add to the group, and  should be a qualified Conjur id,
+            or an object with a `role` attribute or a `roleid` method.  Examples of such objects
+            include `conjur.User`, `conjur.Role`, and `conjur.Group`.
+
+        If `admin` is True, the member will be allowed to add other members to this group.
+        """
         self.role.grant_to(member, admin)
 
     def remove_member(self, member):
+        """
+        Remove a member from the group.
+
+        `member` is the member to remove, and  should be a qualified Conjur id,
+            or an object with a `role` attribute or a `roleid` method.  Examples of such objects
+            include `conjur.User`, `conjur.Role`, and `conjur.Group`.
+        """
         self.role.revoke_from(member)
 </code></pre>
   </div>
@@ -3147,6 +3198,7 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
             
   
+    <div class="desc"><p>Instance of <a href="#conjur.API"><code>API</code></a> used to implement Conjur operations.</p></div>
   <div class="source_cont">
 </div>
 
@@ -3157,6 +3209,7 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
             
   
+    <div class="desc"><p>Identifier (unqualified) of the group.</p></div>
   <div class="source_cont">
 </div>
 
@@ -3167,6 +3220,7 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
             
   
+    <div class="desc"><p>Represents the <a href="#conjur.Role"><code>Role</code></a> associated with this group.</p></div>
   <div class="source_cont">
 </div>
 
@@ -3186,8 +3240,17 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
   <div id="source-conjur.Group.__init__" class="source">
     <pre><code>def __init__(self, api, id):
     self.api = api
+    """
+    Instance of `conjur.API` used to implement Conjur operations.
+    """
     self.id = id
+    """
+    Identifier (unqualified) of the group.
+    """
     self.role = api.role('group', id)
+    """
+    Represents the `conjur.Role` associated with this group.
+    """
 </code></pre>
   </div>
 </div>
@@ -3203,10 +3266,22 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
     
   
+    <div class="desc"><p>Add a member to this group.</p>
+<p><code>member</code> is the member we want to add to the group, and  should be a qualified Conjur id,
+    or an object with a <code>role</code> attribute or a <code>roleid</code> method.  Examples of such objects
+    include <a href="#conjur.User"><code>User</code></a>, <a href="#conjur.Role"><code>Role</code></a>, and <a href="#conjur.Group"><code>Group</code></a>.</p>
+<p>If <code>admin</code> is True, the member will be allowed to add other members to this group.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Group.add_member', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Group.add_member" class="source">
     <pre><code>def add_member(self, member, admin=False):
+    """
+    Add a member to this group.
+    `member` is the member we want to add to the group, and  should be a qualified Conjur id,
+        or an object with a `role` attribute or a `roleid` method.  Examples of such objects
+        include `conjur.User`, `conjur.Role`, and `conjur.Group`.
+    If `admin` is True, the member will be allowed to add other members to this group.
+    """
     self.role.grant_to(member, admin)
 </code></pre>
   </div>
@@ -3223,10 +3298,40 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
     
   
+    <div class="desc"><p>Return a list of members of this group.  Members are returned as <code>dict</code>s
+with the following keys:</p>
+<ul>
+<li><code>'member'</code> the fully qualified identifier of the group</li>
+<li><code>'role'</code> the fully qualified identifier of the group (redundant)</li>
+<li><code>'grantor'</code> the role that granted the membership</li>
+<li><code>'admin_option'</code> whether this member can grant membership in the group to other roles.</li>
+</ul>
+<p>Example: print member ids (fully qualified) and whether they are admins of the group.
+    &gt;&gt;&gt; group = api.group('security_admin')
+    &gt;&gt;&gt; for member in group.members():
+    ...     print('{} is a member of security_admin ({} admin option)'.format(
+    ...         member['member'],
+    ...         'with' if member['admin_option'] else 'without'
+    ...     ))</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Group.members', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Group.members" class="source">
     <pre><code>def members(self):
+    """
+    Return a list of members of this group.  Members are returned as `dict`s
+    with the following keys:
+    * `'member'` the fully qualified identifier of the group
+    * `'role'` the fully qualified identifier of the group (redundant)
+    * `'grantor'` the role that granted the membership
+    * `'admin_option'` whether this member can grant membership in the group to other roles.
+    Example: print member ids (fully qualified) and whether they are admins of the group.
+        >>> group = api.group('security_admin')
+        >>> for member in group.members():
+        ...     print('{} is a member of security_admin ({} admin option)'.format(
+        ...         member['member'],
+        ...         'with' if member['admin_option'] else 'without'
+        ...     ))
+    """
     return self.role.members()
 </code></pre>
   </div>
@@ -3243,10 +3348,20 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
     
   
+    <div class="desc"><p>Remove a member from the group.</p>
+<p><code>member</code> is the member to remove, and  should be a qualified Conjur id,
+    or an object with a <code>role</code> attribute or a <code>roleid</code> method.  Examples of such objects
+    include <a href="#conjur.User"><code>User</code></a>, <a href="#conjur.Role"><code>Role</code></a>, and <a href="#conjur.Group"><code>Group</code></a>.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Group.remove_member', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Group.remove_member" class="source">
     <pre><code>def remove_member(self, member):
+    """
+    Remove a member from the group.
+    `member` is the member to remove, and  should be a qualified Conjur id,
+        or an object with a `role` attribute or a `roleid` method.  Examples of such objects
+        include `conjur.User`, `conjur.Role`, and `conjur.Group`.
+    """
     self.role.revoke_from(member)
 </code></pre>
   </div>
@@ -3261,10 +3376,60 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
       <p id="conjur.Host" class="name">class <span class="ident">Host</span></p>
       
   
+    <div class="desc"><p>A Conjur <code>Host</code> is a role corresponding to a machine or machine identity.</p>
+<p>The <code>Host</code> class provides the ability to check for existence and read attributes of the
+host.</p>
+<p>Attributes (such as the <code>ownerid</code>) are fetched lazily.</p>
+<p>Newly created hosts, as returned by <a href="#conjur.API.create_host"><code>create_host</code></a>, have an <code>api_key</code> attribute,
+but existing hosts retrieved with <a href="#conjur.API.host"><code>host</code></a> or the constructor of this class <em>do not</em>
+have one.</p>
+<p>Example:</p>
+<pre><code>&gt;&gt;&gt; # Create a host and save it's api key to a file.
+&gt;&gt;&gt; host = api.create_host('jenkins')
+&gt;&gt;&gt; api_key = host.api_key
+&gt;&gt;&gt; with open('/etc/conjur.identity') as f:
+...     f.write(api_key)
+</code></pre>
+<p>Example:</p>
+<pre><code>&gt;&gt;&gt; # See if a host named `jenkins` exists:
+&gt;&gt;&gt; if api.host('jenkins').exists():
+...     print("Host 'jenkins' exists")
+... else:
+...     print("Host 'jenkins' does not exist")
+</code></pre></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Host', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Host" class="source">
     <pre><code>class Host(object):
+    """
+    A Conjur `Host` is a role corresponding to a machine or machine identity.
+
+    The `Host` class provides the ability to check for existence and read attributes of the
+    host.
+
+    Attributes (such as the `ownerid`) are fetched lazily.
+
+    Newly created hosts, as returned by `conjur.API.create_host`, have an `api_key` attribute,
+    but existing hosts retrieved with `conjur.API.host` or the constructor of this class *do not*
+    have one.
+
+    Example:
+
+        >>> # Create a host and save it's api key to a file.
+        >>> host = api.create_host('jenkins')
+        >>> api_key = host.api_key
+        >>> with open('/etc/conjur.identity') as f:
+        ...     f.write(api_key)
+
+    Example:
+
+        >>> # See if a host named `jenkins` exists:
+        >>> if api.host('jenkins').exists():
+        ...     print("Host 'jenkins' exists")
+        ... else:
+        ...     print("Host 'jenkins' does not exist")
+
+    """
     def __init__(self, api, id, attrs=None):
         self.api = api
         self.id = id
@@ -3272,6 +3437,9 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
         self.role = self.api.role('host', self.id)
 
     def exists(self):
+        """
+        Return `True` if this host exists.
+        """
         status = self.api.get(self._url(), check_errors=False).status_code
         if status == 200:
             return True
@@ -3368,10 +3536,14 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
     
   
+    <div class="desc"><p>Return <code>True</code> if this host exists.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Host.exists', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Host.exists" class="source">
     <pre><code>def exists(self):
+    """
+    Return `True` if this host exists.
+    """
     status = self.api.get(self._url(), check_errors=False).status_code
     if status == 200:
         return True
@@ -3565,10 +3737,21 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
       <p id="conjur.Resource" class="name">class <span class="ident">Resource</span></p>
       
   
+    <div class="desc"><p>A <code>Resource</code> represents an object on which <code>Role</code>s can
+be permitted to perform certain actions.</p>
+<p>Generally you will not construct these directly, but call the <a href="#conjur.API.role"><code>role</code></a> method
+to do so.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Resource', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Resource" class="source">
     <pre><code>class Resource(object):
+    """
+    A `Resource` represents an object on which `Role`s can
+    be permitted to perform certain actions.
+
+    Generally you will not construct these directly, but call the `conjur.API.role` method
+    to do so.
+    """
     def __init__(self, api, kind, identifier):
         self.api = api
         self.kind = kind
@@ -3576,17 +3759,25 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
     @property
     def resourceid(self):
+        """
+        The fully qualified resource id as a string, like `'the-account:variable:db-password`.
+        """
         return ":".join([self.api.config.account, self.kind, self.identifier])
 
     def permit(self, role, privilege, grant_option=False):
-        '''
-        Permit `role` to perform `privilege` on this resource.  If
-        `grant_option` is True, the role will be able to grant this
+        """
+        Permit `role` to perform `privilege` on this resource.
+
+        `role` is a qualified conjur identifier (e.g. `'user:alice`') or an object
+            with a `role` attribute or `roleid` method, such as a `conjur.User` or
+            `conjur.Group`.
+
+        If `grant_option` is True, the role will be able to grant this
         permission to other resources.
 
         You must own the resource or have the permission with `grant_option`
         to call this method.
-        '''
+        """
         data = {}
         params = {
             'permit': 'true',
@@ -3599,30 +3790,49 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
         self.api.post(self.url(), data=data, params=params)
 
     def deny(self, role, privilege):
-        '''
+        """
         Deny `role` permission to perform `privilege` on this resource.
 
         You must own the resource or have the permission with `grant_option`
         on it to call this method.
-        '''
+        """
         params = {
             'permit': 'true',
             'privilege': privilege,
             'role': authzid(role)
         }
 
-        self.api.post(self.url(), parmas=params)
+        self.api.post(self.url(), params=params)
 
     def permitted(self, privilege, role=None):
-        '''
-        Return True if +role+ has +privilege+ on this resource.
+        """
+        Return True if `role` has `privilege` on this resource.
 
-        +role+ may be a Role instance, an object with a +role+ method,
-        or a role id as a string.
+        `role` may be a `conjur.Role` instance, an object with a `role` method,
+        or a qualified role id as a string.
 
-        If +role+ is not given, check the permission for the currently
+        If `role` is not given, check the permission for the currently
         authenticated role.
-        '''
+
+        Example: Check that the currently authenticated role is allowed to `'read'`
+            a resource.
+
+            >>> service = api.resource('service', 'gateway')
+            >>> if service.permitted('read'):
+            ...     print("I can read 'service:gateway'")
+            ... else:
+            ...     print("I cannot read 'service:gateway'")
+
+        Example: Check whether members of group 'security_admin' can 'update'
+            a resource.
+
+            >>> service = api.resource('service', 'gateway')
+            >>> security_admin = api.group('security_admin')
+            >>> if service.permitted('update', security_admin):
+            ...     print("security_admin members can update service:gateway")
+            >>> else:
+            ...     print("security_admin members cannot update service:gateway")
+        """
 
         if role is None:
             # Handle self role check
@@ -3641,6 +3851,9 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
             return Role.from_roleid(self.api, role).is_permitted(self, privilege)
 
     def url(self):
+        """
+        Internal method to return a url for this object as a string.
+        """
         return "/".join([
             self.api.config.authz_url,
             self.api.config.account,
@@ -3696,6 +3909,7 @@ get the role for a user named bub, you would call <code>api.role('user', 'bub')<
 
             
   
+    <div class="desc"><p>The fully qualified resource id as a string, like <code>'the-account:variable:db-password</code>.</p></div>
   <div class="source_cont">
 </div>
 
@@ -3739,17 +3953,17 @@ on it to call this method.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Resource.deny', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Resource.deny" class="source">
     <pre><code>def deny(self, role, privilege):
-    '''
+    """
     Deny `role` permission to perform `privilege` on this resource.
     You must own the resource or have the permission with `grant_option`
     on it to call this method.
-    '''
+    """
     params = {
         'permit': 'true',
         'privilege': privilege,
         'role': authzid(role)
     }
-    self.api.post(self.url(), parmas=params)
+    self.api.post(self.url(), params=params)
 </code></pre>
   </div>
 </div>
@@ -3765,8 +3979,11 @@ on it to call this method.</p></div>
 
     
   
-    <div class="desc"><p>Permit <code>role</code> to perform <code>privilege</code> on this resource.  If
-<code>grant_option</code> is True, the role will be able to grant this
+    <div class="desc"><p>Permit <code>role</code> to perform <code>privilege</code> on this resource.</p>
+<p><code>role</code> is a qualified conjur identifier (e.g. <code>'user:alice</code>') or an object
+    with a <code>role</code> attribute or <code>roleid</code> method, such as a <a href="#conjur.User"><code>User</code></a> or
+    <a href="#conjur.Group"><code>Group</code></a>.</p>
+<p>If <code>grant_option</code> is True, the role will be able to grant this
 permission to other resources.</p>
 <p>You must own the resource or have the permission with <code>grant_option</code>
 to call this method.</p></div>
@@ -3774,13 +3991,16 @@ to call this method.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Resource.permit', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Resource.permit" class="source">
     <pre><code>def permit(self, role, privilege, grant_option=False):
-    '''
-    Permit `role` to perform `privilege` on this resource.  If
-    `grant_option` is True, the role will be able to grant this
+    """
+    Permit `role` to perform `privilege` on this resource.
+    `role` is a qualified conjur identifier (e.g. `'user:alice`') or an object
+        with a `role` attribute or `roleid` method, such as a `conjur.User` or
+        `conjur.Group`.
+    If `grant_option` is True, the role will be able to grant this
     permission to other resources.
     You must own the resource or have the permission with `grant_option`
     to call this method.
-    '''
+    """
     data = {}
     params = {
         'permit': 'true',
@@ -3805,22 +4025,54 @@ to call this method.</p></div>
 
     
   
-    <div class="desc"><p>Return True if +role+ has +privilege+ on this resource.</p>
-<p>+role+ may be a Role instance, an object with a +role+ method,
-or a role id as a string.</p>
-<p>If +role+ is not given, check the permission for the currently
-authenticated role.</p></div>
+    <div class="desc"><p>Return True if <code>role</code> has <code>privilege</code> on this resource.</p>
+<p><code>role</code> may be a <a href="#conjur.Role"><code>Role</code></a> instance, an object with a <code>role</code> method,
+or a qualified role id as a string.</p>
+<p>If <code>role</code> is not given, check the permission for the currently
+authenticated role.</p>
+<p>Example: Check that the currently authenticated role is allowed to <code>'read'</code>
+    a resource.</p>
+<pre><code>&gt;&gt;&gt; service = api.resource('service', 'gateway')
+&gt;&gt;&gt; if service.permitted('read'):
+...     print("I can read 'service:gateway'")
+... else:
+...     print("I cannot read 'service:gateway'")
+</code></pre>
+<p>Example: Check whether members of group 'security_admin' can 'update'
+    a resource.</p>
+<pre><code>&gt;&gt;&gt; service = api.resource('service', 'gateway')
+&gt;&gt;&gt; security_admin = api.group('security_admin')
+&gt;&gt;&gt; if service.permitted('update', security_admin):
+...     print("security_admin members can update service:gateway")
+&gt;&gt;&gt; else:
+...     print("security_admin members cannot update service:gateway")
+</code></pre></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Resource.permitted', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Resource.permitted" class="source">
     <pre><code>def permitted(self, privilege, role=None):
-    '''
-    Return True if +role+ has +privilege+ on this resource.
-    +role+ may be a Role instance, an object with a +role+ method,
-    or a role id as a string.
-    If +role+ is not given, check the permission for the currently
+    """
+    Return True if `role` has `privilege` on this resource.
+    `role` may be a `conjur.Role` instance, an object with a `role` method,
+    or a qualified role id as a string.
+    If `role` is not given, check the permission for the currently
     authenticated role.
-    '''
+    Example: Check that the currently authenticated role is allowed to `'read'`
+        a resource.
+        >>> service = api.resource('service', 'gateway')
+        >>> if service.permitted('read'):
+        ...     print("I can read 'service:gateway'")
+        ... else:
+        ...     print("I cannot read 'service:gateway'")
+    Example: Check whether members of group 'security_admin' can 'update'
+        a resource.
+        >>> service = api.resource('service', 'gateway')
+        >>> security_admin = api.group('security_admin')
+        >>> if service.permitted('update', security_admin):
+        ...     print("security_admin members can update service:gateway")
+        >>> else:
+        ...     print("security_admin members cannot update service:gateway")
+    """
     if role is None:
         # Handle self role check
         response = self.api.get(self.url(),
@@ -3851,10 +4103,14 @@ authenticated role.</p></div>
 
     
   
+    <div class="desc"><p>Internal method to return a url for this object as a string.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Resource.url', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Resource.url" class="source">
     <pre><code>def url(self):
+    """
+    Internal method to return a url for this object as a string.
+    """
     return "/".join([
         self.api.config.authz_url,
         self.api.config.account,
@@ -3960,6 +4216,23 @@ to that Conjur asset.</p></div>
         return ':'.join([self.api.config.account, self.kind, self.identifier])
 
     def is_permitted(self, resource, privilege):
+        """
+        Check whether `resource` has `privilege` on this role.
+
+        `resource` is a qualified identifier for the resource.
+
+        `privilege` is a string like `"update"` or `"execute"`.
+
+
+        Example:
+
+            >>> role = api.role('user', 'alice')
+            >>> if role.is_permitted('variable:db-password', 'execute'):
+            ...     print("Alice can fetch the database password")
+            ... else:
+            ...     print("Alice cannot fetch the database password")
+
+        """
         params = {
             'check': 'true',
             'resource_id': authzid(resource, 'resource'),
@@ -3975,18 +4248,40 @@ to that Conjur asset.</p></div>
             raise ConjurException("Request failed: %d" % response.status_code)
 
     def grant_to(self, member, admin=None):
+        """
+        Grant this role to `member`.
+
+        `member` is a string or object with a `role` attribute or `roleid` method,
+            such as a `conjur.User` or `conjur.Group`.
+
+        `admin` whether the member can grant this role to others.
+
+        """
         data = {}
         if admin is not None:
             data['admin'] = 'true' if admin else 'false'
-        logging.info("Adding member with {} and data of {}".format(
-            self._membership_url(member), repr(data)))
         self.api.put(self._membership_url(member), data=data)
 
     def revoke_from(self, member):
+        """
+        The inverse of `conjur.Role.grant_to`.  Removes `member` from the members of this
+        role.
+
+        `member` is a string or object with a `role` attribute or `roleid` method,
+            such as a `conjur.User` or `conjur.Group`.
+        """
         self.api.delete(self._membership_url(member))
 
     def members(self):
-        logging.info('Getting members from {}'.format(self._membership_url()))
+        """
+        Return a list of members of this role.  Members are returned as `dict`s
+        with the following keys:
+
+        * `'member'` the fully qualified identifier of the group
+        * `'role'` the fully qualified identifier of the group (redundant)
+        * `'grantor'` the role that granted the membership
+        * `'admin_option'` whether this member can grant membership in the group to other roles.
+        """
         return self.api.get(self._membership_url()).json()
 
     def _membership_url(self, member=None):
@@ -4153,15 +4448,23 @@ def from_roleid(cls, api, roleid):
 
     
   
+    <div class="desc"><p>Grant this role to <code>member</code>.</p>
+<p><code>member</code> is a string or object with a <code>role</code> attribute or <code>roleid</code> method,
+    such as a <a href="#conjur.User"><code>User</code></a> or <a href="#conjur.Group"><code>Group</code></a>.</p>
+<p><code>admin</code> whether the member can grant this role to others.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Role.grant_to', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Role.grant_to" class="source">
     <pre><code>def grant_to(self, member, admin=None):
+    """
+    Grant this role to `member`.
+    `member` is a string or object with a `role` attribute or `roleid` method,
+        such as a `conjur.User` or `conjur.Group`.
+    `admin` whether the member can grant this role to others.
+    """
     data = {}
     if admin is not None:
         data['admin'] = 'true' if admin else 'false'
-    logging.info("Adding member with {} and data of {}".format(
-        self._membership_url(member), repr(data)))
     self.api.put(self._membership_url(member), data=data)
 </code></pre>
   </div>
@@ -4178,10 +4481,31 @@ def from_roleid(cls, api, roleid):
 
     
   
+    <div class="desc"><p>Check whether <code>resource</code> has <code>privilege</code> on this role.</p>
+<p><code>resource</code> is a qualified identifier for the resource.</p>
+<p><code>privilege</code> is a string like <code>"update"</code> or <code>"execute"</code>.</p>
+<p>Example:</p>
+<pre><code>&gt;&gt;&gt; role = api.role('user', 'alice')
+&gt;&gt;&gt; if role.is_permitted('variable:db-password', 'execute'):
+...     print("Alice can fetch the database password")
+... else:
+...     print("Alice cannot fetch the database password")
+</code></pre></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Role.is_permitted', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Role.is_permitted" class="source">
     <pre><code>def is_permitted(self, resource, privilege):
+    """
+    Check whether `resource` has `privilege` on this role.
+    `resource` is a qualified identifier for the resource.
+    `privilege` is a string like `"update"` or `"execute"`.
+    Example:
+        >>> role = api.role('user', 'alice')
+        >>> if role.is_permitted('variable:db-password', 'execute'):
+        ...     print("Alice can fetch the database password")
+        ... else:
+        ...     print("Alice cannot fetch the database password")
+    """
     params = {
         'check': 'true',
         'resource_id': authzid(resource, 'resource'),
@@ -4210,11 +4534,26 @@ def from_roleid(cls, api, roleid):
 
     
   
+    <div class="desc"><p>Return a list of members of this role.  Members are returned as <code>dict</code>s
+with the following keys:</p>
+<ul>
+<li><code>'member'</code> the fully qualified identifier of the group</li>
+<li><code>'role'</code> the fully qualified identifier of the group (redundant)</li>
+<li><code>'grantor'</code> the role that granted the membership</li>
+<li><code>'admin_option'</code> whether this member can grant membership in the group to other roles.</li>
+</ul></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Role.members', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Role.members" class="source">
     <pre><code>def members(self):
-    logging.info('Getting members from {}'.format(self._membership_url()))
+    """
+    Return a list of members of this role.  Members are returned as `dict`s
+    with the following keys:
+    * `'member'` the fully qualified identifier of the group
+    * `'role'` the fully qualified identifier of the group (redundant)
+    * `'grantor'` the role that granted the membership
+    * `'admin_option'` whether this member can grant membership in the group to other roles.
+    """
     return self.api.get(self._membership_url()).json()
 </code></pre>
   </div>
@@ -4231,10 +4570,20 @@ def from_roleid(cls, api, roleid):
 
     
   
+    <div class="desc"><p>The inverse of <a href="#conjur.Role.grant_to"><code>grant_to</code></a>.  Removes <code>member</code> from the members of this
+role.</p>
+<p><code>member</code> is a string or object with a <code>role</code> attribute or <code>roleid</code> method,
+    such as a <a href="#conjur.User"><code>User</code></a> or <a href="#conjur.Group"><code>Group</code></a>.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Role.revoke_from', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Role.revoke_from" class="source">
     <pre><code>def revoke_from(self, member):
+    """
+    The inverse of `conjur.Role.grant_to`.  Removes `member` from the members of this
+    role.
+    `member` is a string or object with a `role` attribute or `roleid` method,
+        such as a `conjur.User` or `conjur.Group`.
+    """
     self.api.delete(self._membership_url(member))
 </code></pre>
   </div>
@@ -4394,16 +4743,62 @@ def from_roleid(cls, api, roleid):
       <p id="conjur.Variable" class="name">class <span class="ident">Variable</span></p>
       
   
+    <div class="desc"><p>A <code>Variable</code> represents a versioned secret stored in Conjur.</p>
+<p>Generally you will get an instance of this class by calling <a href="#conjur.API.create_variable"><code>create_variable</code></a>
+or <a href="#conjur.API.variable"><code>variable</code></a>.</p>
+<p>Instances of this class allow you to fetch values of the variable, and store new ones.</p>
+<p>Example:</p>
+<pre><code>&gt;&gt;&gt; # Print the current value of the variable `mysql-password`
+&gt;&gt;&gt; variable = api.variable('mysql-password')
+&gt;&gt;&gt; print("mysql-password is {}".format(variable.value()))
+</code></pre>
+<p>Example:</p>
+<pre><code>&gt;&gt;&gt; # Print all versions of the same variable
+&gt;&gt;&gt; variable = api.variable('mysql-password')
+&gt;&gt;&gt; for i in range(1, variable.version_count + 1): # version numbers are 1 based
+...     print("version {} of 'mysql-password' is {}".format(i, variable.value(i)))
+</code></pre></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Variable', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Variable" class="source">
     <pre><code>class Variable(object):
+    """
+    A `Variable` represents a versioned secret stored in Conjur.
+
+    Generally you will get an instance of this class by calling `conjur.API.create_variable`
+    or `conjur.API.variable`.
+
+    Instances of this class allow you to fetch values of the variable, and store new ones.
+
+    Example:
+
+        >>> # Print the current value of the variable `mysql-password`
+        >>> variable = api.variable('mysql-password')
+        >>> print("mysql-password is {}".format(variable.value()))
+
+    Example:
+
+        >>> # Print all versions of the same variable
+        >>> variable = api.variable('mysql-password')
+        >>> for i in range(1, variable.version_count + 1): # version numbers are 1 based
+        ...     print("version {} of 'mysql-password' is {}".format(i, variable.value(i)))
+
+    """
     def __init__(self, api, id, attrs=None):
         self.id = id
         self.api = api
         self._attrs = attrs
 
     def value(self, version=None):
+        """
+        Retrieve the secret stored in a variable.
+
+        `version` is a *one based* index of the version to be retrieved.
+
+        If no such version exists, a 404 error is raised.
+
+        Returns the value of the variable as a string.
+        """
         url = "%s/variables/%s/value" % (self.api.config.core_url,
                                          urlescape(self.id))
         if version is not None:
@@ -4411,7 +4806,13 @@ def from_roleid(cls, api, roleid):
         return self.api.get(url).text
 
     def add_value(self, value):
-        # Invalidate _attrs since our version count is going to change
+        """
+        Stores a new version of the secret in this variable.
+
+        `value` is a string giving the new value to store.
+
+        This increments the variable's `version_count` member by one.
+        """
         self._attrs = None
         data = {'value': value}
         url = "%s/variables/%s/values" % (self.api.config.core_url,
@@ -4495,11 +4896,18 @@ def from_roleid(cls, api, roleid):
 
     
   
+    <div class="desc"><p>Stores a new version of the secret in this variable.</p>
+<p><code>value</code> is a string giving the new value to store.</p>
+<p>This increments the variable's <code>version_count</code> member by one.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Variable.add_value', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Variable.add_value" class="source">
     <pre><code>def add_value(self, value):
-    # Invalidate _attrs since our version count is going to change
+    """
+    Stores a new version of the secret in this variable.
+    `value` is a string giving the new value to store.
+    This increments the variable's `version_count` member by one.
+    """
     self._attrs = None
     data = {'value': value}
     url = "%s/variables/%s/values" % (self.api.config.core_url,
@@ -4520,10 +4928,20 @@ def from_roleid(cls, api, roleid):
 
     
   
+    <div class="desc"><p>Retrieve the secret stored in a variable.</p>
+<p><code>version</code> is a <em>one based</em> index of the version to be retrieved.</p>
+<p>If no such version exists, a 404 error is raised.</p>
+<p>Returns the value of the variable as a string.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-conjur.Variable.value', this);">Show source &equiv;</a></p>
   <div id="source-conjur.Variable.value" class="source">
     <pre><code>def value(self, version=None):
+    """
+    Retrieve the secret stored in a variable.
+    `version` is a *one based* index of the version to be retrieved.
+    If no such version exists, a 404 error is raised.
+    Returns the value of the variable as a string.
+    """
     url = "%s/variables/%s/value" % (self.api.config.core_url,
                                      urlescape(self.id))
     if version is not None:
