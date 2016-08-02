@@ -20,6 +20,12 @@ Install from `PyPI <https://pypi.python.org/pypi/Conjur>`__
 uninstall it for the above command to work. You can do so with
 ``pip uninstall pypandoc``.
 
+API Documentation
+-----------------
+
+See the `API documentation <https://conjurinc.github.io/api-python>`__
+for details of all classes and methods.
+
 Usage
 -----
 
@@ -113,13 +119,6 @@ Running locally this will be your ``~/.conjurrc`` file.
     from conjur.config import config
 
     config.load('/etc/conjur.conf')
-
-API Methods
-~~~~~~~~~~~
-
-See the `API
-documentation <https://conjurinc.github.io/api-python/conjur>`__ for
-details of all classes and methods.
 
 Variables
 ~~~~~~~~~

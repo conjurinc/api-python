@@ -16,6 +16,12 @@ pip install conjur
 **Note:** If you have the `pandoc` package installed you may need to uninstall it for the above command to work.  You
 can do so with `pip uninstall pypandoc`.
 
+## API Documentation
+
+See the [API documentation](https://conjurinc.github.io/api-python) for details
+of all classes and methods.
+
+
 ## Usage
 
 ### Configuration
@@ -101,11 +107,6 @@ from conjur.config import config
 
 config.load('/etc/conjur.conf')
 ```
-
-
-### API Methods
-
-See the [API documentation](https://conjurinc.github.io/api-python/conjur) for details of all classes and methods.
 
 ### Variables
 
