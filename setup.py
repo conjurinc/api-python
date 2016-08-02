@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 NAME = 'Conjur'
-VERSION = '0.4.2'
+VERSION = '0.4.0'
 
 try:
     import pypandoc
