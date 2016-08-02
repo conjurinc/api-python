@@ -1,13 +1,15 @@
 from setuptools import setup, find_packages
 
 NAME = 'Conjur'
-VERSION = '0.4.3'
+VERSION = '0.4.4'
 
 try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
 except(IOError, ImportError):
+    print("Warning: Unable to convert README.md to rst!")
     long_description = open('README.md').read()
+
 
 setup(
     name=NAME,
