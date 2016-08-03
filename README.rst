@@ -200,3 +200,16 @@ Run tests and linting with:
 ::
 
     ./jenkins.sh
+
+PyPi
+~~~~
+
+To publish to PyPi, you will need to convert this document to
+restructured text using pandoc:
+
+::
+
+    pandoc --from=markdown --to=rst --output=README.rst README.md
+
+Furthermore, you will likely need to have the ``pypandoc`` package
+installed for the markup to appear correctly on the PyPi site.
