@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014 Conjur Inc
+# Copyright (C) 2014-2016 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -25,28 +25,14 @@ For convenience, a "global" `conjur.config.Config` instance is available as
 `conjur.config.config`.  This object is used when a `conjur.api.API` instance
 is created without a config.
 
-Example:
-    ```python
-    from conjur.config import config
+The most important settings are `url`, `account`, and `cert_file`.
 
-    # Set multiple keys using the `update
+  * `url` points the client to your Possum instance.
 
-The most important settings are `appliance_url`, `account`, and `cert_file`.
+  * `account` is an organizational name you want to use.  This value is required.
 
-  * `appliance_url` points the client to your Conjur appliance.  Suppose the hostname of
-    the appliance is `conjur.example.com`.  Then the appliance url is `https://conjur.example.com/api`.
-    Note that the `scheme` **must** be `https`, and the `/api` path is required.
-
-  * `account` is an organizational name chosen when you deploy your conjur appliance.  The CLI command
-     `conjur authn whoami` will show you this value.  This value is required.
-
-  * `cert_file` is the path to a `pem` formated certificate used to make a secure connection to the
-     Conjur appliance.  The CLI command `conjur init -h <conjur hostname>` is the standard way to install
-     such a certificate.  This option is **required** if you are using a self-signed certificate (which is
-     the most common use case).
-
-While endpoints for specific services can also be configured, this is not normally needed
-outside of development work.
+  * `cert_file` is the path to a `pem` formated certificate used to make a secure connection to
+     Possum.  This option is **required** if you are using https with a self-signed certificate.
 """
 
 import os
@@ -136,7 +122,7 @@ class Config(object):
 
     account = _setting('account', 'conjur', 'Conjur account identifier')
 
-    appliance_url = _setting('appliance_url', None, 'URL for Conjur appliance')
+    url = _setting('url', None, 'URL for Possum')
 
     @property
     def verify(self):

@@ -32,8 +32,8 @@ of all classes and methods.
 from conjur.config import config
 
 # Set the conjur appliance url.  This can also be provided
-# by the CONJUR_APPLIANCE_URL environment variable.
-config.appliance_url = 'https://conjur.example.com/api'
+# by the POSSUM_URL environment variable.
+config.url = 'https://possum.example'
 
 # Set the (PEM) certificate file. This is also configurable with the
 # CONJUR_CERT_FILE environment variable.

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014 Conjur Inc
+# Copyright (C) 2014-2016 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -28,14 +28,14 @@ import conjur
 
 @patch.object(requests, 'post')
 def test_authenticate(mock_post):
-    api = conjur.new_from_key("login", "api-key")
-    api.config.authn_url = "https://example.com"
+    api = conjur.new_from_key("alice", "api-key")
+    api.config.url = "http://possum.test"
     mock_post.return_value = mock_response = Mock()
     mock_response.status_code = 200
     mock_response.text = "token token token"
     token = api.authenticate()
     assert token == "token token token"
-    mock_post.assert_called_with("https://example.com/users/login/authenticate",
+    mock_post.assert_called_with("http://possum.test/authn/conjur/alice/authenticate",
                                  "api-key", verify=api.config.verify)
 
 

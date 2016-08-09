@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014 Conjur Inc
+# Copyright (C) 2014-2016 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -84,7 +84,8 @@ class API(object):
             raise ConjurException(
                 "API created without credentials can't authenticate")
 
-        url = "%s/users/%s/authenticate" % (self.config.authn_url,
+        url = "%s/authn/%s/%s/authenticate" % (self.config.url,
+                                            self.config.account,
                                             urlescape(self.login))
 
         self.token = self._request('post', url, self.api_key).text
