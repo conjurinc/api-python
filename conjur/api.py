@@ -22,7 +22,6 @@ import base64
 
 import requests
 
-from conjur.variable import Variable
 from conjur.role import Role
 from conjur.resource import Resource
 from conjur.util import urlescape

@@ -23,7 +23,6 @@ from config import Config
 from api import API
 from resource import Resource
 from role import Role
-from variable import Variable
 from exceptions import ConjurException
 
 from config import config

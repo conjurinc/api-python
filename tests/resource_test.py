@@ -79,3 +79,23 @@ def test_permitted_error_with_role(mock_get):
     mock_get.return_value = Mock(status_code=401)
     with pytest.raises(conjur.ConjurException):
         resource.permitted('fry', bob)
+
+@patch.object(api, 'get')
+def test_get_secret_value(mock_get):
+    mock_get.return_value = resp = Mock()
+    resp.status_code = 200
+    resp.text = 'teh value'
+    assert resource.secret() == 'teh value'
+    mock_get.assert_called_with(
+        '%s/secrets/conjur/food/bacon' % api.config.url
+    )
+
+@patch.object(api, 'post')
+def test_add_secret_value(mock_post):
+    mock_post.return_value = resp = Mock()
+    resp.status_code = 201
+    resource.add_secret('boo')
+    mock_post.assert_called_with(
+        '%s/secrets/conjur/food/bacon' % api.config.url,
+        data='boo',
+    )

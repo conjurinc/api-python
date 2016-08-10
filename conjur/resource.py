@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014 Conjur Inc
+# Copyright (C) 2014-2016 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal inre
@@ -28,8 +28,16 @@ class Resource(object):
     A `Resource` represents an object on which `Role`s can
     be permitted to perform certain actions.
 
-    Generally you will not construct these directly, but call the `conjur.API.role` method
+    Generally you will not construct these directly, but call the `conjur.API.resource` method
     to do so.
+
+    Resources can be used to represent secrets; conventionally resources with
+    `variable` kind are used for this purpose, but this is not enforced.
+
+    In particular, resources of (kind, id) in the form of ('public_key',
+    'username/key_id') are customarily used to represent public keys of a
+    given user, with the keys themselves attached as secrets.
+    (Note public keys aren't secrets per se, but are stored as such for consistency.)
     """
     def __init__(self, api, kind, identifier):
         self.api = api
@@ -137,6 +145,43 @@ class Resource(object):
             self.api.config.authz_url,
             self.api.config.account,
             'resources',
+            self.kind,
+            self.identifier
+        ])
+
+    def secret(self, version=None):
+        """
+        Retrieve the secret attached to this resource.
+
+        `version` is a *one based* index of the version to be retrieved.
+
+        If no such version exists, a 404 error is raised.
+
+        Returns the value of the secret as a string.
+        """
+        url = self.secret_url()
+        if version is not None:
+            url = "%s?version=%s" % (url, version)
+        return self.api.get(url).text
+
+    def add_secret(self, value):
+        """
+        Stores a new version of the secret in this resource.
+
+        `value` is a string giving the new value to store.
+        """
+        self._attrs = None
+        data = value
+        self.api.post(self.secret_url(), data=data)
+
+    def secret_url(self):
+        """
+        Internal method to return a url for the secrets of this object as a string.
+        """
+        return "/".join([
+            self.api.config.url,
+            'secrets',
+            self.api.config.account,
             self.kind,
             self.identifier
         ])
