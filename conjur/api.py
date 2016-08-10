@@ -23,11 +23,7 @@ import base64
 import requests
 
 from conjur.variable import Variable
-from conjur.user import User
 from conjur.role import Role
-from conjur.group import Group
-from conjur.layer import Layer
-from conjur.host import Host
 from conjur.resource import Resource
 from conjur.util import urlescape
 from conjur.exceptions import ConjurException
@@ -317,7 +313,7 @@ class API(object):
 
         The user is *not* created by this method, and may in fact not exist.
         """
-        return User(self, login)
+        return Role(self, 'user', login)
 
     def create_user(self, login, password=None):
         """
