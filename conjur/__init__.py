@@ -18,6 +18,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import os
+import requests
 
 from config import Config
 from api import API
@@ -85,7 +86,7 @@ def new_from_key(login, api_key, configuration=None):
 
     `login` is the identity of the Conjur user or host to authenticate as.
 
-    `api_key` is the api key *or* password to use when authenticating.
+    `api_key` is the api key to use when authenticating.
 
     `configuration` is a `conjur.Config` instance for the api.  If not given the global
         `Config` instance (`conjur.config`) will be used.
@@ -93,6 +94,25 @@ def new_from_key(login, api_key, configuration=None):
 
     return API(credentials=(login, api_key), config=_config(configuration))
 
+def new_from_password(login, password, configuration=None):
+    """
+    Create a `conjur.API` instance that will authenticate immediately (to
+    exchange the password for the API key) as the identity given by `login`
+    and `api_key`.
+
+    `login` is the identity of the Conjur user or host to authenticate as.
+
+    `password` is the password to use when authenticating.
+
+    `configuration` is a `conjur.Config` instance for the api.  If not given the global
+        `Config` instance (`conjur.config`) will be used. Note it needs to be
+        set up correctly before using this function.
+    """
+    configuration = _config(configuration)
+    url = "%s/authn/%s/login" % (configuration.url, configuration.account)
+    response = requests.get(url, auth=(login, password), verify=configuration.verify)
+    api_key = response.text
+    return new_from_key(login, api_key, configuration)
 
 def new_from_token(token, configuration=None):
     """

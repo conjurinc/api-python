@@ -38,6 +38,27 @@ def test_authenticate(mock_post):
     mock_post.assert_called_with("http://possum.test/authn/conjur/alice/authenticate",
                                  "api-key", verify=api.config.verify)
 
+@patch.object(requests, 'post')
+@patch.object(requests, 'get')
+def test_authenticate_password(mock_get, mock_post):
+    mock_get.return_value = mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.text = "api-key"
+
+    mock_post.return_value = mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.text = "token token token"
+
+    conjur.config.url = "http://possum.test"
+    api = conjur.new_from_password("alice", "secret password")
+    token = api.authenticate()
+    assert token == "token token token"
+
+    mock_get.assert_called_with("http://possum.test/authn/conjur/login",
+                                auth=("alice", "secret password"),
+                                verify=api.config.verify)
+    mock_post.assert_called_with("http://possum.test/authn/conjur/alice/authenticate",
+                                 "api-key", verify=api.config.verify)
 
 @patch.object(requests, 'post')
 def test_authenticate_with_cached_token(mock_post):
