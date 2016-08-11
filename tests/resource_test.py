@@ -37,7 +37,7 @@ def test_permitted_with_role(mock_get):
     assert resource.permitted('fry', bob)
 
     mock_get.assert_called_with(
-        'https://example.com/api/authz/conjur/roles/user/bob',
+        'http://possum.test/roles/conjur/user/bob',
         params={'privilege': 'fry', 'check': 'true',
                 'resource_id': 'conjur:food:bacon'},
         check_errors=False
@@ -49,7 +49,7 @@ def test_permitted_self_role(mock_get):
     mock_get.return_value = Mock(status_code=204)
     assert resource.permitted('fry')
     mock_get.assert_called_with(
-        'https://example.com/api/authz/conjur/resources/food/bacon',  # noqa E501 (line too long)
+        'http://possum.test/resources/conjur/food/bacon',
         params={'privilege': 'fry', 'check': 'true'},
         check_errors=False
     )

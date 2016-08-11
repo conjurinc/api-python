@@ -173,9 +173,9 @@ class Role(object):
         return url
 
     def _url(self, *args):
-        return "/".join([self.api.config.authz_url,
-                         self.api.config.account,
+        return "/".join([self.api.config.url,
                          'roles',
+                         self.api.config.account,
                          self.kind,
                          self.identifier] + list(args))
 

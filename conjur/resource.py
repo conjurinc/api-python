@@ -142,9 +142,9 @@ class Resource(object):
         Internal method to return a url for this object as a string.
         """
         return "/".join([
-            self.api.config.authz_url,
-            self.api.config.account,
+            self.api.config.url,
             'resources',
+            self.api.config.account,
             self.kind,
             self.identifier
         ])

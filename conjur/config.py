@@ -53,16 +53,6 @@ def _setting(name, default=_DEFAULT, doc=''):
     return property(fget, fset, doc=doc)
 
 
-def _service_url(name, per_account=True, doc=''):
-    def fget(self):
-        return self.service_url(name, per_account)
-
-    def fset(self, value):
-        self.set(name + '_url', value)
-
-    return property(fget=fget, fset=fset, doc=doc)
-
-
 class Config(object):
     def __init__(self, **kwargs):
         self._config = {}
@@ -80,18 +70,6 @@ class Config(object):
         for d in dicts + (kwargs, ):
             self._config.update(d)
 
-    def service_url(self, service, per_account=True):
-        key = '%s_url' % service
-        if key in self._config:
-            return self._config[key]
-        if self.appliance_url is not None:
-            url_parts = [self.appliance_url]
-            if service != "core":
-                url_parts.append(service)
-            return "/".join(url_parts)
-        else:
-            raise ConfigException('Missing appliance_url')
-
     def get(self, key, default=_DEFAULT):
         if key in self._config:
             return self._config[key]
@@ -106,15 +84,6 @@ class Config(object):
 
     def set(self, key, value):
         self._config[key] = value
-
-    authn_url = _service_url('authn', doc='URL for the authn service')
-    core_url = _service_url('core', doc='URL for the core service')
-    authz_url = _service_url('authz',
-                             per_account=False,
-                             doc='URL for the authz service')
-
-    pubkeys_url = _service_url('pubkeys', doc='URL for the pubkeys service')
-
 
     cert_file = _setting('cert_file', None,
                          "Path to certificate to verify ssl requests \
