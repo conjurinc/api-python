@@ -51,45 +51,6 @@ class Resource(object):
         """
         return ":".join([self.api.config.account, self.kind, self.identifier])
 
-    def permit(self, role, privilege, grant_option=False):
-        """
-        Permit `role` to perform `privilege` on this resource.
-
-        `role` is a qualified conjur identifier (e.g. `'user:alice`') or an object
-            with a `role` attribute or `roleid` method, such as a `conjur.User` or
-            `conjur.Group`.
-
-        If `grant_option` is True, the role will be able to grant this
-        permission to other resources.
-
-        You must own the resource or have the permission with `grant_option`
-        to call this method.
-        """
-        data = {}
-        params = {
-            'permit': 'true',
-            'privilege': privilege,
-            'role': authzid(role, 'role')
-        }
-        if grant_option:
-            data['grant_option'] = 'true'
-
-        self.api.post(self.url(), data=data, params=params)
-
-    def deny(self, role, privilege):
-        """
-        Deny `role` permission to perform `privilege` on this resource.
-
-        You must own the resource or have the permission with `grant_option`
-        on it to call this method.
-        """
-        params = {
-            'permit': 'true',
-            'privilege': privilege,
-            'role': authzid(role)
-        }
-
-        self.api.post(self.url(), params=params)
 
     def permitted(self, privilege, role=None):
         """
