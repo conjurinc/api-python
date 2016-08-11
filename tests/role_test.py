@@ -24,6 +24,7 @@ config = Config()
 api = new_from_key('login', 'pass', config)
 config.account = 'the-account'
 config.appliance_url = 'https://example.com/api'
+config.url = 'http://possum.test'
 
 
 def test_roleid():
@@ -104,4 +105,14 @@ def test_role_grant_to_user(mock_put):
             'the-account%3Auser%3Asomebody'
         ),
         data={}
+    )
+
+@patch.object(api, 'get')
+def test_public_keys(mock_get):
+    response = "a b key1\na b key2"
+    mock_get.return_value = Mock(text=response)
+    user = api.role('user', 'somebody')
+    assert user.public_keys() == response
+    mock_get.assert_called_with(
+        'http://possum.test/public_keys/the-account/user/somebody'
     )

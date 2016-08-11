@@ -178,3 +178,18 @@ class Role(object):
                          'roles',
                          self.kind,
                          self.identifier] + list(args))
+
+    def _public_keys_url(self):
+        return '/'.join([
+            self.api.config.url,
+            'public_keys',
+            self.api.config.account,
+            self.kind,
+            self.identifier
+        ])
+
+    def public_keys(self):
+        """
+        Returns all SSH public keys for this role, if any, as a newline delimited string.
+        """
+        return self.api.get(self._public_keys_url()).text
