@@ -128,31 +128,6 @@ class Role(object):
         else:
             raise ConjurException("Request failed: %d" % response.status_code)
 
-    def grant_to(self, member, admin=None):
-        """
-        Grant this role to `member`.
-
-        `member` is a string or object with a `role` attribute or `roleid` method,
-            such as a `conjur.User` or `conjur.Group`.
-
-        `admin` whether the member can grant this role to others.
-
-        """
-        data = {}
-        if admin is not None:
-            data['admin'] = 'true' if admin else 'false'
-        self.api.put(self._membership_url(member), data=data)
-
-    def revoke_from(self, member):
-        """
-        The inverse of `conjur.Role.grant_to`.  Removes `member` from the members of this
-        role.
-
-        `member` is a string or object with a `role` attribute or `roleid` method,
-            such as a `conjur.User` or `conjur.Group`.
-        """
-        self.api.delete(self._membership_url(member))
-
     def members(self):
         """
         Return a list of members of this role.  Members are returned as `dict`s
