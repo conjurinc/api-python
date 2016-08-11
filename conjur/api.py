@@ -33,7 +33,7 @@ class API(object):
         Creates an API instance configured with the given credentials or token
         and config.
 
-        Generally you should use `conjur.new_from_key`, `conjur.new_from_netrc`,
+        Generally you should use `conjur.new_from_key`, `conjur.new_from_password`,
         or `conjur.new_from_token` to get an API instance instead of calling
         this constructor directly.
 

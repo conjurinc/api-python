@@ -53,32 +53,6 @@ def configure(**kwargs):
     config.update(**kwargs)
     return config
 
-
-def new_from_netrc(netrc_file=None, configuration=None):
-    """
-    Create a `conjur.API` instance using an identity loaded from netrc.  This method
-    uses the identity stored for the host `config.authn_url`.
-
-    `netrc_file` is an alternative path to the netrc formatted file.  Defaults
-    to ~/.netrc on unixy systems.
-
-    `configuration` is a `conjur.Config` instance used to determine the host
-    in the netrc file, and also passed to the `conjur.new_from_key` method to
-    create the API instance using the identity.
-    """
-    import netrc
-
-    configuration = _config(configuration)
-    auth = netrc.netrc(netrc_file).authenticators(configuration.authn_url)
-    if auth is None:
-        raise ValueError("No authenticators found for authn_url '%s' in %s" % (
-            configuration.authn_url,
-            (netrc_file or '~/.netrc')
-        ))
-    login, _, api_key = auth
-    return new_from_key(login, api_key, configuration)
-
-
 def new_from_key(login, api_key, configuration=None):
     """
     Create a `conjur.API` instance that will authenticate on demand as the identity given
