@@ -23,7 +23,6 @@ from conjur import Config, new_from_key
 config = Config()
 api = new_from_key('login', 'pass', config)
 config.account = 'the-account'
-config.appliance_url = 'https://example.com/api'
 config.url = 'http://possum.test'
 
 
