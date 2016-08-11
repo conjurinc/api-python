@@ -96,7 +96,7 @@ def test_role_members(mock_get):
 @patch.object(api, 'put')
 def test_role_grant_to_user(mock_put):
     role = api.role('somekind', 'admins')
-    user = api.user('somebody')
+    user = api.role('user', 'somebody')
     role.grant_to(user)
     mock_put.assert_called_with(
         '{0}/the-account/roles/somekind/admins?members&member={1}'.format(

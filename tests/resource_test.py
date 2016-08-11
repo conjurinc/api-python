@@ -24,7 +24,7 @@ import pytest
 
 api = conjur.new_from_key('admin', 'secret')
 resource = api.resource('food', 'bacon')
-bob = api.user('bob')
+bob = api.role('user', 'bob')
 
 
 def test_resource_id():
