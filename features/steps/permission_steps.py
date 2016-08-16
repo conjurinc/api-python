@@ -11,7 +11,9 @@ def check_permission_current_impl(api, privilege, resource, can):
     resource = api.resource(*resource.split(':'))
     assert resource.permitted(privilege) == can
 
-
+@given(u'the preloaded policy')
+def preloaded_policy(context):
+    pass
 
 @then('"{role}" can "{privilege}" "{resource}"')
 def role_can_resource(context, role, privilege, resource):
