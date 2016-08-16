@@ -36,19 +36,16 @@ def conjur_env(name, default=None):
 def api():
     config = Config(
         account=conjur_env('account', 'cucumber'),
-        appliance_url=conjur_env('appliance_url', 'https://conjur/api'),
+        url=conjur_env('url', 'http://possum.test'),
         cert_file=conjur_env('cert_file', '/opt/conjur/etc/ssl/conjur.pem')
     )
 
     print("config={}".format(repr(config._config)))
 
-    if not os.path.exists(config.cert_file):
-        raise Exception("Missing cert file at {}".format(config.cert_file))
+    login = 'alice'
+    password = 'secret'
 
-    login = conjur_env('authn_login', 'admin')
-    password = conjur_env('admin_password', 'secret')
-
-    return conjur.new_from_key(login, password, config)
+    return conjur.new_from_password(login, password, config)
 
 
 def random_string(prefix, size=8):
