@@ -6,6 +6,5 @@ WORKDIR /app
 COPY requirements* /app/
 RUN pip install -r requirements.txt -r requirements_dev.txt
 
-COPY . /app
-
 VOLUME /artifacts
+VOLUME /app

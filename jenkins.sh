@@ -1,46 +1,69 @@
 #!/bin/bash -ex
 
-function cleanup {
-   docker rm -f $(cat conjur-cid)
-   rm conjur-cid
-}
+CONJUR_VERSION=${CONJUR_VERSION:-"latest"}
+DOCKER_IMAGE=${DOCKER_IMAGE:-"conjurinc/possum:$CONJUR_VERSION"}
+NOKILL=${NOKILL:-"1"}
+PULL=${PULL:-"0"}
+CMD_PREFIX=""
 
-if [ -z "$KEEP" ] ; then
-    trap cleanup EXIT
+function finish {
+  # Stop and remove the Conjur container if env var NOKILL != "1"
+  if [ "$NOKILL" != "1" ]; then
+      docker rm -f ${pg} || true
+      docker rm -f ${cid} || true
+  fi
+}
+trap finish EXIT
+
+job=$JOB_NAME
+if [ -z $job ]; then
+       job=sandbox
 fi
 
-APPLIANCE_VERSION=4.8-stable
+tag=api-python:$job
 
+docker build -t api-python:$job .
 
-rm -rf artifacts
+rm -rf report
+mkdir report
 
-docker build -t api-python .
+if [ "$PULL" == "1" ]; then
+    docker pull $DOCKER_IMAGE
+fi
 
-docker run -d \
-  --cidfile=conjur-cid \
-  --privileged \
-  -p 443:443 \
-  -v ${PWD}/ci:/ci \
-  --add-host=conjur:127.0.0.1 \
-  registry.tld/conjur-appliance-cuke-master:$APPLIANCE_VERSION
+if [ ! -f data_key ]; then
+    echo "Generating data key"
+    docker run --rm ${DOCKER_IMAGE} data-key generate > data_key
+fi
 
-docker exec $(cat conjur-cid) /opt/conjur/evoke/bin/wait_for_conjur
+export POSSUM_DATA_KEY="$(cat data_key)"
 
+pg=$(docker run -d postgres:9.3)
 
-mkdir -p ${PWD}/certs
+# Launch and configure a Conjur container
+cid=$(docker run -d \
+    -e DATABASE_URL=postgresql://postgres@pg/postgres \
+    -e POSSUM_DATA_KEY \
+    -e POSSUM_ADMIN_PASSWORD=secret \
+    -e CONJUR_PASSWORD_ALICE=secret \
+    -v $PWD/features/policy:/run/possum/policy/ \
+    --link ${pg}:pg \
+    ${DOCKER_IMAGE} \
+    server -a cucumber -f /run/possum/policy/conjur.yml)
+>&2 echo "Container id:"
+>&2 echo $cid
 
-docker cp $(cat conjur-cid):/opt/conjur/etc/ssl/cuke-master.pem ${PWD}/certs
-
-docker exec $(cat conjur-cid) /ci/setup.sh
+sleep 10
 
 docker run --rm -Pi \
-  -v ${PWD}/certs:/certs \
   -v ${PWD}/artifacts:/artifacts \
-  --link $(cat conjur-cid):conjur \
-api-python sh <<COMMANDS
-find . -name '*.pyc' -delete
+  -v ${PWD}:/app \
+  --link $cid:possum.test \
+  $tag sh <<COMMANDS
+umask 000
+set -x
 
-export CONJUR_CERT_FILE=/certs/cuke-master.pem
+find . -name '*.pyc' -delete
 
 py.test --cov conjur --junitxml=pytest.xml --instafail
 

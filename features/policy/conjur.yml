@@ -1,0 +1,23 @@
+---
+- !user test
+
+- !webservice the-service
+
+- !user
+  id: alice
+  owner: !user test
+  public_keys:
+  - ssh-rsa AAAAB3NzHhIqxF alice@home
+
+- !group everyone
+
+- !variable db-password
+
+- !grant
+  role: !group everyone
+  member: !user alice
+
+- !permit
+  role: !user alice
+  resource: !webservice the-service
+  privilege: [update, execute]
