@@ -3,7 +3,7 @@
 CONJUR_VERSION=${CONJUR_VERSION:-"latest"}
 DOCKER_IMAGE=${DOCKER_IMAGE:-"conjurinc/possum:$CONJUR_VERSION"}
 NOKILL=${NOKILL:-"1"}
-PULL=${PULL:-"1"}
+PULL=${PULL:-"0"}
 CMD_PREFIX=""
 
 function finish {
