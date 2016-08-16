@@ -30,14 +30,30 @@ def test_roleid():
     role = api.role('some-kind', 'the-id')
     assert role.roleid == 'the-account:some-kind:the-id'
 
+role_info = {
+    u'id': u'cucumber:group:everyone',
+    u'members': [
+        {
+            u'member': u'cucumber:user:admin',
+            u'role': u'cucumber:group:everyone',
+            u'grantor': u'cucumber:group:everyone',
+            u'admin_option': True
+        }, {
+            u'member': u'cucumber:user:alice',
+            u'role': u'cucumber:group:everyone',
+            u'grantor': u'cucumber:group:everyone',
+            u'admin_option': False
+        }
+    ]
+}
+
 @patch.object(api, 'get')
 def test_role_members(mock_get):
-    members = ['foo', 'bar']
-    mock_get.return_value = Mock(json=lambda: members)
+    mock_get.return_value = Mock(json=lambda: role_info)
     role = api.role('blah', 'boo')
-    assert role.members() == members
+    assert role.members() == role_info['members']
     mock_get.assert_called_with(
-        'http://possum.test/roles/the-account/blah/boo?members'
+        'http://possum.test/roles/the-account/blah/boo'
     )
 @patch.object(api, 'get')
 def test_public_keys(mock_get):

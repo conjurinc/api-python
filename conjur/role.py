@@ -128,24 +128,27 @@ class Role(object):
         else:
             raise ConjurException("Request failed: %d" % response.status_code)
 
+    def info(self):
+        """
+        Return role information. This will be a `dict` with the following keys:
+
+        * `'created_at'` timestamp of role creation (eg. last refresh of the
+            policy that creates it)
+        * `'id'` fully qualified role id
+        * `'members'` members of the role (see `members` for details)
+        """
+        return self.api.get(self._url()).json()
+
     def members(self):
         """
         Return a list of members of this role.  Members are returned as `dict`s
         with the following keys:
 
-        * `'member'` the fully qualified identifier of the group
+        * `'member'` the fully qualified identifier of the member
         * `'role'` the fully qualified identifier of the group (redundant)
-        * `'grantor'` the role that granted the membership
         * `'admin_option'` whether this member can grant membership in the group to other roles.
         """
-        return self.api.get(self._membership_url()).json()
-
-    def _membership_url(self, member=None):
-        url = self._url() + "?members"
-        if member is not None:
-            memberid = authzid(member, 'role')
-            url += "&member=" + urlescape(memberid)
-        return url
+        return self.info()['members']
 
     def _url(self, *args):
         return "/".join([self.api.config.url,
