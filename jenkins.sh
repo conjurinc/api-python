@@ -56,7 +56,6 @@ cid=$(docker run -d \
 sleep 10
 
 docker run --rm -Pi \
-  -v ${PWD}/artifacts:/artifacts \
   -v ${PWD}:/app \
   --link $cid:possum.test \
   $tag sh <<COMMANDS
