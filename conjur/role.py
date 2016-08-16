@@ -116,7 +116,7 @@ class Role(object):
         """
         params = {
             'check': 'true',
-            'resource_id': authzid(resource, 'resource'),
+            'resource': authzid(resource, 'resource'),
             'privilege': privilege
         }
         response = self.api.get(self._url(), params=params,

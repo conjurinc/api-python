@@ -39,7 +39,7 @@ def test_permitted_with_role(mock_get):
     mock_get.assert_called_with(
         'http://possum.test/roles/conjur/user/bob',
         params={'privilege': 'fry', 'check': 'true',
-                'resource_id': 'conjur:food:bacon'},
+                'resource': 'conjur:food:bacon'},
         check_errors=False
     )
 
