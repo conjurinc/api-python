@@ -53,8 +53,6 @@ cid=$(docker run -d \
 >&2 echo "Container id:"
 >&2 echo $cid
 
-sleep 10
-
 docker run --rm -Pi \
   -v ${PWD}:/app \
   --link $cid:possum.test \
@@ -65,6 +63,19 @@ set -x
 find . -name '*.pyc' -delete
 
 py.test --cov conjur --junitxml=pytest.xml --instafail
+
+# wait for possum to be up
+python -c "
+import requests; import time
+for _ in range(30):
+  try:
+    requests.get('http://possum.test', timeout=30)
+    exit(0)
+  except requests.exceptions.ConnectionError:
+    time.sleep(1)
+
+exit(1)
+"
 
 # Runs cukes with coverage
 coverage run --source='conjur/' -a -m behave --junit \
