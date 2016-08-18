@@ -7,3 +7,4 @@ COPY requirements* /app/
 RUN pip install -r requirements.txt -r requirements_dev.txt
 
 VOLUME /app
+VOLUME /artifacts

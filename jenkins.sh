@@ -55,6 +55,7 @@ cid=$(docker run -d \
 
 docker run --rm -Pi \
   -v ${PWD}:/app \
+  -v ${PWD}/artifacts:/artifacts \
   --link $cid:possum.test \
   $tag sh <<COMMANDS
 umask 000
