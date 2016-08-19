@@ -85,6 +85,8 @@ def new_from_password(login, password, configuration=None):
     configuration = _config(configuration)
     url = "%s/authn/%s/login" % (configuration.url, configuration.account)
     response = requests.get(url, auth=(login, password), verify=configuration.verify)
+    if response.status_code != 200:
+        raise ConjurException("Authentication error: {} {}".format(response.status_code, response.reason))
     api_key = response.text
     return new_from_key(login, api_key, configuration)
 

@@ -22,9 +22,9 @@ import base64
 
 from mock import patch, Mock
 import requests
+import pytest
 
 import conjur
-
 
 @patch.object(requests, 'post')
 def test_authenticate(mock_post):
@@ -60,12 +60,23 @@ def test_authenticate_password(mock_get, mock_post):
     mock_post.assert_called_with("http://possum.test/authn/conjur/alice/authenticate",
                                  "api-key", verify=api.config.verify)
 
+@patch.object(requests, 'get')
+def test_authenticate_wrong_password(mock_get):
+    mock_get.return_value = mock_response = Mock()
+    mock_response.status_code = 401
+
+    with pytest.raises(conjur.exceptions.ConjurException):
+        conjur.new_from_password("alice", "bad password")
+
+    mock_get.assert_called_with("http://possum.test/authn/conjur/login",
+                                auth=("alice", "bad password"),
+                                verify=conjur.config.verify)
+
 @patch.object(requests, 'post')
 def test_authenticate_with_cached_token(mock_post):
     api = conjur.new_from_token("token token")
     assert api.authenticate() == "token token"
     mock_post.assert_not_called()
-
 
 def test_auth_header():
     api = conjur.new_from_token("the token")
