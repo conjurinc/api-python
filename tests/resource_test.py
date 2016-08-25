@@ -95,7 +95,18 @@ def test_get_secret_value(mock_get):
     resp.text = 'teh value'
     assert resource.secret() == 'teh value'
     mock_get.assert_called_with(
-        '%s/secrets/conjur/food/bacon' % api.config.url
+        '%s/secrets/conjur/food/bacon' % api.config.url,
+        check_errors = False
+    )
+
+@patch.object(api, 'get')
+def test_get_no_secret_value(mock_get):
+    mock_get.return_value = resp = Mock()
+    resp.status_code = 404
+    assert resource.secret() == None
+    mock_get.assert_called_with(
+        '%s/secrets/conjur/food/bacon' % api.config.url,
+        check_errors = False
     )
 
 @patch.object(api, 'post')

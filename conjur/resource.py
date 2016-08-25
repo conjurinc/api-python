@@ -120,14 +120,20 @@ class Resource(object):
 
         `version` is a *one based* index of the version to be retrieved.
 
-        If no such version exists, a 404 error is raised.
+        If no such version exists, None is returned.
 
         Returns the value of the secret as a string.
         """
         url = self.secret_url()
         if version is not None:
             url = "%s?version=%s" % (url, version)
-        return self.api.get(url).text
+        res = self.api.get(url, check_errors = False)
+        if res.status_code < 300:
+            return res.text
+        elif res.status_code == 404:
+            return None
+        else:
+            raise ConjurException("Request failed: %d" % res.status_code)
 
     def add_secret(self, value):
         """
