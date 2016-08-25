@@ -18,7 +18,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from conjur.util import authzid
+from conjur.util import authzid, split_id
 from conjur.role import Role
 from conjur.exceptions import ConjurException
 
@@ -39,17 +39,21 @@ class Resource(object):
     given user, with the keys themselves attached as secrets.
     (Note public keys aren't secrets per se, but are stored as such for consistency.)
     """
-    def __init__(self, api, kind, identifier):
+    def __init__(self, api, account=None, kind=None, id=None):
         self.api = api
-        self.kind = kind
-        self.identifier = identifier
+        [self.account, self.kind, self.identifier] = split_id(id)
+        self.account = self.account or account or api.config.account
+        self.kind = self.kind or kind
+        assert self.account and (not account or self.account == account)
+        assert self.kind and (not kind or self.kind == kind)
+        assert self.identifier
 
     @property
     def resourceid(self):
         """
         The fully qualified resource id as a string, like `'the-account:variable:db-password`.
         """
-        return ":".join([self.api.config.account, self.kind, self.identifier])
+        return ":".join([self.account, self.kind, self.identifier])
 
 
     def permitted(self, privilege, role=None):
@@ -105,7 +109,7 @@ class Resource(object):
         return "/".join([
             self.api.config.url,
             'resources',
-            self.api.config.account,
+            self.account,
             self.kind,
             self.identifier
         ])
@@ -142,7 +146,7 @@ class Resource(object):
         return "/".join([
             self.api.config.url,
             'secrets',
-            self.api.config.account,
+            self.account,
             self.kind,
             self.identifier
         ])

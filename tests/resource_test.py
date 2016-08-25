@@ -44,6 +44,11 @@ def test_permitted_with_role(mock_get):
     )
 
 
+def test_fq_resource():
+    res = api.resource_qualified('foo:bar:baz')
+    assert res.url() == 'http://possum.test/resources/foo/bar/baz'
+
+
 @patch.object(api, 'get')
 def test_permitted_self_role(mock_get):
     mock_get.return_value = Mock(status_code=204)
@@ -99,3 +104,27 @@ def test_add_secret_value(mock_post):
         '%s/secrets/conjur/food/bacon' % api.config.url,
         data='boo',
     )
+
+
+@patch.object(api, 'get')
+def test_resource_listing(mock_get):
+    resources = ['conjur:foo:bar', 'conjur:baz:bar']
+    mock_get.return_value = resp = Mock(
+        json=lambda: [{"id": r} for r in resources],
+        status_code=200
+    )
+    resources_list = api.resources()
+    assert set(r.resourceid for r in resources_list) == set(resources)
+    mock_get.assert_called_with('http://possum.test/resources/conjur')
+
+
+@patch.object(api, 'get')
+def test_resource_listing_filtered(mock_get):
+    resources = ['conjur:foo:bar']
+    mock_get.return_value = resp = Mock(
+        json=lambda: [{"id": r} for r in resources],
+        status_code=200
+    )
+    resources_list = api.resources(kind='foo')
+    assert set(r.resourceid for r in resources_list) == set(resources)
+    mock_get.assert_called_with('http://possum.test/resources/conjur/foo')

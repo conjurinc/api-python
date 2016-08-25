@@ -39,3 +39,10 @@ def authzid(obj, kind, with_account=True):
         if hasattr(obj, attr):
             return authzid(getattr(obj, attr), kind)
     raise TypeError("Can't get {0}id from {1}".format(kind, obj))
+
+def split_id(id):
+    """
+    Return id split into [account, kind, id], any of which might be None.
+    """
+    pieces = id.split(':', 2)
+    return [None] * (3 - len(pieces)) + pieces

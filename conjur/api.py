@@ -219,4 +219,27 @@ class API(object):
         get the resource for a user variable named db_password, you would call
         `api.resource('variable', 'db_password')`.
         """
-        return Resource(self, kind, identifier)
+        return Resource(self, kind=kind, id=identifier)
+
+    def resource_qualified(self, qualified_identifier):
+        """
+        Return a `conjur.Resource` corresponding to the given qualified identifier.
+        """
+        return Resource(self, id=qualified_identifier)
+
+    def resources(self, kind=None):
+        """
+        Return a list of all `conjur.Resources` from the account, optionally filtered by kind.
+        """
+        resources = self.get(self._resources_url(kind=kind)).json()
+        return [self.resource_qualified(r["id"]) for r in resources]
+
+    def _resources_url(self, kind=None):
+        pieces = [
+            self.config.url,
+            'resources',
+            self.config.account,
+        ]
+        if kind:
+            pieces += [kind]
+        return '/'.join(pieces)
