@@ -48,6 +48,9 @@ def test_fq_resource():
     res = api.resource_qualified('foo:bar:baz')
     assert res.url() == 'http://possum.test/resources/foo/bar/baz'
 
+def test_role_of_resource():
+    res = api.resource_qualified('foo:bar:baz')
+    assert res.role().roleid == 'foo:bar:baz'
 
 @patch.object(api, 'get')
 def test_permitted_self_role(mock_get):

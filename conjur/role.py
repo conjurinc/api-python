@@ -148,3 +148,11 @@ class Role(object):
         Returns all SSH public keys for this role, if any, as a newline delimited string.
         """
         return self.api.get(self._public_keys_url()).text.strip()
+
+    def resource(self):
+        """
+        Return the corresponding resource (ie. with the same id).
+        Note not every role will have one, so the
+        returned object may refer to a nonexistent resource.
+        """
+        return self.api.resource_qualified(self.roleid)

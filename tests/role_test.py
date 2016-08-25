@@ -36,6 +36,10 @@ def test_role_qualified():
     assert role.url() == 'http://possum.test/roles/foo/bar/baz'
 
 
+def test_resource_of_role():
+    role = api.role_qualified('foo:bar:baz')
+    assert role.resource().resourceid == 'foo:bar:baz'
+
 role_info = {
     u'id': u'cucumber:group:everyone',
     u'members': [

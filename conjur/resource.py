@@ -150,3 +150,11 @@ class Resource(object):
             self.kind,
             self.identifier
         ])
+
+    def role(self):
+        """
+        Return the corresponding role (ie. with the same id).
+        Note not every resource will have one, so the
+        returned object may refer to a nonexistent role.
+        """
+        return self.api.role_qualified(self.resourceid)
