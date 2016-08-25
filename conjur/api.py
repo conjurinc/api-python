@@ -204,7 +204,13 @@ class API(object):
         `identifier` should be the *unqualified* Conjur id.  For example, to
         get the role for a user named bub, you would call `api.role('user', 'bub')`.
         """
-        return Role(self, kind, identifier)
+        return Role(self, kind=kind, id=identifier)
+
+    def role_qualified(self, qualified_identifier):
+        """
+        Return a `conjur.Role` corresponding to the given qualified identifier.
+        """
+        return Role(self, id=qualified_identifier)
 
     def resource(self, kind, identifier):
         """

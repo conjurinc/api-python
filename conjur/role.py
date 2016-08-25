@@ -18,7 +18,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from conjur.util import urlescape, authzid
+from conjur.util import urlescape, authzid, split_id
 from conjur.exceptions import ConjurException
 import logging
 
@@ -38,34 +38,14 @@ class Role(object):
     `conjur.User` and `conjur.Group` objects have `role` members that reference the role corresponding
     to that Conjur asset.
     """
-    def __init__(self, api, kind, identifier):
-        """
-        Create a role to represent the Conjur role with id `<kind>:<identifier>`.  For
-        example, to represent the role associated with a user named bob,
-
-            role = Role(api, 'user', 'bob')
-
-        `api` must be a `conjur.API` instance, used to implement this classes interactions with Conjur
-
-        `kind` is a string giving the role kind
-
-        `identifier` is the unqualified identifier of the role.
-        """
-
+    def __init__(self, api, account=None, kind=None, id=None):
         self.api = api
-        """
-        The `conjur.API` instance used to implement our methods.
-        """
-
-        self.kind = kind
-        """
-        The `kind` portion of the role's id.
-        """
-
-        self.identifier = identifier
-        """
-        The `identifier` portion of the role's id.
-        """
+        [self.account, self.kind, self.identifier] = split_id(id)
+        self.account = self.account or account or api.config.account
+        self.kind = self.kind or kind
+        assert self.account and (not account or self.account == account)
+        assert self.kind and (not kind or self.kind == kind)
+        assert self.identifier
 
     @classmethod
     def from_roleid(cls, api, roleid):
@@ -77,10 +57,7 @@ class Role(object):
         `roleid` is a fully or partially qualified Conjur identifier, for example,
         `"the-account:service:some-service"` or `"service:some-service"` resolve to the same role.
         """
-        tokens = authzid(roleid, 'role').split(':', 3)
-        if len(tokens) == 3:
-            tokens.pop(0)
-        return cls(api, *tokens)
+        return cls(api, id=authzid(roleid, 'role'))
 
     @property
     def roleid(self):
@@ -94,7 +71,7 @@ class Role(object):
             'the-account:user:bob'
 
          """
-        return ':'.join([self.api.config.account, self.kind, self.identifier])
+        return ':'.join([self.account, self.kind, self.identifier])
 
     def is_permitted(self, resource, privilege):
         """
@@ -119,7 +96,7 @@ class Role(object):
             'resource': authzid(resource, 'resource'),
             'privilege': privilege
         }
-        response = self.api.get(self._url(), params=params,
+        response = self.api.get(self.url(), params=params,
                                 check_errors=False)
         if response.status_code == 204:
             return True
@@ -137,7 +114,7 @@ class Role(object):
         * `'id'` fully qualified role id
         * `'members'` members of the role (see `members` for details)
         """
-        return self.api.get(self._url()).json()
+        return self.api.get(self.url()).json()
 
     def members(self):
         """
@@ -150,10 +127,10 @@ class Role(object):
         """
         return self.info()['members']
 
-    def _url(self, *args):
+    def url(self, *args):
         return "/".join([self.api.config.url,
                          'roles',
-                         self.api.config.account,
+                         self.account,
                          self.kind,
                          self.identifier] + list(args))
 
@@ -161,7 +138,7 @@ class Role(object):
         return '/'.join([
             self.api.config.url,
             'public_keys',
-            self.api.config.account,
+            self.account,
             self.kind,
             self.identifier
         ])

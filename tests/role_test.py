@@ -30,6 +30,12 @@ def test_roleid():
     role = api.role('some-kind', 'the-id')
     assert role.roleid == 'the-account:some-kind:the-id'
 
+
+def test_role_qualified():
+    role = api.role_qualified('foo:bar:baz')
+    assert role.url() == 'http://possum.test/roles/foo/bar/baz'
+
+
 role_info = {
     u'id': u'cucumber:group:everyone',
     u'members': [
