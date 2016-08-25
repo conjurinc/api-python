@@ -147,4 +147,4 @@ class Role(object):
         """
         Returns all SSH public keys for this role, if any, as a newline delimited string.
         """
-        return self.api.get(self._public_keys_url()).text
+        return self.api.get(self._public_keys_url()).text.strip()
