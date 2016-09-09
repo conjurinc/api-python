@@ -38,6 +38,14 @@ def test_new_from_token():
     assert api.config == config
 
 
+def test_new_from_header():
+    api = conjur.new_from_header("Token token=\"dGhlIHRva2Vu\"")
+    assert api.token == "the token"
+    assert api.api_key is None
+    assert api.login is None
+    assert api.config == config
+
+
 def test_new_with_config():
     cfg = Config()
     api = conjur.new_from_key("login", "secret", cfg)
