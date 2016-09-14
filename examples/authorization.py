@@ -1,24 +1,16 @@
 from wsgiref.simple_server import make_server
 import conjur
-from base64 import b64decode
 
 conjur.config.update(
     url = "http://possum.example",
     account = "example"
 )
 
-possum_resource = 'example:webservice:prod/analytics/v1'
+possum_resource = 'example:host:myapp-01'
 
 def simple_app(environ, start_response):
-    # Usually you'd use some utility for extracting auth, but let's keep it simple
-    username, password = b64decode(environ['HTTP_AUTHORIZATION'].split(' ')[1]).split(':')
-
-    try:
-        # can also use API key or token directly
-        possum = conjur.new_from_password(username, password)
-    except conjur.ConjurException:
-        start_response("401 Unauthorized", [])
-        return ["Unauthorized\r\n"]
+    # use authorization header supplied by the client
+    possum = conjur.new_from_header(environ['HTTP_AUTHORIZATION'])
 
     if not possum.resource_qualified(possum_resource).permitted('execute'):
         start_response("403 Forbidden", [])
