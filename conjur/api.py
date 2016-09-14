@@ -28,7 +28,7 @@ from conjur.util import urlescape
 from conjur.exceptions import ConjurException
 
 class API(object):
-    def __init__(self, credentials=None, token=None, config=None):
+    def __init__(self, credentials=None, token=None, header=None, config=None):
         """
         Creates an API instance configured with the given credentials or token
         and config.
@@ -48,6 +48,9 @@ class API(object):
             self.token = None
         elif token:
             self.token = token
+            self.login = self.api_key = None
+        elif header:
+            self.header = header
             self.login = self.api_key = None
         else:
             raise TypeError("must be given a credentials or token argument")
@@ -93,9 +96,12 @@ class API(object):
 
         Returns a string suitable for use as an `Authorization` header value.
         """
-        token = self.authenticate()
-        enc = base64.b64encode(token)
-        return 'Token token="%s"' % enc
+        try:
+            return self.header
+        except AttributeError:
+            token = self.authenticate()
+            enc = base64.b64encode(token)
+            return 'Token token="%s"' % enc
 
     def request(self, method, url, **kwargs):
         """

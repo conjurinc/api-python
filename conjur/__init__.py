@@ -120,9 +120,7 @@ def new_from_header(authorization_header, configuration=None):
     `configuration` is a conjur.Config instance for the api.  If not given, the global Config
     instance (`conjur.config`) will be used.
     """
-    m = re.match('Token token="(.*)"', authorization_header)
-    token = base64.b64decode(m.group(1))
-    return API(token=token, config=_config(configuration))
+    return API(header=authorization_header, config=_config(configuration))
 
 __all__ = (
     'config', 'Config', 'Group', 'API', 'User', 'Host', 'Layer', 'Resource', 'Role', 'Variable',

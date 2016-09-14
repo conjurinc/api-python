@@ -40,7 +40,7 @@ def test_new_from_token():
 
 def test_new_from_header():
     api = conjur.new_from_header("Token token=\"dGhlIHRva2Vu\"")
-    assert api.token == "the token"
+    assert api.auth_header() == "Token token=\"dGhlIHRva2Vu\""
     assert api.api_key is None
     assert api.login is None
     assert api.config == config
