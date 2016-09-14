@@ -28,6 +28,4 @@ for user in client.resources(kind='user'):
     print("User {}".format(user.resourceid))
     keys = user.role().public_keys()
     if len(keys):
-        print("   public keys:")
-        for key in keys:
-            print("    - {}".format(key))
+        print("   public keys:\n{}".format(keys))
