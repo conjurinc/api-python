@@ -6,7 +6,7 @@ conjur.config.update(
     account = "example"
 )
 
-possum_resource = 'example:host:myapp-01'
+possum_resource = 'example:webservice:prod/analytics/v1'
 
 def simple_app(environ, start_response):
     # use authorization header supplied by the client

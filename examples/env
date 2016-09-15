@@ -1,5 +1,5 @@
 POSSUM_URL=http://possum.example
 POSSUM_ACCOUNT=example
 POSSUM_LOGIN=admin
-POSSUM_PASSWORD=admin
+POSSUM_PASSWORD=secret
 PYTHONPATH=/app

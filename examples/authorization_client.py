@@ -6,9 +6,9 @@ conjur.config.update(
     account = "example"
 )
 
-conn = httplib.HTTPConnection("service.example:8000")
+conn = httplib.HTTPConnection("localhost:8000")
 
-possum = conjur.new_from_password('admin', 'admin')
+possum = conjur.new_from_password('admin', 'secret')
 conn.request("GET", "/", None, {"Authorization": possum.auth_header()})
 
 response = conn.getresponse()
