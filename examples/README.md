@@ -88,3 +88,12 @@ Serving on port 8000...
 200 OK
 You are authorized!!!!!
 ```
+
+In the Possum server log, you'll see the authorization check:
+
+```
+possum_1   | Started GET "/resources/example/webservice/prod/analytics/v1?privilege=execute&check=true" for 172.17.0.7 at 2016-09-15 14:32:55 +0000
+possum_1   | Processing by ResourcesController#check_permission as */*
+possum_1   |   Parameters: {"privilege"=>"execute", "check"=>"true", "account"=>"example", "kind"=>"webservice", "identifier"=>"prod/analytics/v1"}
+possum_1   | Completed 204 No Content in 3ms
+```
