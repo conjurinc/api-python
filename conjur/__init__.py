@@ -17,7 +17,9 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+import base64
 import os
+import re
 import requests
 
 from config import Config
@@ -104,6 +106,21 @@ def new_from_token(token, configuration=None):
     instance (`conjur.config`) will be used.
     """
     return API(token=token, config=_config(configuration))
+
+def new_from_header(authorization_header, configuration=None):
+    """
+    Create a `conjur.API` instance based on an Authorization header.
+
+    This is mostly useful for proxies, authenticators and wrappers which
+    forward Authorization header supplied by the client.
+
+    `authorization_header` is the Authorization header contents,
+    eg. `Token token="<base64d token>"`.
+
+    `configuration` is a conjur.Config instance for the api.  If not given, the global Config
+    instance (`conjur.config`) will be used.
+    """
+    return API(header=authorization_header, config=_config(configuration))
 
 __all__ = (
     'config', 'Config', 'Group', 'API', 'User', 'Host', 'Layer', 'Resource', 'Role', 'Variable',
