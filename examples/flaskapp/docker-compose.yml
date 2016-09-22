@@ -1,0 +1,18 @@
+version: '2'
+services:
+  db:
+    image: postgres:9.3
+
+  possum:
+    image: conjurinc/possum
+    ports:
+      - "3030:80"
+    command: server -a example -f /src/policy.yml
+    volumes:
+      - .:/src
+    environment:
+      DATABASE_URL: postgres://postgres@db/postgres
+      POSSUM_ADMIN_PASSWORD: secret
+      POSSUM_DATA_KEY:
+    depends_on:
+      - db

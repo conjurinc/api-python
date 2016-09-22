@@ -1,0 +1,3 @@
+Flask
+
+-e git+git://github.com/conjurinc/api-python.git@work/possum#egg=conjur

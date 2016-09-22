@@ -1,0 +1,14 @@
+<html>
+  <head>
+    <title>Flask Possum Example</title>
+  </head>
+  <body>
+    <h1>Secrets</h1>
+
+    <ul>
+      {% for secret in secrets %}
+        <li>{{secret.identifier}} = {{secret.secret() }}</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
