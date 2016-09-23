@@ -1,2 +1,32 @@
 ---
-- !variable dbpassword
+- !variable &dbpassword dbpassword
+
+- !webservice &petstore_ws petstore_ws
+- !host &petstore_host petstore_host
+- !host &inventory_manager inventory_manager
+
+- !group &employees_group employees
+
+- &employees
+    - !user dan
+    - !user lisa
+    - !user jamal
+
+- !grant
+  role: *employees_group
+  members: *employees
+
+- !permit
+  role: *employees
+  resource: *petstore_ws
+  privileges: [add_pet]
+
+- !permit
+  role: *inventory_manager
+  resource: *petstore_ws
+  privileges: [add_pet, remove_pet]
+
+- !permit
+  role: *petstore_host
+  resource: *dbpassword
+  privileges: [execute]

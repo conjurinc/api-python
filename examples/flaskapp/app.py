@@ -1,3 +1,5 @@
+from functools import wraps
+
 from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
@@ -31,6 +33,28 @@ class Pets(db.Model):
 db.create_all()
 
 
+# This decorater validates that the user/host calling the route has privilege to do so
+# Arguments
+#   - resource: Kind and ID of a Possum resource, separated by : - example 'variable:dbpassword'
+#   - privilege: The privilege the callers needs on the resource to be allowed to call the route
+def validate_privilege(resource, privilege):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            auth_token = request.headers.get('AUTHORIZATION')
+            if auth_token is None:
+                return jsonify({'ok': False, 'msg': 'Authorization header missing'}), 401
+
+            _api = conjur.new_from_header(auth_token)
+            kind, identifier = resource.split(':')
+            if not _api.resource(kind=kind, identifier=identifier).permitted(privilege):
+                return jsonify({'ok': False, 'msg': 'Not authorized'}), 403
+
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
 @app.route('/')
 def home():
     return render_template('home.html', pets=Pets.query.all())
@@ -39,6 +63,7 @@ def home():
 # API routes
 
 @app.route('/api/pets', methods=['POST'])
+@validate_privilege('webservice:petstore', 'add_pet')
 def add_pet():
     json = request.get_json(force=True)
     valid = json.has_key('name') and json.has_key('type')
@@ -54,6 +79,7 @@ def add_pet():
 
 
 @app.route('/api/pets/<id>', methods=['DELETE'])
+@validate_privilege('webservice:petstore', 'remove_pet')
 def remove_pet(id):
     pet = Pets.query.filter_by(id=id).first()
 
