@@ -53,14 +53,13 @@ You will notice that there are no pets displayed.
 [policy.yml](policy.yml) is loaded when Possum starts up. The policy defines:
 
 * variable `dbpassword` - Variable resource holds, the `petstore` database password
-* webservice `petstore_ws` - Webservice resource fpr the `petstore` app
 * host `petstore` - Host role for the `petstore` app
 * host `inventory_manager` - Host role for the `inventory_manager` app
 * group `employees` - Group role with three users
 
 The host `petstore` is granted `execute` (read) access to the `dbpassword` variable. `petstore` fetches this password from Possum when starting up.
-`inventory_manager` is granted `add_pet` and `remove_pet` privileges on `petstore_ws`. 
-Members of group `employees` are granted `add_pet` permission on the `petstore` webservice. Removing pets is a more privileged operation than adding them.
+`inventory_manager` is granted `add_pet` and `remove_pet` privileges on the`petstore` host. 
+Members of group `employees` are granted `add_pet` permission on the `petstore` host. Removing pets is a more privileged operation than adding them.
 
 Pets can be added and removed by using the pet store's API.
 
@@ -69,14 +68,14 @@ Pets can be added and removed by using the pet store's API.
 
 The add and remove views are protected with the `validate_privilege` decorator
 in [app.py](app.py). A user or machine must pass an `Authorization` header
-when calling the `petstore` webservice. `petstore` consults Possum to ensure
-that the caller has `update` privilege on the `petstore` webservice defined
+when calling the `petstore` host. `petstore` consults Possum to ensure
+that the caller has `update` privilege on the `petstore` host defined
 in [policy.yml](policy.yml). If so, the request proceeds. If not, an error
 message is returned.
 
 ## Demo
 
-Simulate calling the `petstore` webservice as different identities:
+Simulate calling the `petstore` host as different identities:
 
 ```sh-session
 # non-employee

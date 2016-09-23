@@ -2,6 +2,16 @@
 
 These examples show how to use the Python API.
 
+## petstore
+
+An end-to-end example that illustrates fetching secrets using host identity
+and enabling traffic authorization can be found in the [petstore](petstore)
+subdirectory.
+
+Read on for other examples of how to use the Conjur Python API client.
+
+---
+
 A docker-compose environment is included for ease of use. Note it needs
 [conjurinc/possum-example](https://github.com/conjurinc/possum-example)
 and [conjurinc/possum](https://github.com/conjurinc/possum) images available

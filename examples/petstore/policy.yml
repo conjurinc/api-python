@@ -1,8 +1,7 @@
 ---
 - !variable &dbpassword dbpassword
 
-- !webservice &petstore_ws petstore_ws
-- !host &petstore_host petstore_host
+- !host &petstore petstore
 - !host &inventory_manager inventory_manager
 
 - !group &employees_group employees
@@ -18,15 +17,15 @@
 
 - !permit
   role: *employees
-  resource: *petstore_ws
+  resource: *petstore
   privileges: [add_pet]
 
 - !permit
   role: *inventory_manager
-  resource: *petstore_ws
+  resource: *petstore
   privileges: [add_pet, remove_pet]
 
 - !permit
-  role: *petstore_host
+  role: *petstore
   resource: *dbpassword
   privileges: [execute]

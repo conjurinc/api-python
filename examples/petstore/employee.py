@@ -14,7 +14,6 @@ conjur.config.account = 'example'
 
 api = conjur.new_from_password('admin', 'secret')
 key = api.role('user', 'dan').rotate_api_key()
-
 api = conjur.new_from_key('dan', key)
 
 

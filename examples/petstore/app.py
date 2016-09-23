@@ -9,7 +9,10 @@ app = Flask(__name__)
 
 conjur.config.url = 'http://localhost:3030'
 conjur.config.account = 'example'
-api = conjur.new_from_password('admin', 'secret')  # TODO: swap this out with host creds
+
+api = conjur.new_from_password('admin', 'secret')
+key = api.role('host', 'petstore').rotate_api_key()
+api = conjur.new_from_key('host/petstore', key)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://petstore:{}@localhost/petstore'.format(
     api.resource('variable', 'dbpassword').secret()
@@ -63,7 +66,7 @@ def home():
 # API routes
 
 @app.route('/api/pets', methods=['POST'])
-@validate_privilege('webservice:petstore', 'add_pet')
+@validate_privilege('host:petstore', 'add_pet')
 def add_pet():
     json = request.get_json(force=True)
     valid = json.has_key('name') and json.has_key('type')
@@ -79,7 +82,7 @@ def add_pet():
 
 
 @app.route('/api/pets/<id>', methods=['DELETE'])
-@validate_privilege('webservice:petstore', 'remove_pet')
+@validate_privilege('host:petstore', 'remove_pet')
 def remove_pet(id):
     pet = Pets.query.filter_by(id=id).first()
 
