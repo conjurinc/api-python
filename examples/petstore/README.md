@@ -69,9 +69,8 @@ Pets can be added and removed by using the pet store's API.
 The add and remove views are protected with the `validate_privilege` decorator
 in [app.py](app.py). A user or machine must pass an `Authorization` header
 when calling the `petstore` host. `petstore` consults Possum to ensure
-that the caller has `update` privilege on the `petstore` host defined
-in [policy.yml](policy.yml). If so, the request proceeds. If not, an error
-message is returned.
+that the caller has the required privilege on the `petstore` host. 
+If so, the request proceeds. If not, an error message is returned.
 
 ## Demo
 
