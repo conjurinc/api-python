@@ -156,3 +156,12 @@ class Role(object):
         returned object may refer to a nonexistent resource.
         """
         return self.api.resource_qualified(self.roleid)
+
+    def rotate_api_key(self):
+        """
+        Rotates the API key of a role
+        The calling role must either be the target role itself or have 'update' privilege on the target role
+        """
+        return self.api.put(
+            '{}/authn/{}/api_key?role={}:{}'.format(self.api.config.url, self.account, self.kind, self.identifier)
+        ).text.strip()

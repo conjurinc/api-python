@@ -89,7 +89,7 @@ $ python employee.py
 Adding pet
 201: {u'ok': True, u'id': 7}
 Removing pet
-401: {u'msg': u'Not authorized', u'ok': False}
+403: {u'msg': u'Not authorized', u'ok': False}
 
 # inventory_manager
 $ python inventory_manager.py

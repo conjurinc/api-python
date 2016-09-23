@@ -1,8 +1,10 @@
-# Simulates an employee trying to add a pet to the pet store
-from pprint import pprint
+# Simulates an employee trying to add and remove a pet
+
+import sys
 
 import requests
 
+sys.path.append('../..')
 import conjur
 
 PETSTORE_URL = 'http://localhost:8080'
@@ -10,7 +12,11 @@ PETSTORE_URL = 'http://localhost:8080'
 conjur.config.url = 'http://localhost:3030'
 conjur.config.account = 'example'
 
-api = conjur.new_from_password('admin', 'secret')  # TODO: swap this with creds of an employee
+api = conjur.new_from_password('admin', 'secret')
+key = api.role('user', 'dan').rotate_api_key()
+
+api = conjur.new_from_key('dan', key)
+
 
 print 'Adding pet'
 response = requests.post(

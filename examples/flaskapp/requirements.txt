@@ -2,4 +2,4 @@ Flask
 psycopg2
 Flask-SQLAlchemy
 
--e git+git://github.com/conjurinc/api-python.git@work/possum#egg=conjur
+# conjur - this library is being loaded locally

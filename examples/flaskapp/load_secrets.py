@@ -1,6 +1,9 @@
 import random
 import string
 
+import sys
+
+sys.path.append('../..')
 import conjur
 
 
@@ -12,6 +15,5 @@ conjur.config.account = 'example'
 
 api = conjur.new_from_password('admin', 'secret')
 
-
-# Set random values for secrets
+# Set the database password to a known value
 api.resource('variable', 'dbpassword').add_secret('w^kftUagHmF2Ahph')
