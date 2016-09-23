@@ -14,6 +14,4 @@ api = conjur.new_from_password('admin', 'secret')
 
 
 # Set random values for secrets
-api.resource('variable', 'dbpassword').add_secret(random_value())
-api.resource('variable', 'aws_access_key_id').add_secret(random_value())
-api.resource('variable', 'aws_secret_access_key').add_secret(random_value())
+api.resource('variable', 'dbpassword').add_secret('w^kftUagHmF2Ahph')

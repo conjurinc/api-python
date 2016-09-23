@@ -1,7 +1,11 @@
 version: '2'
 services:
-  db:
+  appdb:
     image: postgres:9.3
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
 
   possum:
     image: conjurinc/possum
@@ -11,8 +15,11 @@ services:
     volumes:
       - .:/src
     environment:
-      DATABASE_URL: postgres://postgres@db/postgres
+      DATABASE_URL: postgres://postgres@possumdb/postgres
       POSSUM_ADMIN_PASSWORD: secret
       POSSUM_DATA_KEY:
     depends_on:
-      - db
+      - possumdb
+
+  possumdb:
+    image: postgres:9.3

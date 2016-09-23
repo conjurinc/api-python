@@ -10,3 +10,7 @@ fi
 export POSSUM_DATA_KEY="$(cat data_key)"
 
 docker-compose up -d
+
+sleep 20  # a better way to do this?
+
+python load_secrets.py

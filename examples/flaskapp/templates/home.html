@@ -1,14 +1,33 @@
 <html>
   <head>
-    <title>Flask Possum Example</title>
+    <title>Pets</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
   </head>
   <body>
-    <h1>Secrets</h1>
+    <div class="container">
+      <h1>Pets</h1>
 
-    <ul>
-      {% for secret in secrets %}
-        <li>{{secret.identifier}} = {{secret.secret() }}</li>
-      {% endfor %}
-    </ul>
+      <table class="bordered highlight">
+        <thead>
+          <tr>
+            <th data-field="id">ID</th>
+            <th data-field="name">Name</th>
+            <th data-field="type">Type</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pet in pets %}
+          <tr>
+            <td>{{pet.id}}</td>
+            <td>{{pet.name}}</td>
+            <td>{{pet.type}}</td>
+            <td>x</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
   </body>
 </html>

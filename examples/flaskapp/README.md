@@ -1,7 +1,20 @@
-# Example of using Possum with Flask
+# Pet Store - Using Possum with Python's Flask web framework
 
-Example project showing how to use the [Conjur API client](https://pypi.python.org/pypi/Conjur) to
-fetch secrets from Possum and use them in a Flask web application.
+This example project illustrates how to:
+
+* Fetch a secret (database password) using the [Conjur Python API client](https://pypi.python.org/pypi/Conjur)
+* Authorize traffic from other clients that want to call this web service [TODO]
+
+The scenario for this example:
+
+> A local pet store wants to be able to display all pets that they have available to the general public.
+Pet info is fetched from a PostgreSQL database and displayed on a website page. The pet store wants to be able
+to add and remove pets from their inventory securely. Only their employees should be able to add and remove pets.
+The pet store also has an inventory manager, another web service that can be used to add or remove pets as needed. 
+When the `pet store` service receives a request from `employees` or the `inventory manager`, it authenticates and authorizes the
+request with Possum.
+
+![Pet store diagram](http://i.imgur.com/HLSO2VB.png)
 
 ## Requirements
 
@@ -10,7 +23,7 @@ fetch secrets from Possum and use them in a Flask web application.
 
 ## Example
 
-First, launch a local Possum instance:
+First, set up your environment.
 
 ```
 ./start.sh
@@ -19,6 +32,10 @@ First, launch a local Possum instance:
 Possum has now loaded [policy.yml](policy.yml) and is running and listening on
 local port `3030`. For this example, the `admin` user's password is
 `secret`.
+
+The `petstore` database has also been created, with user `petstore`.
+The database user's password has been loaded into the `dbpassword` variable
+in Possum with [load_secrets.py](load_secrets.py).
 
 Now that Possum is running, run the Flask app from this directory:
 
@@ -29,22 +46,15 @@ python app.py
 
 The Flask web app is now listening on port `8080`.
 Open [localhost:8080](http://localhost:8080) in your browser.
-Notice that the secrets have no value yet.
+You will notice that there are no pets displayed.
 
-![secrets with no values](https://i.imgur.com/5blnU8O.png)
+Pets can be added and removed by using the pet store's API.
 
-Load new secrets with:
+* add pet: `POST` `/api/pets`, JSON body with `name` and `type` fields
+* remove pet: `DELETE` `/api/pets/<id>` with pet ID
 
-```
-python load_secrets.py
-```
+TODO: add section on traffic auth for users and hosts
 
-Reload the page at `localhost:8080` to see that the secret values
-have now been fetched and are displayed in the browser.
-
-![secrets with values](https://i.imgur.com/WRrS8Ih.png)
-
-Secrets have been fetched from Possum and passed through to the Flask template.
 
 To stop the possum server run:
 
