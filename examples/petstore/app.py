@@ -7,14 +7,14 @@ import conjur
 
 app = Flask(__name__)
 
-conjur.config.url = 'http://localhost:3030'
+conjur.config.url = 'http://possum'
 conjur.config.account = 'example'
 
 api = conjur.new_from_password('admin', 'secret')
 key = api.role('host', 'petstore').rotate_api_key()
 api = conjur.new_from_key('host/petstore', key)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://petstore:{}@localhost/petstore'.format(
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://petstore:{}@appdb/petstore'.format(
     api.resource('variable', 'dbpassword').secret()
 )
 db = SQLAlchemy(app)

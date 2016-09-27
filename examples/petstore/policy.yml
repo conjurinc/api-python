@@ -16,7 +16,7 @@
   members: *employees
 
 - !permit
-  role: *employees
+  role: !group employees
   resource: *petstore
   privileges: [add_pet]
 

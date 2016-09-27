@@ -19,7 +19,6 @@ request with Possum.
 ## Requirements
 
 * Docker and docker-compose
-* Python 2.7+ and pip
 
 ## Example
 
@@ -29,23 +28,14 @@ First, set up your environment.
 ./start.sh
 ```
 
-Possum has now loaded [policy.yml](policy.yml) and is running and listening on
-local port `3030`. For this example, the `admin` user's password is
+Possum has now loaded [policy.yml](policy.yml) and is running and listening in the `possum` container. For this example, the `admin` user's password is
 `secret`.
 
 The `petstore` database has also been created, with user `petstore`.
 The database user's password has been loaded into the `dbpassword` variable
 in Possum with [load_secrets.py](load_secrets.py).
 
-Now that Possum is running, run the Flask app from this directory:
-
-```
-pip install -r requirements.txt
-python app.py
-```
-
-The Flask web app is now listening on port `8080`.
-Open [localhost:8080](http://localhost:8080) in your browser.
+Also, there is a Flask app running in the `app` container and listening on the host port `8080`. Open [localhost:8080](http://localhost:8080) in your browser.
 You will notice that there are no pets displayed.
 
 ## Policy
@@ -58,13 +48,12 @@ You will notice that there are no pets displayed.
 * group `employees` - Group role with three users
 
 The host `petstore` is granted `execute` (read) access to the `dbpassword` variable. `petstore` fetches this password from Possum when starting up.
-`inventory_manager` is granted `add_pet` and `remove_pet` privileges on the`petstore` host. 
-Members of group `employees` are granted `add_pet` permission on the `petstore` host. Removing pets is a more privileged operation than adding them.
+`inventory_manager` is granted `add_pet` and `remove_pet` privileges on the`petstore` host. Members of group `employees` are granted `add_pet` permission on the `petstore` host. Removing pets is a more privileged operation than adding them.
 
 Pets can be added and removed by using the pet store's API.
 
-* add pet: `POST` `/api/pets`, JSON body with `name` and `type` fields
-* remove pet: `DELETE` `/api/pets/<id>` with pet ID
+* **add pet** `POST` `/api/pets`, JSON body with `name` and `type` fields
+* **remove pet** `DELETE` `/api/pets/<id>` with pet id
 
 The add and remove views are protected with the `validate_privilege` decorator
 in [app.py](app.py). A user or machine must pass an `Authorization` header

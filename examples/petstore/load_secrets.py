@@ -1,10 +1,10 @@
 import sys
 
-sys.path.append('../..')
+sys.path.insert(0, '../..')
+
 import conjur
 
-
-conjur.config.url = 'http://localhost:3030'
+conjur.config.url = 'http://possum'
 conjur.config.account = 'example'
 
 api = conjur.new_from_password('admin', 'secret')

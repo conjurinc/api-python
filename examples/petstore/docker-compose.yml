@@ -1,25 +1,44 @@
-version: '2'
-services:
-  appdb:
-    image: postgres:9.3
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+possumdb:
+  image: postgres:9.3
 
-  possum:
-    image: conjurinc/possum
-    ports:
-      - "3030:80"
-    command: server -a example -f /src/policy.yml
-    volumes:
-      - .:/src
-    environment:
-      DATABASE_URL: postgres://postgres@possumdb/postgres
-      POSSUM_ADMIN_PASSWORD: secret
-      POSSUM_DATA_KEY:
-    depends_on:
-      - possumdb
+possum:
+  image: conjurinc/possum
+  command: server -a example -f /src/policy.yml
+  volumes:
+  - .:/src
+  environment:
+    DATABASE_URL: postgres://postgres@possumdb/postgres
+    POSSUM_ADMIN_PASSWORD: secret
+    POSSUM_DATA_KEY:
+  links:
+  - possumdb:possumdb
 
-  possumdb:
-    image: postgres:9.3
+appdb:
+  image: postgres:9.3
+  environment:
+    POSTGRES_USER: petstore
+    POSTGRES_PASSWORD:
+
+app:
+  build: .
+  dockerfile: Dockerfile.app
+  command: python app.py
+  ports:
+  - "8080:8080"
+  volumes:
+  - .:/src
+  links:
+  - possum:possum
+  - appdb:appdb
+
+client:
+  build: .
+  dockerfile: Dockerfile.app
+  environment:
+    POSTGRES_PASSWORD:
+  command: bash
+  volumes:
+  - .:/src
+  links:
+  - possum:possum
+  - app:app

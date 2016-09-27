@@ -20,10 +20,6 @@ possum:
 api:
   build: ..
   entrypoint: bash
-  environment:
-    CONJUR_APPLIANCE_URL: http://possum
   env_file: env
-  volumes:
-  - ..:/app
   links:
-  - possum:possum.example
+  - possum:possum

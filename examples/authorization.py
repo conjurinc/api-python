@@ -2,7 +2,7 @@ from wsgiref.simple_server import make_server
 import conjur
 
 conjur.config.update(
-    url = "http://possum.example",
+    url = "http://possum",
     account = "example"
 )
 

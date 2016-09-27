@@ -1,4 +1,4 @@
-POSSUM_URL=http://possum.example
+POSSUM_URL=http://possum
 POSSUM_ACCOUNT=example
 POSSUM_LOGIN=admin
 POSSUM_PASSWORD=secret
