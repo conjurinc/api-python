@@ -1,8 +1,10 @@
 from functools import wraps
+import sys
 
 from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
+sys.path.append('../..')
 import conjur
 
 app = Flask(__name__)
