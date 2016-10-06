@@ -30,6 +30,20 @@ def urlescape(s):
     return quote(s, '')
 
 
+def login_kind(login):
+    tokens = login.split('/', 1)
+    if len(tokens) == 2:
+        return tokens[0]
+    else:
+        return 'user'
+
+def login_identifier(login):
+    tokens = login.split('/', 1)
+    if len(tokens) == 2:
+        return tokens[1]
+    else:
+        return tokens[0]
+
 def authzid(obj, kind, with_account=True):
     if isinstance(obj, (str, unicode)):  # noqa F821 (flake8 doesn't know about unicode)
         if not with_account:
