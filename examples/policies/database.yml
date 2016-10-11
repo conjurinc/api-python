@@ -1,0 +1,7 @@
+- &variables
+  - !variable password
+
+- !permit
+  role: !layer ../frontend
+  privilege: [ read, execute ]
+  resource: *variables
