@@ -19,6 +19,7 @@
 
   - !policy
     id: database
+    owner: !group ../people/operations
 
 - !permit
   role: !group people/frontend
