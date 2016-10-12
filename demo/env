@@ -1,0 +1,3 @@
+CONJUR_URL=http://possum
+CONJUR_ACCOUNT=demo
+PYTHONPATH=/app

@@ -1,0 +1,9 @@
+- !group security_admin
+
+- !policy
+  id: people
+  owner: !group security_admin
+
+- !policy
+  id: prod
+  owner: !group security_admin
