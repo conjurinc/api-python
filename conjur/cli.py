@@ -7,6 +7,7 @@ import sys
 import os
 import conjur
 import inflection
+import json
 from tabulate import tabulate
 
 def eprint(*args, **kwargs):
@@ -99,9 +100,16 @@ def login_handler(args):
     eprint("Enter your username to log into Possum: ", end="")
     role = raw_input()
   kind, identifier = interpret_login(role)
-  password = getpass.getpass("Enter password for %s %s (it will not be echoed): " % ( kind, identifier ))
   username = '/'.join((kind, identifier))
-  api_key = conjur.new_from_password(username, password).api_key
+
+  if args.rotate:
+    api = connect()
+    role = conjur.Role.from_roleid(api, ":".join((kind, identifier)))
+    api_key = role.rotate_api_key()
+  else:
+    password = getpass.getpass("Enter password for %s %s (it will not be echoed): " % ( kind, identifier ))
+    api_key = conjur.new_from_password(username, password).api_key
+
   save_api_key(username, api_key)
   print("Logged in")
 
@@ -147,7 +155,13 @@ def show_handler(args):
   resource = resource.api.get(resource.url()).json()
   keys = resource.keys()
   keys.sort()
-  data  =[ ( inflection.camelize(key), resource[key] ) for key in keys ]
+  def format_value(value):
+    if isinstance(value, basestring):
+      return value
+    else:
+      return json.dumps(value)
+
+  data  = [ ( inflection.camelize(key), format_value(resource[key]) ) for key in keys ]
   print(tabulate(data))
 
 def policy_load_handler(args):
@@ -183,6 +197,7 @@ subparsers = parser.add_subparsers()
 
 login = subparsers.add_parser('login')
 login.add_argument('-r', '--role')
+login.add_argument('--rotate', action='store_true')
 login.set_defaults(func=login_handler)
 
 whoami = subparsers.add_parser('whoami')
