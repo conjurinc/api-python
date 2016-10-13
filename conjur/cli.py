@@ -178,8 +178,15 @@ def policy_load_handler(args):
     conjur.util.urlescape(policy.identifier)
   ])
 
-  response = policy.api.post(url, data=value)
-  print("Policy updated")
+  response = policy.api.post(url, data=value).json()
+  created_roles = response['created_roles']
+  print("")
+  print("Loaded policy version %s" % response['version'])
+  print("Created %s roles" % len(created_roles))
+  if len(created_roles) > 0:
+    print("")
+    print(tabulate([ ( record['id'], record['api_key'] ) for record in created_roles.values() ], ("Id", "API Key")))
+    print("")
 
 def fetch_handler(args):
   print(find_variable(args.id).secret(args.version))
