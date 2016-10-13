@@ -182,14 +182,18 @@ def policy_load_handler(args):
   created_roles = response['created_roles']
   print("")
   print("Loaded policy version %s" % response['version'])
-  print("Created %s roles" % len(created_roles))
   if len(created_roles) > 0:
+    print("Created %s roles" % len(created_roles))
     print("")
     print(tabulate([ ( record['id'], record['api_key'] ) for record in created_roles.values() ], ("Id", "API Key")))
     print("")
 
 def fetch_handler(args):
-  print(find_variable(args.id).secret(args.version))
+  value = find_variable(args.id).secret(args.version)
+  if value:
+    print(value)
+  else:
+    sys.exit(1)
 
 def store_handler(args):
   if args.value == '-':
