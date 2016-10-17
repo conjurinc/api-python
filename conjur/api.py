@@ -134,7 +134,11 @@ class API(object):
 
         response = getattr(requests, method.lower())(url, *args, **kwargs)
         if check_errors and response.status_code >= 300:
-            raise ConjurException("Request failed: %d" % response.status_code)
+            try:
+                error = response.json()['error']
+            except:
+                raise ConjurException("Request failed: %d" % response.status_code)
+            raise ConjurException("%s : %s" % ( error['code'], error['message'] ))
 
         return response
 

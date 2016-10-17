@@ -1,0 +1,16 @@
+- !group operations
+
+- !group frontend
+
+- !user owen
+
+- !user frank
+
+- !grant
+  role: !group operations
+  member: !user owen
+
+- !grant
+  role: !group frontend
+  member: !user frank
+

@@ -1,0 +1,9 @@
+- !layer
+
+- &hosts
+  - !host frontend-01
+  - !host frontend-02
+
+- !grant
+  role: !layer
+  members: *hosts

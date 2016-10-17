@@ -1,0 +1,32 @@
+- !group security_admin
+
+- !policy
+  id: people
+  owner: !group security_admin
+  body:
+  - !group
+    id: frontend
+
+  - !group
+    id: operations
+
+- !policy
+  id: prod
+  owner: !group security_admin
+  body:
+  - !policy
+    id: frontend
+
+  - !policy
+    id: database
+    owner: !group ../people/operations
+
+- !permit
+  role: !group people/frontend
+  privilege: [ read, execute ]
+  resource: !policy prod/frontend
+
+- !permit
+  role: !group people/operations
+  privilege: [ read, execute ]
+  resource: !policy prod/database

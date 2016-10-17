@@ -1,0 +1,23 @@
+pg:
+  image: postgres:9.3
+
+possum:
+  image: conjurinc/possum
+  command: server -a demo -f /var/lib/possum/initial_bootstrap.yml
+  environment:
+    DATABASE_URL: postgres://postgres@pg/postgres
+    POSSUM_ADMIN_PASSWORD: secret
+    POSSUM_DATA_KEY:
+  volumes:
+  - .:/var/lib/possum
+  links:
+  - pg:pg
+
+client:
+  build: ..
+  entrypoint: bash
+  env_file: env
+  volumes:
+  - ..:/app
+  links:
+  - possum:possum

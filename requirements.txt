@@ -1,2 +1,4 @@
 pyyaml
 requests >= 2.2.1
+tabulate
+inflection
