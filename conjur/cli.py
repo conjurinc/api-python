@@ -55,7 +55,7 @@ def credentials_from_netrc():
 
 def credentials():
   try:
-    ( os.environ['CONJUR_AUTHN_LOGIN'], os.environ['CONJUR_AUTHN_API_KEY'] )
+    return ( os.environ['CONJUR_AUTHN_LOGIN'], os.environ['CONJUR_AUTHN_API_KEY'] )
   except KeyError:
     return credentials_from_netrc()
 
