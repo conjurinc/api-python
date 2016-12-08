@@ -9,7 +9,7 @@ if [ -z "$KEEP" ] ; then
     trap cleanup EXIT
 fi
 
-APPLIANCE_VERSION=4.8-stable
+APPLIANCE_VERSION=4.9-stable
 
 
 rm -rf artifacts
