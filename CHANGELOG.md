@@ -1,5 +1,7 @@
 **Unreleased**
 
+* Changes license to Apache 2.0
+
 **v0.3.2**
 * Improve usage documentation
 * Allow using `CONJURRC` env var for specifying config file
