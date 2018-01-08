@@ -48,7 +48,7 @@ py.test --cov conjur --junitxml=pytest.xml --instafail
 coverage run --source='conjur/' -a -m behave --junit \
  --junit-directory=/artifacts/ \
  --tags ~@wip
- 
+
 coverage xml -o './coverage.xml'
 coverage html
 # pylint -f parseable conjur tests | tee pylint.out
