@@ -2,6 +2,8 @@
 
 A Python client for the Conjur API.
 
+** IMPORTANT: THIS API CLIENT IS NOT CURRENTLY ACTIVELY BEING SUPPORTED **
+
 ## Installation
 
 The Conjur Python API requires Python 2.7.  While we love Python 3, Python 2.x is the priority because of its
