@@ -1,13 +1,14 @@
-# Conjur Python API Client
+# Conjur Python2 API Client
 
-A Python client for the Conjur API.
+A Python2 client for the Conjur API.
+
+**If you are looking for Python3 API client, please go to our new project page at https://github.com/cyberark/conjur-api-python3.**
 
 **IMPORTANT: THIS API CLIENT IS NOT CURRENTLY ACTIVELY BEING SUPPORTED**
 
 ## Installation
 
-The Conjur Python API requires Python 2.7.  While we love Python 3, Python 2.x is the priority because of its
-widespread use by DevOps tools such as Salt and Ansible.
+This Conjur Python2 API requires Python 2.7.  
 
 Install from [PyPI](https://pypi.python.org/pypi/Conjur)
 
