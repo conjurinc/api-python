@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 NAME = 'Conjur'
-VERSION = '0.4.4'
+VERSION = '0.4.5'
 
 try:
     import pypandoc
@@ -15,11 +15,12 @@ setup(
     name=NAME,
     version=VERSION,
     packages=find_packages(),
+    python_requires='<3',
     install_requires=open('requirements.txt').readlines(),
     package_data={},
     author='Jon Mason',
     author_email='jon@conjur.net',
-    description='Python client for the Conjur API',
+    description='Python2-only client for the Conjur v4 API',
     long_description=long_description,
     license='MIT',
     url='https://github.com/conjurinc/api-python',
