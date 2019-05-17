@@ -1,5 +1,6 @@
 **Unreleased**
 
+* Add requirement to setup.py for Python version 2
 * Changes license to Apache 2.0
 
 **v0.3.2**
