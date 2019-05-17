@@ -22,6 +22,7 @@ setup(
     author_email='jon@conjur.net',
     description='Python2-only client for the Conjur v4 API',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     license='MIT',
     url='https://github.com/conjurinc/api-python',
     classifiers=[
